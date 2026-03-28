@@ -1,0 +1,4 @@
+FROM alpine:3.20
+ARG APP_VERSION=unknown
+RUN echo "app version: ${APP_VERSION}" > /version.txt
+CMD ["cat", "/version.txt"]

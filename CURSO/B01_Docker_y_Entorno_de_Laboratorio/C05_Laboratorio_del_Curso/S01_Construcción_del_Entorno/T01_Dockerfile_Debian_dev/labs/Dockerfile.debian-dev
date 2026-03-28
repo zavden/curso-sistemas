@@ -1,0 +1,43 @@
+FROM debian:bookworm
+
+# Locale
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+# Habilitar man pages (excluidas por defecto en Docker Debian)
+RUN sed -i 's/^path-exclude \/usr\/share\/man/#path-exclude \/usr\/share\/man/' \
+    /etc/dpkg/dpkg.cfg.d/excludes 2>/dev/null || true
+
+# Instalar todas las herramientas en una sola capa
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Compilacion C/C++
+    gcc g++ make cmake pkg-config libc6-dev \
+    # Debugging
+    gdb valgrind strace ltrace \
+    # Documentacion
+    man-db manpages-dev manpages-posix-dev \
+    # Utilidades
+    git curl wget vim-tiny less tree file bc locales \
+    # Desarrollo de red
+    netcat-openbsd iproute2 iputils-ping dnsutils tcpdump \
+    # Dependencias
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Crear usuario de desarrollo
+RUN useradd -m -s /bin/bash dev
+
+# Cambiar a usuario non-root
+USER dev
+WORKDIR /home/dev
+
+# Instalar Rust via rustup
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
+    sh -s -- -y --default-toolchain stable --component rustfmt clippy
+
+# Anadir cargo al PATH
+ENV PATH="/home/dev/.cargo/bin:${PATH}"
+
+WORKDIR /home/dev/workspace
+
+CMD ["/bin/bash"]

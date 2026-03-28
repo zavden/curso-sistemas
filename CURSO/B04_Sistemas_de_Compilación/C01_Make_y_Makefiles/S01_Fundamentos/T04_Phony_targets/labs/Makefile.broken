@@ -1,0 +1,22 @@
+# Makefile WITHOUT .PHONY — demonstrates the problem.
+# Targets "clean" and "all" are NOT declared as phony.
+
+CC      = gcc
+CFLAGS  = -Wall -Wextra -std=c11
+
+TARGET  = greeter
+OBJS    = main.o greeting.o
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $^
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+main.o: greeting.h
+greeting.o: greeting.h
+
+clean:
+	$(RM) $(OBJS) $(TARGET)

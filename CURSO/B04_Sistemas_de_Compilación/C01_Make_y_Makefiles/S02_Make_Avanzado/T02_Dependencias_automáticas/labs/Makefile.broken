@@ -1,0 +1,19 @@
+# Makefile SIN dependencias automaticas -- tiene el bug de headers.
+CC     = gcc
+CFLAGS = -Wall -Wextra -std=c11
+
+SRCS = main.c engine.c logger.c
+OBJS = $(SRCS:.c=.o)
+
+all: app
+
+app: $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+clean:
+	$(RM) app $(OBJS)
+
+.PHONY: all clean

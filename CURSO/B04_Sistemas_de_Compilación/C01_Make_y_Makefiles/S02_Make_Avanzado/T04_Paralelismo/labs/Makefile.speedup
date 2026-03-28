@@ -1,0 +1,20 @@
+CC       = gcc
+CFLAGS   = -std=c11 -Wall -Wextra -Wpedantic -O0
+TARGET   = parallel_demo
+SRCS     = main_parallel.c alpha.c bravo.c charlie.c delta.c \
+           echo_func.c foxtrot.c golf.c hotel.c india.c juliet.c
+OBJS     = $(SRCS:.c=.o)
+
+.DELETE_ON_ERROR:
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $^
+
+%.o: %.c funcs.h
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+.PHONY: all clean
+clean:
+	rm -f $(OBJS) $(TARGET)

@@ -1,0 +1,15 @@
+# Makefile.compare -- Side-by-side comparison of = vs :=
+# Shows the critical difference in one Makefile.
+
+X = hello
+
+LAZY = $(X) world
+IMMEDIATE := $(X) world
+
+X = goodbye
+
+$(info LAZY     = $(LAZY))
+$(info IMMEDIATE = $(IMMEDIATE))
+
+all:
+	@echo "Done"

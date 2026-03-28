@@ -1,0 +1,5 @@
+FROM docker.io/library/alpine:latest
+
+RUN echo "Built with OCI tools" > /info.txt
+
+CMD ["cat", "/info.txt"]

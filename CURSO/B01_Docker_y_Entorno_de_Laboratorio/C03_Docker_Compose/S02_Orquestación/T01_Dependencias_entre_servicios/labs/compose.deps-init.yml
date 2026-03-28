@@ -1,0 +1,11 @@
+services:
+  init:
+    image: alpine:latest
+    command: sh -c 'echo "Running initialization..." && sleep 3 && echo "Init complete"'
+
+  app:
+    image: alpine:latest
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    command: sh -c 'echo "App started after init at $$(date +%T)" && sleep 3600'

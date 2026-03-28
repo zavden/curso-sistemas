@@ -1,0 +1,22 @@
+# Makefile.pattern -- Pattern rules: user-defined %.o: %.c
+# replaces Make's built-in implicit rule.
+
+CC       = gcc
+CFLAGS   = -Wall -Wextra -std=c11 -g
+CPPFLAGS = -Isrc
+
+SRCS = src/main.c src/utils.c
+OBJS = src/main.o src/utils.o
+
+program: $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+
+# User-defined pattern rule -- replaces the built-in %.o: %.c
+%.o: %.c
+	@echo "[pattern rule] Compiling $< -> $@"
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+
+clean:
+	rm -f program $(OBJS)
+
+.PHONY: clean

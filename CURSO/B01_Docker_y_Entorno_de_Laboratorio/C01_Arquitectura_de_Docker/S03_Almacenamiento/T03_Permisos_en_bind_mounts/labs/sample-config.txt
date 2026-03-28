@@ -1,0 +1,3 @@
+app_name=lab-permissions
+version=1.0
+debug=false

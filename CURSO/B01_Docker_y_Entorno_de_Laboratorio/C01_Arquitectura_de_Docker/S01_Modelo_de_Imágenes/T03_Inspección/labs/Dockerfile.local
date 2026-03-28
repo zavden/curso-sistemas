@@ -1,0 +1,4 @@
+FROM debian:bookworm
+RUN echo "layer 1: update" && apt-get update && rm -rf /var/lib/apt/lists/*
+RUN echo "layer 2: create file" && echo "hello from local build" > /data.txt
+CMD ["cat", "/data.txt"]

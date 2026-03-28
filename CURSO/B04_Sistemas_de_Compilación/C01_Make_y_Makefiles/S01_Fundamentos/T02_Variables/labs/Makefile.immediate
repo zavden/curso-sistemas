@@ -1,0 +1,17 @@
+# Makefile.immediate -- Demonstrates simply expanded variables (:=)
+# The value IS evaluated at definition time.
+# It is captured once and never re-evaluated.
+
+X := hello
+B := $(X) world
+
+$(info --- Before redefining X ---)
+$(info B = $(B))
+
+X := goodbye
+
+$(info --- After redefining X ---)
+$(info B = $(B))
+
+all:
+	@echo "Done"

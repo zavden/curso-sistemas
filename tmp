@@ -1,0 +1,1011 @@
+Intro to Rust
+3:26
+The Rust Compiler
+5:32
+[macOS] Intro to Terminal
+8:02
+[macOS] Installing XCode Command Line Tools
+3:17
+[macOS] Installing Rust
+3:00
+[macOS] Installing Visual Studio Code
+7:36
+[macOS] Add VSCode to PATH
+3:31
+[Windows] Intro to PowerShell
+8:06
+[Windows] Find Out Your Windows Operating System
+1:03
+[Windows] Installing Visual Studio
+3:56
+[Windows] Installing Rust
+4:08
+[Windows] Installing Visual Studio Code
+8:17
+Updating or Uninstalling Rust with rustup
+4:13
+Install Git
+1:18
+Create Rust Project with Cargo
+8:15
+Hello World
+14:51
+Compiling and Running Rust File from the Terminal
+8:38
+Formatting with rustfmt and cargo fmt
+3:51
+The cargo build Command
+9:18
+The cargo run Command
+2:00
+The cargo check Command
+2:38
+Comments
+6:39
+Project
+0:48
+Project Solution
+11:12
+Download Course Materials
+1:15
+Quiz
+Section Review
+10:09
+Open Variables and Mutability Project
+0:19
+Intro to Variables
+9:58
+Interpolation with Curly Braces
+9:32
+Positional Arguments to println!
+3:37
+Underscore with Variables
+2:25
+Immutable and Mutable Variables
+4:58
+Rust Error Codes Index
+3:32
+Variable Shadowing
+7:56
+Scopes
+8:46
+Constants
+7:10
+Type Aliases
+4:18
+Compiler Directives
+7:32
+Project
+0:57
+Project Solution
+9:42
+Quiz
+Section Review
+9:18
+Open Data Types Project
+0:23
+Intro to Data Types
+13:36
+Integers
+8:00
+Using _ as Visual Separator for Numbers
+1:32
+The usize and isize Types
+2:30
+Strings and Raw Strings
+10:00
+Intro to Methods
+8:56
+Floating Point Types
+6:37
+Formatting Floats with Format Specifier
+3:33
+Casting Types with the as Keyword
+4:01
+Math Operations
+5:41
+Augmented Assignment Operator
+6:06
+Intro to Booleans
+6:20
+Boolean Inversion with !
+4:22
+Equality and Inequality Operators
+8:11
+And Logic with &&
+4:33
+Or Logic with ||
+5:48
+The Character Type
+7:51
+The Array Type
+9:03
+Reading and Writing Array Elements
+7:57
+The Display Trait
+9:48
+The Debug Trait
+6:15
+The dbg! Macro
+4:31
+The Tuple Type
+6:56
+Ranges and Range Iteration
+8:54
+Intro to Generics
+11:40
+Project
+0:49
+Project Solution
+9:12
+Quiz
+Section Review
+18:27
+Open Functions Project
+0:17
+Intro to Functions
+6:14
+Parameters and Arguments
+7:25
+Explicit Return Values
+5:30
+Implicit Return Values
+2:08
+The Unit as a Return Type
+3:18
+Blocks in Functions
+5:25
+Project
+0:52
+Project Solution
+14:21
+Quiz
+Section Review
+5:27
+Open Control Flow Project
+0:19
+The if Statement
+6:45
+The else if Statement
+7:50
+The else Statement
+3:17
+Assigning Result of if Statement to Variable
+5:34
+The match Statement
+10:08
+Underscore in a Match Arm
+9:13
+The match Statement with Multiple Values and Conditionals
+10:24
+The loop and break Keywords
+8:49
+The continue Keyword
+5:56
+While Loop
+5:30
+Recursion
+12:06
+Debugging in VSCode I
+16:47
+Debugging in VSCode II
+4:12
+Debugging in VSCode III
+10:23
+Project
+0:53
+Project Solution
+26:30
+Quiz
+Section Review
+7:34
+Open Ownership Project
+0:23
+Intro to Ownership
+13:32
+The Stack and Heap
+11:29
+Scope and Ownership
+7:10
+The Copy Trait
+5:10
+The String Type
+7:48
+The push_str Method on a String Type
+8:01
+Moves and Ownership
+8:59
+The drop Function
+3:06
+The clone Method
+3:44
+References and Borrowing
+11:25
+The Dereference Operator
+5:27
+String, &String, str, and &str
+6:54
+The Copy Trait with References
+3:23
+Ownership and Function Parameters
+7:24
+Mutable Parameters
+8:22
+Return Values I
+4:33
+Return Values II
+6:21
+Project
+1:01
+Project Solution
+10:31
+Quiz
+Section Review
+13:21
+Open Ownership Project
+0:18
+Immutable and Mutable Reference Parameters
+8:38
+Multiple Immutable References
+6:29
+Mutable Reference Restrictions
+10:30
+Ownership with Immutable and Mutable References
+5:37
+Dangling References
+6:52
+Ownership with Arrays and Tuples
+8:49
+Project
+1:01
+Project Solution
+10:13
+Quiz
+Section Review
+8:07
+Open Slices Project
+0:18
+Intro to Slices
+3:29
+Create a String Slice from a String
+7:40
+String Slices and String Literals
+7:28
+String Slice Lengths
+5:40
+Syntactic Shortcuts
+5:36
+String Slices as Function Parameters
+5:52
+Array Slices
+7:19
+Deref Coercion with Array Slices
+6:27
+Mutable Array Slices
+6:41
+Project
+0:53
+Project Solution
+11:52
+Quiz
+Section Review
+6:03
+Open Structs Project
+0:27
+Define a Struct
+8:39
+Create a Struct Instance
+3:23
+Access Struct Fields
+7:51
+Overwrite Struct Fields
+4:39
+Create Structs in a Function
+8:35
+Struct Field Initialization Shorthand Syntax
+3:42
+Struct Update Syntax
+8:59
+Passing Structs into a Function
+12:56
+Deriving Debug Trait for Struct
+6:35
+Defining Struct Methods
+18:59
+self Parameter as Mutable Struct Instance
+6:45
+self Parameter as Immutable and Mutable References to Struct Instance
+9:40
+Methods with Multiple Parameters
+8:10
+Calling Methods from Other Methods
+4:15
+Associated Functions
+8:29
+Multiple impl Blocks
+2:39
+Builder Pattern
+12:16
+Tuple Structs
+10:52
+Unit-Like Structs
+2:34
+Project
+0:59
+Project Solution
+17:02
+Quiz
+Section Review
+14:36
+Open Enums Project
+0:19
+Intro to Enums
+10:07
+Enum with Associated Values I
+8:41
+Enum with Associated Values II
+3:40
+A Brief Discussion on Enum Memory
+3:49
+Struct Variants
+10:23
+Nesting Enums in Enums
+6:38
+The match Keyword I
+10:06
+The match Keyword II
+4:05
+The match Keyword III
+9:04
+Defining Methods on Enums
+7:41
+The match Keyword IV - Catching Multiple Values
+7:36
+The match Keyword V - match with Exact Value
+7:30
+The if let Construct
+9:20
+The let else Construct
+9:03
+Project
+1:06
+Project Solution
+12:05
+Quiz
+Section Review
+Open Generics Project
+0:17
+Intro to Generics
+17:46
+The Turbofish Operator
+3:20
+Multiple Generics
+7:43
+Generics in Structs
+6:23
+Generics and impl Blocks I
+9:59
+Generics and impl Blocks II
+7:18
+Generics in Enums
+7:53
+Project
+1:00
+Project Solution
+11:56
+Quiz
+Section Review
+5:24
+Open Option and Result Enums Project
+0:19
+The Option Enum
+8:28
+Real Example of Option Enum (The get Method on an Array)
+8:17
+The unwrap and expect Methods
+6:23
+The match Keyword with Option Enum
+8:51
+Returning an Option Enum from a Function
+10:05
+Top-Level Option Variants
+3:23
+The unwrap_or Method
+5:08
+Building Option from Scratch
+11:36
+The Result Enum
+7:41
+Real Example of Result Enum (The parse Method on a string)
+5:25
+Returning a Result Enum from a Function
+8:56
+Result Methods
+4:50
+Nuances of unwrap Method on Result
+13:41
+The while let Construct
+5:29
+Project
+1:51
+Project Solution
+15:17
+Quiz
+Section Review
+6:05
+Open Vectors Project
+0:18
+Create a Vector
+10:19
+Adding and Removing Elements
+7:44
+Reading Vector Elements
+11:44
+The get Method
+4:35
+Ownership with Vectors
+9:19
+Writing Vector Elements
+6:36
+Vector Capacity Behind the Scenes
+7:11
+Project
+1:18
+Project Solution
+15:21
+Quiz
+Section Review
+8:13
+Open Warehouse Project
+0:26
+Packages and Crates
+8:36
+Intro to Modules
+5:47
+The pub Keyword
+5:23
+The Benefit of Namespaces
+2:30
+Module as File
+9:15
+Module as Folder
+5:28
+Module Ambiguity
+3:05
+Public Enums, Public Structs, and Public Fields
+10:14
+Submodules
+11:39
+The crate Prefix
+7:03
+The use Keyword I
+5:41
+The use Keyword II (Name Conflicts)
+3:33
+The self Keyword
+3:39
+The super Keyword
+9:16
+Create Aliases with the as Keyword
+3:52
+Using pub use to Export Names from Submodules
+5:23
+External Crates
+10:20
+The Standard Library
+5:08
+The Glob Operator
+6:30
+Create Library Crate
+8:51
+Multiple Binary Crates
+9:01
+Documentation Comments
+8:53
+Bonus - Walking through Sample Module Structure
+8:05
+Project
+1:55
+Project Solution
+26:46
+Quiz
+Section Review
+16:56
+Open Strings Project
+0:20
+Review of Strings
+9:17
+Concatenation
+11:21
+The format! Macro
+3:49
+Common String Methods (trim, casing, replace, split)
+9:46
+Collecting User Input with read_line Method
+14:36
+Project
+0:59
+Project Solution
+17:09
+Quiz
+Section Review
+9:43
+Open Hash Maps Project
+0:19
+Create a HashMap with new Function
+14:04
+The remove Method
+8:18
+Hash Maps and Ownership
+6:50
+Access a Value by Key
+6:12
+Overwriting a Value with an Existing Key
+1:44
+The entry Method
+5:25
+The HashSet
+8:24
+HashSet Operations
+9:16
+Project
+0:59
+Project Solution
+11:25
+Quiz
+Section Review
+4:55
+Open Error Handling Project
+0:22
+The panic! Macro
+6:45
+The process Module and the exit Function
+2:21
+Standard Error (eprintln! Macro)
+7:44
+Opening a File
+13:01
+Asking the User for Input
+12:14
+Reading the File's Contents
+7:49
+Propagating Errors
+15:45
+Understanding Error Type Redeclaration
+10:29
+The ? Operator (The Try Operator)
+8:14
+The read_to_string Associated Function
+4:07
+Using ? with Option
+8:00
+Project
+1:01
+Project Solution
+18:54
+Quiz
+Section Review
+8:14
+Open Traits Project
+0:29
+Intro to Traits
+8:11
+Defining a Trait
+9:20
+Implementing Trait for Struct I
+10:06
+Implementing Trait for Struct II
+12:41
+Default Implementations
+4:12
+Calling Trait Method from Another Method
+4:07
+Traits for Function Parameter Constraints
+8:57
+Trait Bound Syntax
+13:03
+Multiple Trait Bounds
+9:16
+where Clauses
+5:54
+Traits as Function Return Values
+6:50
+Trait Bounds to Conditionally Implement Methods
+18:54
+A Preview of Trait Objects
+15:57
+Trait Must be In Scope to Use its Definitions
+6:17
+Moving to Project Structure I
+10:53
+Moving to Project Structure II (Multiple Modules)
+9:49
+Associated Constants in a Trait
+10:03
+Getters in Traits
+7:47
+Setters in Traits
+10:17
+Supertraits I (Trait Inheritance)
+12:36
+Traits with Generics
+12:38
+Implementing the Display Trait on a Struct
+16:04
+Implementing the Display Trait on an Enum
+8:26
+Implementing the Debug Trait
+9:03
+Formatter Methods
+7:18
+Implementing the Drop Trait
+7:26
+Implementing the Clone Trait
+10:46
+Implementing the Copy Trait
+9:23
+Implementing the PartialEq Trait for Structs
+10:25
+Defining Equality for Different Types
+10:03
+Implementing the PartialEq Trait for Enums
+10:22
+Implementing the Eq Trait
+10:25
+Implementing the PartialOrd Trait
+15:57
+Associated Types I
+10:41
+Associated Types II
+7:13
+Project
+2:52
+Project Solution
+32:49
+Quiz
+Section Review
+17:53
+Open Lifetimes Project
+0:23
+Concrete Lifetimes for Values I
+7:02
+Concrete Lifetimes for Values II
+5:17
+Concrete Lifetimes for References
+9:06
+Non-Lexical Lifetimes
+7:50
+Invalid Lifetimes I
+7:14
+Invalid Lifetimes II
+6:01
+Functions Cannot Return References to Owned Values or Parameters
+8:04
+References as Function Parameters
+14:58
+Intro to Generic Lifetimes
+14:02
+Lifetimes and Referents
+5:18
+Lifetime Elision Rules I
+10:38
+Multiple Parameters I
+9:18
+Multiple Parameters II
+15:15
+Lifetime Elision Rules II
+14:57
+Lifetimes in Structs
+10:15
+Multiple Lifetimes
+12:16
+The static Lifetime
+5:28
+Project
+1:21
+Project Solution
+17:36
+Quiz
+Section Review
+11:11
+Open Closures Project
+0:22
+Nested Functions
+7:08
+Intro to Closures
+13:38
+Closure Shortcuts
+12:13
+The Fn Trait Hierarchy
+6:40
+Closures that Capture Immutable References
+5:54
+Closures that Capture Mutable References
+10:47
+Closures with Ownership
+11:26
+The move Keyword
+8:06
+The unwrap_or_else Method
+10:03
+Defining a Method that Accepts a Closure I (FnOnce Trait)
+19:57
+The String.retain Method
+9:41
+Defining a Method that Accepts a Closure II (FnMut Trait)
+18:16
+The Fn Trait
+7:13
+Passing in a Function to Fn Trait Parameter
+4:03
+Project
+1:54
+Project Solution
+18:53
+Quiz
+Section Review
+11:33
+Open Iterators Project
+0:39
+Manual Iteration
+11:24
+The Iterator and IntoIterator Traits
+12:29
+The IntoIterator Trait In Action
+6:39
+Exhausting the Iterator
+5:05
+The for Loop with Iterator
+6:24
+Why Iterator Can Be Immutable
+3:33
+The iter Method
+5:51
+The iter_mut Method
+10:11
+HashMap Iteration
+7:31
+String Iteration
+8:41
+Solving a Problem with Iteration
+10:43
+The for_each Method
+4:18
+The map Method I
+10:04
+The collect Method
+8:21
+The map Method II
+5:31
+The filter and find Methods I
+14:57
+The filter and find Methods II
+13:32
+The any and all Methods
+7:59
+The cloned Method
+11:15
+The filter_map Method
+7:41
+The flatten Method
+3:29
+The flat_map Method
+6:02
+The enumerate Method
+8:42
+The partition Method
+4:58
+The zip Method
+8:05
+The fold Method
+15:18
+The reduce Method
+9:37
+The sum, product, max, min, and count Methods
+17:19
+The last, nth, nth_back, and position Methods
+9:27
+The take, rev, skip, and step_by Methods
+11:06
+The sort and sort_by_key Methods
+12:46
+The lines Method
+6:44
+Collecting Command Line Arguments I
+7:50
+Collecting Command Line Arguments II
+22:33
+Reading Directory
+23:38
+The FromIterator Trait
+20:06
+Project: Wordle
+22:06
+Project
+3:00
+Project Solution
+43:32
+Quiz
+Section Review
+35:58
+Intro to Testing
+6:09
+Writing a Test and the assert_eq! Macro
+11:09
+The tests Module and the cfg Attribute
+12:49
+Test Failures
+6:31
+The assert! Macro
+4:08
+Testing Inequality with the assert_ne! Macro
+2:22
+The pretty_assertions Crate
+10:10
+Trait Requirements for Types in Testing
+5:32
+Custom Failure Messages
+5:35
+The should_panic Attribute
+9:14
+Using Result Enum in Tests
+6:56
+Running A Subset of Tests
+2:38
+Ignoring Tests
+2:02
+Showing Printed Output from Passing Tests
+3:26
+Adding MovieTheater Struct
+6:52
+Dependency Injection I
+11:26
+Dependency Injection II
+14:14
+Integration Tests
+13:37
+Documentation Tests
+12:32
+Test Options
+5:10
+Fixtures with the rstest Crate
+12:48
+Test-Driven Development
+10:51
+Project
+1:47
+Project Solution
+26:15
+Quiz
+Section Review
+23:28
+Open Random Project
+0:19
+Intro to the rand Crate
+5:11
+The ThreadRng Struct
+9:10
+Randomizing Vector Elements with shuffle Method
+2:02
+Project
+1:33
+Project Solution
+21:52
+Quiz
+Section Review
+5:51
+Open Datetimes Project
+0:20
+The NaiveDate Struct
+9:40
+The TimeDelta Struct
+10:21
+Adding and Subtracting Time
+8:38
+The NaiveTime and NaiveDateTime Structs
+7:17
+The DateTime Struct
+11:55
+Converting Timezones
+5:24
+The parse_from_str Function
+8:31
+The format Method
+5:14
+Project
+1:01
+Project Solution
+27:29
+Quiz
+Section Review
+7:23
+Open Regular Expressions Project
+0:22
+Intro to the regex Crate
+2:34
+The find and find_iter Methods
+11:43
+Searching for Digits
+3:59
+Alphanumeric Characters
+2:15
+Whitespace
+1:00
+Word Boundaries
+5:14
+The Dot Metacharacter
+3:22
+Square Brackets with Characters
+4:58
+Number of Matches I
+4:31
+Number of Matches II
+7:08
+Or Logic
+3:02
+Anchors
+5:36
+Capture Groups
+15:15
+The replace_all Method
+8:28
+Project
+1:37
+Project Solution
+26:17
+Quiz
+Section Review
+16:22
+Open Smart Pointers: Box Project
+0:22
+Raw Pointers
+8:48
+Raw Pointers and Unsafe Code
+15:00
+Smart Pointers
+7:37
+The Box Smart Pointer
+10:59
+Intro to Linked Lists
+6:13
+Defining the LinkedList
+9:54
+Creating the LinkedList
+13:32
+Box vs Regular References I
+16:30
+Box vs Regular References II
+6:16
+Vectors are Smart Pointers
+10:04
+Intro to Binary Search Trees
+18:32
+Creating a Binary Search Tree
+45:27
+The Deref and DerefMut Traits I
+20:31
+The Deref and DerefMut Traits II
+6:38
+The Drop Trait
+5:56
+Deref Coercions
+9:47
+Trait Objects I
+16:53
+Trait Objects II: Handling Multiple Errors
+29:05
+Custom Error Types
+8:44
+Project
+2:42
+Project Solution
+37:24
+Quiz
+Section Review
+18:12
+Open Smart Pointers II Project
+0:22
+The Cell Type and Interior Mutability Pattern
+15:49
+The RefCell Type
+21:55

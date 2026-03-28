@@ -1,0 +1,7 @@
+FROM alpine:latest
+
+ARG VERSION=1
+RUN echo "version ${VERSION}" > /version.txt
+RUN dd if=/dev/urandom of=/padding.bin bs=1M count=5 2>/dev/null
+
+CMD ["cat", "/version.txt"]

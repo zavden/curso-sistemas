@@ -1,0 +1,43 @@
+FROM almalinux:9
+
+# Locale
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+
+# Instalar EPEL para paquetes adicionales
+RUN dnf install -y epel-release && dnf clean all
+
+# Instalar todas las herramientas en una sola capa
+RUN dnf install -y \
+    # Compilacion C/C++
+    gcc gcc-c++ make cmake pkgconf-pkg-config glibc-devel \
+    # Debugging
+    gdb valgrind strace ltrace \
+    # Documentacion
+    man-db man-pages \
+    # Utilidades
+    git curl wget vim-minimal less tree file bc \
+    glibc-langpack-en \
+    # Desarrollo de red
+    nmap-ncat iproute iputils bind-utils tcpdump \
+    # Dependencias
+    ca-certificates findutils \
+    && dnf clean all
+
+# Crear usuario de desarrollo
+RUN useradd -m -s /bin/bash dev
+
+# Cambiar a usuario non-root
+USER dev
+WORKDIR /home/dev
+
+# Instalar Rust via rustup
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
+    sh -s -- -y --default-toolchain stable --component rustfmt clippy
+
+# Anadir cargo al PATH
+ENV PATH="/home/dev/.cargo/bin:${PATH}"
+
+WORKDIR /home/dev/workspace
+
+CMD ["/bin/bash"]

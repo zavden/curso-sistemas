@@ -1,0 +1,17 @@
+services:
+  isolated:
+    image: alpine:latest
+    command: sleep 3600
+    networks:
+      - no_internet
+
+  connected:
+    image: alpine:latest
+    command: sleep 3600
+    networks:
+      - no_internet
+      - default
+
+networks:
+  no_internet:
+    internal: true

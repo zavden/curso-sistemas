@@ -1,0 +1,20 @@
+FROM alpine:latest
+
+# WORKDIR creates the directory if it doesn't exist
+WORKDIR /app
+
+# COPY places files relative to WORKDIR
+COPY hello.c .
+COPY config.txt ./config/
+
+# RUN executes in the current WORKDIR
+RUN echo "Current directory:" && pwd && ls -la
+
+# WORKDIR with relative path appends to current
+WORKDIR src
+RUN echo "Now in:" && pwd
+
+# Record final WORKDIR for verification
+RUN pwd > /app/final-workdir.txt
+
+CMD ["sh", "-c", "echo '=== /app contents ===' && ls /app/ && echo '=== Final WORKDIR ===' && cat /app/final-workdir.txt"]

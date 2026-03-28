@@ -1,0 +1,10 @@
+FROM debian:bookworm-slim
+
+# BAD PATTERN: install and clean in separate RUN instructions
+# Layer 1: installs curl + downloads package lists (cache remains in this layer)
+RUN apt-get update && apt-get install -y --no-install-recommends curl
+
+# Layer 2: removes cache, but layer 1 still contains it
+RUN rm -rf /var/lib/apt/lists/*
+
+CMD ["curl", "--version"]

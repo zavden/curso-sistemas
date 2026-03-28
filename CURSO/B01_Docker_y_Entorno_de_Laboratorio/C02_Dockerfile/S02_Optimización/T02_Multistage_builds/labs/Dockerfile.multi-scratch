@@ -1,0 +1,15 @@
+# Stage 1: BUILD
+FROM debian:bookworm AS builder
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc libc6-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+COPY hello.c .
+RUN gcc -static -o hello hello.c
+
+# Stage 2: SCRATCH — absolutely nothing except the binary
+FROM scratch
+COPY --from=builder /src/hello /hello
+CMD ["/hello"]

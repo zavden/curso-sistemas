@@ -1,0 +1,3 @@
+FROM alpine:latest
+
+CMD ["echo", "Default CMD: no arguments provided"]

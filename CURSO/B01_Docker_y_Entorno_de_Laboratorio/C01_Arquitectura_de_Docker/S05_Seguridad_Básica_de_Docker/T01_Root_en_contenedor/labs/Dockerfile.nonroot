@@ -1,0 +1,16 @@
+FROM alpine:latest
+
+# Install a utility as root (only root can do this)
+RUN apk add --no-cache curl
+
+# Create a non-root user
+RUN adduser -D -s /bin/sh appuser
+
+# Create application directory with correct ownership
+RUN mkdir -p /app && chown appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+WORKDIR /home/appuser
+
+CMD ["id"]

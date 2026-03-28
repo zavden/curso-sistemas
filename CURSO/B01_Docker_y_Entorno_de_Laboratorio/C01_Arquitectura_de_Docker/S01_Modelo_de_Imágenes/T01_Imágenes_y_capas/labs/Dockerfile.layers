@@ -1,0 +1,8 @@
+FROM debian:bookworm
+WORKDIR /src
+COPY hello.c /src/hello.c
+RUN apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev \
+    && rm -rf /var/lib/apt/lists/*
+RUN gcc -o /src/hello /src/hello.c
+LABEL description="Lab - Anatomia de capas"
+CMD ["/src/hello"]

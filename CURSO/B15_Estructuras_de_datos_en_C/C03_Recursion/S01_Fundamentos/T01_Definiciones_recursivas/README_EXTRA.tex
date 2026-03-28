@@ -1,0 +1,315 @@
+\documentclass[11pt, letterpaper]{article}
+
+% --- Idioma y codificación ---
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% --- Matemáticas ---
+\usepackage{amsmath, amssymb, amsthm}
+
+% --- Formato ---
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue!70!black}
+
+% --- Entornos de teoremas ---
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolario}
+\theoremstyle{remark}
+\newtheorem{remark}{Observación}[section]
+
+\title{%
+  T01 --- Demostraciones formales:\\[4pt]
+  Recursión, inducción y Fibonacci
+}
+\author{Curso Linux--C--Rust --- B15 Estructuras de datos en C}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+% ===================================================================
+\section{Recordatorio: inducción matemática}
+% ===================================================================
+
+\begin{definition}[Inducción simple]
+Para probar $P(n)$ para todo $n \geq 0$:
+\begin{enumerate}
+  \item \textbf{Base}: probar $P(0)$.
+  \item \textbf{Paso}: suponer $P(k)$ (hipótesis inductiva), probar $P(k+1)$.
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Inducción fuerte (o completa)]
+Para probar $P(n)$ para todo $n \geq 0$:
+\begin{enumerate}
+  \item \textbf{Base}: probar $P(0)$ (y posiblemente $P(1), \ldots, P(j)$).
+  \item \textbf{Paso}: suponer $P(0), P(1), \ldots, P(k)$ \emph{todas}
+    verdaderas, probar $P(k+1)$.
+\end{enumerate}
+\end{definition}
+
+La inducción fuerte es más poderosa cuando el caso recursivo depende
+de más de un predecesor (como Fibonacci, que depende de $F(n-1)$ y
+$F(n-2)$).
+
+% ===================================================================
+\section{Demostración 1: correctitud del factorial recursivo}
+% ===================================================================
+
+\begin{definition}[Factorial recursivo]
+\[
+  f(n) = \begin{cases} 1 & \text{si } n = 0 \\ n \cdot f(n-1) & \text{si } n \geq 1 \end{cases}
+\]
+\end{definition}
+
+\begin{definition}[Factorial por productoria]
+\[
+  n! = \prod_{i=1}^{n} i = 1 \cdot 2 \cdot 3 \cdots n
+\]
+con la convención de que el producto vacío ($n = 0$) es~1.
+\end{definition}
+
+\begin{theorem}\label{thm:factorial}
+$f(n) = n!$ para todo $n \geq 0$.
+\end{theorem}
+
+\begin{proof}
+Por inducción fuerte. Sea $P(n)$: ``$f(n) = n!$''.
+
+\textbf{Base ($n = 0$).}
+\[
+  f(0) = 1 = 0! \quad \checkmark
+\]
+
+\textbf{Paso inductivo.} Sea $k \geq 0$. Suponemos $P(i)$ verdadera
+para todo $0 \leq i \leq k$. Calculamos $f(k+1)$:
+\begin{align*}
+  f(k+1) &= (k+1) \cdot f(k)       && \text{(definición recursiva)} \\
+         &= (k+1) \cdot k!          && \text{(hipótesis inductiva)} \\
+         &= (k+1)!                   && \text{(definición de factorial)}
+\end{align*}
+
+$P(k+1)$ es verdadera. Por inducción fuerte, $f(n) = n!$ para todo
+$n \geq 0$.
+\end{proof}
+
+\begin{remark}
+Esta demostración también funciona con inducción simple, ya que el
+caso recursivo solo depende de $f(n-1)$. Usamos inducción fuerte por
+consistencia con la Demostración~3.
+\end{remark}
+
+% ===================================================================
+\section{Demostración 2: terminación del factorial recursivo}
+% ===================================================================
+
+\begin{theorem}\label{thm:termination}
+Para todo $n \geq 0$, la evaluación de $f(n)$ termina en exactamente
+$n$ llamadas recursivas.
+\end{theorem}
+
+\begin{proof}
+Por inducción simple.
+
+\textbf{Base ($n = 0$).} $f(0) = 1$ retorna directamente. $0$
+llamadas recursivas. \checkmark
+
+\textbf{Paso inductivo.} Supongamos que $f(k)$ termina en $k$
+llamadas. Entonces $f(k+1) = (k+1) \cdot f(k)$ ejecuta una llamada
+a $f(k)$, que termina en $k$ llamadas. Total: $1 + k = k+1$ llamadas.
+\end{proof}
+
+\begin{remark}[Función de decrecimiento]
+El argumento $n$ decrece estrictamente en cada llamada ($n \to n-1$)
+y está acotado inferiormente por~0. Todo entero no negativo
+decreciente eventualmente llega a~0, donde la recursión se detiene.
+\end{remark}
+
+% ===================================================================
+\section{Demostración 3: fórmula cerrada de Fibonacci}
+% ===================================================================
+
+\begin{definition}[Secuencia de Fibonacci]
+\[
+  F(n) = \begin{cases}
+    0 & \text{si } n = 0 \\
+    1 & \text{si } n = 1 \\
+    F(n-1) + F(n-2) & \text{si } n \geq 2
+  \end{cases}
+\]
+\end{definition}
+
+\begin{theorem}[Fórmula de Binet]\label{thm:binet}
+Para todo $n \geq 0$:
+\[
+  F(n) = \frac{\varphi^n - \psi^n}{\sqrt{5}}
+\]
+donde $\varphi = \dfrac{1 + \sqrt{5}}{2}$ (proporción áurea) y
+$\psi = \dfrac{1 - \sqrt{5}}{2}$.
+\end{theorem}
+
+\subsection{Parte 1: derivación por ecuación característica}
+
+La recurrencia $F(n) = F(n-1) + F(n-2)$ es lineal homogénea de
+segundo orden. Buscamos soluciones de la forma $F(n) = r^n$:
+\[
+  r^n = r^{n-1} + r^{n-2}
+  \quad\Longrightarrow\quad
+  r^2 - r - 1 = 0
+\]
+
+Resolviendo:
+\[
+  r = \frac{1 \pm \sqrt{5}}{2}
+  \quad\Longrightarrow\quad
+  \varphi = \frac{1 + \sqrt{5}}{2} \approx 1.618,
+  \quad
+  \psi = \frac{1 - \sqrt{5}}{2} \approx -0.618
+\]
+
+La solución general es $F(n) = A\varphi^n + B\psi^n$. Las condiciones
+iniciales determinan $A$ y $B$:
+\begin{align*}
+  F(0) = 0: \quad & A + B = 0 \tag{I} \\
+  F(1) = 1: \quad & A\varphi + B\psi = 1 \tag{II}
+\end{align*}
+
+De (I): $B = -A$. Sustituyendo en (II):
+\[
+  A(\varphi - \psi) = 1
+  \quad\Longrightarrow\quad
+  A \cdot \sqrt{5} = 1
+  \quad\Longrightarrow\quad
+  A = \frac{1}{\sqrt{5}}, \quad B = -\frac{1}{\sqrt{5}}
+\]
+donde usamos $\varphi - \psi = \sqrt{5}$.
+
+\subsection{Parte 2: verificación por inducción fuerte}
+
+\begin{proof}[Prueba del Teorema~\ref{thm:binet}]
+Sea $P(n)$: ``$F(n) = (\varphi^n - \psi^n)/\sqrt{5}$''.
+
+\textbf{Base ($n = 0$ y $n = 1$).}
+\begin{align*}
+  F(0) &= \frac{\varphi^0 - \psi^0}{\sqrt{5}} = \frac{1 - 1}{\sqrt{5}} = 0 \quad \checkmark \\
+  F(1) &= \frac{\varphi - \psi}{\sqrt{5}} = \frac{\sqrt{5}}{\sqrt{5}} = 1 \quad \checkmark
+\end{align*}
+
+\textbf{Paso inductivo.} Sea $k \geq 1$. Suponemos $P(i)$ verdadera
+para todo $0 \leq i \leq k$. Por la recurrencia y la hipótesis:
+\[
+  F(k+1) = F(k) + F(k-1)
+  = \frac{\varphi^k - \psi^k}{\sqrt{5}}
+  + \frac{\varphi^{k-1} - \psi^{k-1}}{\sqrt{5}}
+  = \frac{\varphi^{k-1}(\varphi + 1) - \psi^{k-1}(\psi + 1)}{\sqrt{5}}
+\]
+
+Como $\varphi$ y $\psi$ son raíces de $r^2 = r + 1$:
+\[
+  \varphi + 1 = \varphi^2, \qquad \psi + 1 = \psi^2
+\]
+
+Verificación: $\varphi^2 = \frac{(1+\sqrt{5})^2}{4} = \frac{6+2\sqrt{5}}{4} = \frac{3+\sqrt{5}}{2} = \varphi + 1$. \checkmark
+
+Sustituyendo:
+\[
+  F(k+1) = \frac{\varphi^{k-1} \cdot \varphi^2 - \psi^{k-1} \cdot \psi^2}{\sqrt{5}}
+  = \frac{\varphi^{k+1} - \psi^{k+1}}{\sqrt{5}}
+\]
+
+$P(k+1)$ es verdadera. Por inducción fuerte, la fórmula vale para
+todo $n \geq 0$.
+\end{proof}
+
+% ===================================================================
+\section{Consecuencias de la fórmula de Binet}
+% ===================================================================
+
+\begin{corollary}[$F(n)$ siempre es entero]\label{cor:integer}
+A pesar de que la fórmula involucra $\sqrt{5}$, $F(n) \in \mathbb{Z}$
+para todo $n \geq 0$.
+\end{corollary}
+
+\begin{proof}
+Expandiendo con el binomio de Newton:
+\[
+  \varphi^n = \frac{1}{2^n}\sum_{j=0}^{n}\binom{n}{j}(\sqrt{5})^j,
+  \qquad
+  \psi^n = \frac{1}{2^n}\sum_{j=0}^{n}\binom{n}{j}(-\sqrt{5})^j
+\]
+
+Al restar, los términos con $j$ par se cancelan y los impares se
+duplican. Cada término con $j$ impar contiene
+$(\sqrt{5})^j = 5^{(j-1)/2}\sqrt{5}$, que al dividir por $\sqrt{5}$
+da un racional. Los coeficientes binomiales garantizan que el
+resultado es entero.
+\end{proof}
+
+\begin{corollary}\label{cor:round}
+$F(n) = \operatorname{round}(\varphi^n / \sqrt{5})$ para todo $n \geq 1$.
+\end{corollary}
+
+\begin{proof}
+Como $|\psi| = \frac{\sqrt{5}-1}{2} \approx 0.618 < 1$:
+\[
+  \left|F(n) - \frac{\varphi^n}{\sqrt{5}}\right|
+  = \frac{|\psi|^n}{\sqrt{5}}
+  < \frac{1}{\sqrt{5}}
+  < \frac{1}{2}
+\]
+
+$F(n)$ es entero y $\varphi^n/\sqrt{5}$ está a distancia $< 1/2$,
+así que $F(n)$ es el entero más cercano.
+\end{proof}
+
+\begin{corollary}[Complejidad de la recursión ingenua]\label{cor:complexity}
+El número de llamadas $T(n)$ de la implementación recursiva directa
+satisface $T(n) = \Theta(\varphi^n)$.
+\end{corollary}
+
+\begin{proof}
+$T(n)$ satisface $T(0) = T(1) = 1$, $T(n) = T(n-1) + T(n-2) + 1$.
+Se puede probar que $T(n) = 2F(n+1) - 1$, lo que por la fórmula de
+Binet da $T(n) = \Theta(\varphi^n)$.
+\end{proof}
+
+% ===================================================================
+\section{Resumen de resultados}
+% ===================================================================
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llc}
+\toprule
+\textbf{Resultado} & \textbf{Técnica} & \textbf{Tipo de inducción} \\
+\midrule
+$f(n) = n!$
+  & Inducción
+  & Simple (basta $P(k)$) \\
+$f(n)$ termina en $n$ llamadas
+  & Inducción + func.\ de decrecimiento
+  & Simple \\
+Fórmula de Binet para $F(n)$
+  & Ec.\ característica + inducción
+  & Fuerte ($P(k)$ y $P(k{-}1)$) \\
+$F(n) \in \mathbb{Z}$
+  & Expansión binomial
+  & Directa \\
+$F(n) = \operatorname{round}(\varphi^n/\sqrt{5})$
+  & Cota sobre $|\psi^n|$
+  & Directa \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

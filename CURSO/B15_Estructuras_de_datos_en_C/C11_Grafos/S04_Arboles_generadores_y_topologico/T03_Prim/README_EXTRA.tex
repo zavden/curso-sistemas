@@ -1,0 +1,355 @@
+\documentclass[11pt, letterpaper]{article}
+
+% --- Idioma y codificación ---
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% --- Matemáticas ---
+\usepackage{amsmath, amssymb, amsthm}
+
+% --- Formato ---
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue!70!black}
+
+% --- Entornos de teoremas ---
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolario}
+\theoremstyle{remark}
+\newtheorem{remark}{Observación}[section]
+
+\title{%
+  T03 --- Demostración formal:\\[4pt]
+  Prim produce un MST por la propiedad de corte
+}
+\author{Curso Linux--C--Rust --- B15 Estructuras de datos en C}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+% ===================================================================
+\section{Modelo}
+% ===================================================================
+
+\begin{definition}
+Grafo $G = (V, E)$ no dirigido, conexo, con función de peso
+$w: E \to \mathbb{R}$. $|V| = n$, $|E| = m$.
+\end{definition}
+
+\begin{definition}
+\textbf{Algoritmo de Prim.} Mantiene un conjunto $S$ de vértices ya
+incluidos en el MST parcial (inicialmente $S = \{s\}$ para un
+vértice fuente arbitrario $s$). En cada paso, agrega la arista de
+peso mínimo que cruza el corte $(S,\, V \setminus S)$, incorporando
+su extremo $v \in V \setminus S$ a $S$.
+\end{definition}
+
+\textbf{Convención.} Pesos distintos (la prueba se adapta con
+desempate consistente para pesos iguales).
+
+% ===================================================================
+\section{Demostración 1: correctitud por invariante de bucle}
+% ===================================================================
+
+\begin{theorem}\label{thm:correctness}
+Al terminar, las aristas seleccionadas por Prim forman un MST.
+\end{theorem}
+
+\begin{proof}
+Sea $A_k$ el conjunto de aristas seleccionadas tras $k$ iteraciones.
+Definimos el invariante:
+\[
+  \mathrm{INV}(k):\quad
+  A_k \text{ es subconjunto de algún MST de } G
+\]
+
+\textbf{Inicialización ($k = 0$).} $A_0 = \emptyset$, que es
+subconjunto de cualquier MST. \checkmark
+
+\textbf{Mantenimiento.} Supongamos $\mathrm{INV}(k)$: existe un MST
+$T^*$ con $A_k \subseteq T^*$. En la iteración $k + 1$, Prim
+selecciona la arista $e = (u, v)$ de peso mínimo que cruza el corte
+$(S_k,\, V \setminus S_k)$, donde $S_k$ es el conjunto de vértices
+incluidos tras $k$ iteraciones.
+
+\emph{Caso 1: $e \in T^*$.} Entonces
+$A_{k+1} = A_k \cup \{e\} \subseteq T^*$. \checkmark
+
+\emph{Caso 2: $e \notin T^*$.} Agregar $e$ a $T^*$ crea un ciclo
+$C$. El ciclo $C$ contiene $e = (u, v)$ con $u \in S_k$ y
+$v \in V \setminus S_k$, así que $C$ cruza el corte al menos dos
+veces. Sea $e' \neq e$ otra arista de $C$ que cruza el corte
+$(S_k,\, V \setminus S_k)$, con $e' \in T^*$.
+
+Como $e$ es la arista de peso mínimo que cruza el corte:
+$w(e) < w(e')$ (pesos distintos).
+
+Definimos $T^{**} = T^* \setminus \{e'\} \cup \{e\}$.
+
+\begin{itemize}
+  \item $T^{**}$ es un árbol generador (eliminar $e'$ del ciclo $C$
+    y mantener $e$ preserva la conexión; $n - 1$ aristas).
+  \item $w(T^{**}) = w(T^*) - w(e') + w(e) < w(T^*)$.
+\end{itemize}
+
+Pero $T^*$ era un MST, así que $w(T^{**}) \geq w(T^*)$.
+Contradicción. $\therefore$ el Caso~2 no ocurre (con pesos
+distintos).
+
+Con pesos iguales: $w(e) \leq w(e')$, y $T^{**}$ es también un MST
+con $A_{k+1} \subseteq T^{**}$. \checkmark
+
+\textbf{Verificación de que $e' \notin A_k$.} La arista $e'$ cruza
+el corte $(S_k,\, V \setminus S_k)$ y está en $T^*$. Si
+$e' \in A_k$, entonces $e'$ fue seleccionada en una iteración
+anterior $j < k$, cuando cruzaba el corte
+$(S_j,\, V \setminus S_j)$. Pero entonces ambos extremos de $e'$
+estarían en $S_k$ (el extremo de $V \setminus S_j$ fue incorporado a
+$S$ al seleccionar $e'$). Esto contradice que $e'$ cruza
+$(S_k,\, V \setminus S_k)$. $\therefore e' \notin A_k$, y el
+intercambio es válido. \checkmark
+
+\textbf{Terminación ($k = n - 1$).} $A_{n-1}$ contiene $n - 1$
+aristas, $S = V$, y $A_{n-1}$ es subconjunto de algún MST. Como un
+MST tiene exactamente $n - 1$ aristas, $A_{n-1}$ \textbf{es} un MST.
+\end{proof}
+
+% ===================================================================
+\section{Demostración 2: key[v] es la arista ligera del corte}
+% ===================================================================
+
+\begin{theorem}\label{thm:key}
+Al momento de extraer $v$ de la cola de prioridad,
+$\mathrm{key}[v]$ es el peso de la arista de peso mínimo entre $v$
+y algún vértice de $S$.
+\end{theorem}
+
+\begin{proof}
+Se mantiene el invariante:
+\[
+  \mathrm{key}[v]
+  = \min\{w(u, v) : u \in S,\; (u, v) \in E\}
+\]
+(o $\infty$ si no existe tal arista).
+
+\emph{Inicialización.} $S = \{s\}$. Para cada vecino $v$ de $s$:
+$\mathrm{key}[v] = w(s, v)$. Para no vecinos:
+$\mathrm{key}[v] = \infty$. Correcto. \checkmark
+
+\emph{Mantenimiento.} Al agregar $u$ a $S$, para cada vecino
+$v \notin S$ de $u$: si $w(u, v) < \mathrm{key}[v]$, se actualiza
+$\mathrm{key}[v] = w(u, v)$. Esto incorpora la nueva información de
+que $u$ ahora está en $S$.
+
+Ninguna arista más ligera entre $v$ y $S$ puede quedar sin
+considerar: la única información nueva es que $u \in S$, y se examina
+$w(u, v)$. Las aristas desde vértices anteriores de $S$ ya fueron
+consideradas cuando esos vértices se agregaron. \checkmark
+\end{proof}
+
+\begin{corollary}
+La arista seleccionada $(u, v)$ con
+$\mathrm{key}[v] = \min_{v \notin S} \mathrm{key}[v]$ es la arista
+de peso mínimo que cruza $(S,\, V \setminus S)$. Esto es exactamente
+lo que requiere la propiedad de corte.
+\end{corollary}
+
+% ===================================================================
+\section{Demostración 3: Prim y Dijkstra son estructuralmente
+  idénticos}
+% ===================================================================
+
+\begin{theorem}\label{thm:equiv}
+Prim y Dijkstra tienen la misma estructura algorítmica; difieren
+únicamente en la clave de la cola de prioridad.
+\end{theorem}
+
+\begin{proof}
+Comparación directa:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Aspecto} & \textbf{Dijkstra} & \textbf{Prim} \\
+\midrule
+Cola de prioridad
+  & $\mathrm{dist}[v] = \delta(s,v)$ estimada
+  & $\mathrm{key}[v] = \min w(u,v)$, $u \in S$ \\
+Actualización
+  & $\min(\mathrm{dist}[v],\, \mathrm{dist}[u]{+}w(u,v))$
+  & $\min(\mathrm{key}[v],\, w(u,v))$ \\
+Optimiza
+  & Distancia acumulada desde $s$
+  & Peso de una sola arista \\
+Resultado
+  & Árbol de caminos más cortos
+  & Árbol generador mínimo \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La diferencia es una sola línea: Dijkstra acumula
+($\mathrm{dist}[u] + w$); Prim no ($w$ solo). Ambos extraen el
+mínimo de la cola y relajan vecinos. La estructura de bucle, las
+operaciones sobre el heap y el patrón de visita son idénticos.
+\end{proof}
+
+\begin{corollary}
+La complejidad de Prim es idéntica a la de Dijkstra: $O(n^2)$ con
+array, $O(m \log n)$ con heap binario, $O(m + n\log n)$ con
+Fibonacci heap.
+\end{corollary}
+
+% ===================================================================
+\section{Demostración 4: complejidad
+  \texorpdfstring{$O(m \log n)$}{O(m log n)} con heap binario}
+% ===================================================================
+
+\begin{theorem}\label{thm:complexity}
+Prim con min-heap binario (y lazy deletion) ejecuta en
+$O(m \log n)$.
+\end{theorem}
+
+\begin{proof}
+Contamos operaciones sobre el heap:
+
+\textbf{Extracciones.} Se extraen a lo sumo $n$ vértices válidos y
+hasta $m - n$ entradas obsoletas (lazy deletion). Total: $O(m)$
+extracciones, cada una $O(\log m) = O(\log n)$:
+\[
+  C_{\text{extract}} = O(m \log n)
+\]
+
+\textbf{Inserciones.} Cada relajación exitosa
+($w(u,v) < \mathrm{key}[v]$) produce un push al heap. Se procesan
+$O(m)$ pares $(u, v)$ en total. Inserciones: $O(m)$, cada una
+$O(\log n)$:
+\[
+  C_{\text{insert}} = O(m \log n)
+\]
+
+\textbf{Total:}
+\[
+  T = O(m \log n)
+\]
+
+\textbf{Con decrease-key (heap indexado):} a lo sumo $m$
+decrease-keys, cada una $O(\log n)$, y $n$ extracciones
+$O(\log n)$:
+\[
+  T = O((m + n) \log n) = O(m \log n)
+\]
+Mismo orden asintótico, menor constante por no tener entradas
+duplicadas.
+\end{proof}
+
+% ===================================================================
+\section{Demostración 5: Prim con array es óptimo para grafos densos}
+% ===================================================================
+
+\begin{theorem}\label{thm:dense}
+Para grafos con $m = \Theta(n^2)$, Prim con array lineal ($O(n^2)$)
+es asintóticamente óptimo.
+\end{theorem}
+
+\begin{proof}
+\emph{Cota superior.} Ya demostrada: $O(n^2)$ con array.
+
+\emph{Cota inferior.} Cualquier algoritmo MST debe examinar todas
+las aristas (de lo contrario, una arista no examinada de peso
+$-\infty$ invalidaría el resultado). Para grafos densos con
+$m = \Theta(n^2)$:
+\[
+  T \geq \Omega(m) = \Omega(n^2)
+\]
+
+Combinando: $T = \Theta(n^2)$ para Prim con array en grafos densos.
+
+\textbf{Comparación con heap para grafos densos ($m = n^2$):}
+\[
+  T_{\text{array}} = O(n^2), \qquad
+  T_{\text{heap}} = O(n^2 \log n)
+\]
+
+El array gana por un factor de $\log n$. Para $n = 10^4$ con grafo
+completo: $n^2 = 10^8$ vs $n^2 \log n \approx 1.3 \times 10^9$
+--- el heap es ${\sim}\,13\times$ más lento.
+\end{proof}
+
+% ===================================================================
+\section{Verificación numérica}
+% ===================================================================
+
+Grafo con 6 vértices, fuente~0:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{cccccc}
+\toprule
+\textbf{Iter.} & \textbf{Extraer $v$} & $\mathrm{key}[v]$
+  & \textbf{Arista MST} & \textbf{Corte $(S, V \setminus S)$}
+  & \textbf{¿Mín.?} \\
+\midrule
+1 & 0 & 0 & --- & $(\{0\},\, \{1,2,3,4,5\})$ & --- \\
+2 & 3 & 3 & $(0,3)$
+  & $(\{0\},\, \{1,2,3,4,5\})$ & Sí: $3 < 4$ \checkmark \\
+3 & 1 & 4 & $(0,1)$
+  & $(\{0,3\},\, \{1,2,4,5\})$ & Sí: $4 < 8,9$ \checkmark \\
+4 & 2 & 2 & $(1,2)$
+  & $(\{0,1,3\},\, \{2,4,5\})$ & Sí: $2 < 5,6,7,9$ \checkmark \\
+5 & 4 & 5 & $(2,4)$
+  & $(\{0,1,2,3\},\, \{4,5\})$ & Sí: $5 < 6,7,9$ \checkmark \\
+6 & 5 & 1 & $(4,5)$
+  & $(\{0,1,2,3,4\},\, \{5\})$ & Sí: $1 < 7$ \checkmark \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Peso total: $3 + 4 + 2 + 5 + 1 = 15$. Idéntico a Kruskal.
+\checkmark
+
+En cada paso, la arista seleccionada es efectivamente la de peso
+mínimo que cruza el corte, confirmando la propiedad de corte.
+\checkmark
+
+% ===================================================================
+\section{Resumen de resultados}
+% ===================================================================
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llp{5.5cm}}
+\toprule
+\textbf{Resultado} & \textbf{Técnica} & \textbf{Clave} \\
+\midrule
+Prim produce MST
+  & Invariante $A_k \subseteq T^*$ + corte
+  & Intercambio $T^{**} = T^* \setminus \{e'\} \cup \{e\}$ \\
+$\mathrm{key}[v]$ = arista ligera
+  & Invariante de la cola
+  & Actualizar al agregar cada $u$ a $S$ \\
+Prim $\equiv$ Dijkstra
+  & Comparación directa
+  & Diferencia: $w(u,v)$ vs $\mathrm{dist}[u] + w(u,v)$ \\
+$O(m \log n)$ con heap
+  & Contar operaciones
+  & $O(m)$ ins./ext.\ $\times\, O(\log n)$ \\
+$\Theta(n^2)$ óptimo densos
+  & Cota inferior $\Omega(m)$
+  & Toda arista debe examinarse \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

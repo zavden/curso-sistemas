@@ -1,0 +1,476 @@
+\documentclass[11pt, letterpaper]{article}
+
+% ── Idioma y codificación ─────────────────────────────────────────
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% ── Matemáticas ───────────────────────────────────────────────────
+\usepackage{amsmath, amssymb, amsthm}
+
+% ── Tipografía y layout ──────────────────────────────────────────
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}            % párrafos separados, sin sangría
+\usepackage{enumitem}
+\usepackage{booktabs}           % tablas bonitas
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!60!black, urlcolor=blue!60!black}
+
+% ── Entornos de teoremas ─────────────────────────────────────────
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{corollary}[theorem]{Corolario}
+\theoremstyle{remark}
+\newtheorem*{remark}{Nota}
+
+% ── Comandos útiles ──────────────────────────────────────────────
+\newcommand{\bigo}{O}
+\newcommand{\bigomega}{\Omega}
+\newcommand{\bigtheta}{\Theta}
+
+% ══════════════════════════════════════════════════════════════════
+\title{%
+  \textbf{Demostraciones formales: $O$, $\Omega$, $\Theta$} \\[6pt]
+  \large B15 --- Estructuras de Datos en C y Rust \\
+  C01 / S02 / T01 --- Notación asintótica
+}
+\author{Curso Linux--C--Rust}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\bigskip\hrule\bigskip
+
+% ══════════════════════════════════════════════════════════════════
+\section{Definiciones}
+% ══════════════════════════════════════════════════════════════════
+
+Fijamos las definiciones exactas que se usarán en todas las demostraciones.
+Sean $f, g : \mathbb{N} \to \mathbb{R}^{\geq 0}$.
+
+\begin{definition}[Big-$O$ --- cota superior asintótica]
+  $f(n) \in O(g(n))$ si y solo si
+  \[
+    \exists\, c > 0,\; \exists\, n_0 \geq 0
+    \quad\text{tales que}\quad
+    f(n) \le c \cdot g(n)
+    \quad \forall\, n \ge n_0.
+  \]
+\end{definition}
+
+\begin{definition}[Big-$\Omega$ --- cota inferior asintótica]
+  $f(n) \in \Omega(g(n))$ si y solo si
+  \[
+    \exists\, c > 0,\; \exists\, n_0 \geq 0
+    \quad\text{tales que}\quad
+    f(n) \ge c \cdot g(n)
+    \quad \forall\, n \ge n_0.
+  \]
+\end{definition}
+
+\begin{definition}[Big-$\Theta$ --- cota ajustada asintótica]
+  $f(n) \in \Theta(g(n))$ si y solo si
+  \[
+    \exists\, c_1 > 0,\; c_2 > 0,\; \exists\, n_0 \geq 0
+    \quad\text{tales que}\quad
+    c_1 \cdot g(n) \le f(n) \le c_2 \cdot g(n)
+    \quad \forall\, n \ge n_0.
+  \]
+\end{definition}
+
+La negación de $f(n) \in O(g(n))$ será útil más adelante:
+\[
+  f(n) \notin O(g(n))
+  \;\;\Longleftrightarrow\;\;
+  \forall\, c > 0,\;
+  \forall\, n_0 \geq 0,\;
+  \exists\, n \geq n_0
+  \;\text{tal que}\;
+  f(n) > c \cdot g(n).
+\]
+
+
+% ══════════════════════════════════════════════════════════════════
+\section{Demostración 1: \texorpdfstring{$3n^2 + 5n \in O(n^2)$}{3n²+5n ∈ O(n²)}}
+% ══════════════════════════════════════════════════════════════════
+
+\begin{theorem}\label{thm:3n2-bigo}
+  Sea $f(n) = 3n^2 + 5n$. Entonces $f(n) \in O(n^2)$.
+\end{theorem}
+
+\begin{proof}
+  Debemos exhibir constantes $c > 0$ y $n_0 \geq 0$ tales que
+  \[
+    3n^2 + 5n \;\leq\; c \cdot n^2
+    \qquad \forall\, n \geq n_0.
+  \]
+
+  Acotamos el término de menor orden. Para $n \geq 1$:
+  \[
+    n \leq n^2
+    \quad\Longrightarrow\quad
+    5n \leq 5n^2.
+  \]
+
+  Sumando $3n^2$ a ambos lados:
+  \[
+    3n^2 + 5n \;\leq\; 3n^2 + 5n^2 \;=\; 8n^2.
+  \]
+
+  Tomamos $c = 8$ y $n_0 = 1$.
+
+  \textbf{Verificación.} Para todo $n \geq 1$:
+  \[
+    3n^2 + 5n \;\leq\; 8n^2
+    \quad\Longleftrightarrow\quad
+    5n \leq 5n^2
+    \quad\Longleftrightarrow\quad
+    1 \leq n.
+    \qquad\checkmark
+  \]
+\end{proof}
+
+\begin{remark}[Sobre la elección de testigos]
+  Los valores $c = 8$, $n_0 = 1$ no son únicos. Otras elecciones válidas:
+
+  \begin{center}
+  \begin{tabular}{lll}
+    \toprule
+    $c$ & $n_0$ & Justificación \\
+    \midrule
+    $4$   & $5$  & $3n^2 + 5n \leq 4n^2 \iff 5n \leq n^2 \iff 5 \leq n$ \\
+    $3.1$ & $50$ & $3n^2 + 5n \leq 3.1n^2 \iff 5n \leq 0.1n^2 \iff 50 \leq n$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+
+  Mientras más ajustada sea $c$ (cercana al coeficiente líder $3$),
+  más grande necesitamos $n_0$. Esto refleja la naturaleza asintótica
+  de la definición: para $n$ suficientemente grande, $5n$ es
+  despreciable frente a $3n^2$.
+\end{remark}
+
+
+% ══════════════════════════════════════════════════════════════════
+\section{Demostración 2: \texorpdfstring{$n^2 \notin O(n)$}{n² ∉ O(n)}}
+% ══════════════════════════════════════════════════════════════════
+
+\begin{theorem}\label{thm:n2-not-on}
+  $n^2 \notin O(n)$.
+\end{theorem}
+
+\subsection{Prueba por contradicción}
+
+\begin{proof}
+  Supongamos, buscando una contradicción, que $n^2 \in O(n)$.
+  Entonces existen constantes $c > 0$ y $n_0 \geq 0$ tales que
+  \[
+    n^2 \leq c \cdot n \qquad \forall\, n \geq n_0.
+  \]
+
+  Dividiendo ambos lados por $n$ (válido para $n \geq 1$; podemos
+  asumir $n_0 \geq 1$ sin pérdida de generalidad):
+  \[
+    n \leq c \qquad \forall\, n \geq n_0.
+  \]
+
+  Pero $c$ es una constante fija. Tomemos
+  $n^{*} = \max\!\big(n_0,\; \lceil c \rceil + 1\big)$.
+  Entonces:
+  \begin{itemize}[nosep]
+    \item $n^{*} \geq n_0$, así que la desigualdad debería valer.
+    \item $n^{*} \geq \lceil c \rceil + 1 > c$, así que $n^{*} \leq c$ es falso.
+  \end{itemize}
+
+  Contradicción. La hipótesis $n^2 \in O(n)$ es falsa.
+\end{proof}
+
+\subsection{Prueba directa (por negación)}
+
+\begin{proof}
+  Usamos la negación de la definición: debemos mostrar que
+  \[
+    \forall\, c > 0,\;
+    \forall\, n_0 \geq 0,\;
+    \exists\, n \geq n_0
+    \quad\text{tal que}\quad
+    n^2 > c \cdot n.
+  \]
+
+  Sean $c > 0$ y $n_0 \geq 0$ arbitrarios. Definimos
+  $n = \max\!\big(n_0,\; \lceil c \rceil + 1\big)$.
+  Entonces:
+  \begin{align*}
+    n &\geq n_0 &&\text{(por construcción),} \\
+    n &\geq \lceil c \rceil + 1 > c &&\text{(por definición de techo),} \\
+    n^2 &= n \cdot n > c \cdot n &&\text{(multiplicamos por } n > 0\text{).}
+  \end{align*}
+
+  Para cualesquiera $c$ y $n_0$ hemos exhibido un $n$ que viola la
+  desigualdad de $O(n)$.
+\end{proof}
+
+\begin{remark}[Técnica de demostración]
+  Ambas pruebas explotan la misma idea: si $n^2 \leq cn$ para todo
+  $n$ grande, entonces $n \leq c$ para todo $n$ grande, lo cual es
+  absurdo porque $n$ crece sin límite y $c$ es constante. Esta es la
+  técnica estándar para probar que una función \emph{no} pertenece a
+  una clase asintótica.
+\end{remark}
+
+
+% ══════════════════════════════════════════════════════════════════
+\section{Demostración 3: \texorpdfstring{$3n^2 + 5n \in \Omega(n^2)$}{3n²+5n ∈ Ω(n²)}}
+% ══════════════════════════════════════════════════════════════════
+
+\begin{theorem}\label{thm:3n2-omega}
+  Sea $f(n) = 3n^2 + 5n$. Entonces $f(n) \in \Omega(n^2)$.
+\end{theorem}
+
+\begin{proof}
+  Debemos exhibir $c > 0$ y $n_0 \geq 0$ tales que
+  \[
+    3n^2 + 5n \;\geq\; c \cdot n^2 \qquad \forall\, n \geq n_0.
+  \]
+
+  Para todo $n \geq 0$, el término $5n$ es no negativo:
+  \[
+    3n^2 + 5n \;\geq\; 3n^2.
+  \]
+
+  Tomamos $c = 3$ y $n_0 = 0$.
+
+  \textbf{Verificación.} $3n^2 + 5n \geq 3n^2$ equivale a $5n \geq 0$,
+  que vale para todo $n \geq 0$. $\checkmark$
+\end{proof}
+
+
+% ══════════════════════════════════════════════════════════════════
+\section{Demostración 4: \texorpdfstring{$\Theta(g) = O(g) \cap \Omega(g)$}{Θ(g) = O(g) ∩ Ω(g)}}
+\label{sec:theta-equivalence}
+% ══════════════════════════════════════════════════════════════════
+
+Este es un resultado fundamental que justifica por qué $\Theta$ captura
+el crecimiento ``exacto'' de una función.
+
+\begin{theorem}\label{thm:theta-intersection}
+  Para cualquier función $g : \mathbb{N} \to \mathbb{R}^{\geq 0}$,
+  \[
+    \Theta(g(n)) \;=\; O(g(n)) \;\cap\; \Omega(g(n)).
+  \]
+\end{theorem}
+
+Probamos ambas direcciones de la igualdad de conjuntos.
+
+% ── Dirección ⇒ ──────────────────────────────────────────────────
+\subsection{\texorpdfstring{$\Theta(g) \subseteq O(g) \cap \Omega(g)$}{Θ(g) ⊆ O(g) ∩ Ω(g)}}
+
+\begin{proof}
+  Sea $f(n) \in \Theta(g(n))$. Por definición, existen $c_1, c_2 > 0$ y
+  $n_0 \geq 0$ tales que
+  \[
+    c_1 \cdot g(n) \;\leq\; f(n) \;\leq\; c_2 \cdot g(n)
+    \qquad \forall\, n \geq n_0.
+  \]
+
+  \begin{itemize}[nosep]
+    \item La desigualdad derecha ($f(n) \leq c_2 \cdot g(n)$, $\forall\, n \geq n_0$)
+          es la definición de $f(n) \in O(g(n))$ con testigo $c = c_2$.
+    \item La desigualdad izquierda ($f(n) \geq c_1 \cdot g(n)$, $\forall\, n \geq n_0$)
+          es la definición de $f(n) \in \Omega(g(n))$ con testigo $c = c_1$.
+  \end{itemize}
+
+  Por lo tanto, $f(n) \in O(g(n)) \cap \Omega(g(n))$.
+\end{proof}
+
+% ── Dirección ⇐ ──────────────────────────────────────────────────
+\subsection{\texorpdfstring{$O(g) \cap \Omega(g) \subseteq \Theta(g)$}{O(g) ∩ Ω(g) ⊆ Θ(g)}}
+
+\begin{proof}
+  Sea $f(n) \in O(g(n)) \cap \Omega(g(n))$. Por las respectivas
+  definiciones, existen:
+  \begin{align}
+    &c_a > 0,\; n_1 \geq 0 \quad\text{tales que}\quad
+      f(n) \leq c_a \cdot g(n) \;\;\forall\, n \geq n_1,
+      \label{eq:bigo-hyp} \\
+    &c_b > 0,\; n_2 \geq 0 \quad\text{tales que}\quad
+      f(n) \geq c_b \cdot g(n) \;\;\forall\, n \geq n_2.
+      \label{eq:omega-hyp}
+  \end{align}
+
+  Definimos:
+  \[
+    c_1 = c_b, \qquad c_2 = c_a, \qquad n_0 = \max(n_1,\, n_2).
+  \]
+
+  Para todo $n \geq n_0$:
+  \begin{itemize}[nosep]
+    \item $n \geq n_0 \geq n_2$, así que por~\eqref{eq:omega-hyp}:
+          $f(n) \geq c_b \cdot g(n) = c_1 \cdot g(n)$.
+    \item $n \geq n_0 \geq n_1$, así que por~\eqref{eq:bigo-hyp}:
+          $f(n) \leq c_a \cdot g(n) = c_2 \cdot g(n)$.
+  \end{itemize}
+
+  Combinando:
+  \[
+    c_1 \cdot g(n) \;\leq\; f(n) \;\leq\; c_2 \cdot g(n)
+    \qquad \forall\, n \geq n_0,
+  \]
+  que es la definición de $f(n) \in \Theta(g(n))$.
+\end{proof}
+
+\begin{remark}[Consecuencia práctica]
+  Para probar $f(n) \in \Theta(g(n))$, basta probar por separado que
+  $f(n) \in O(g(n))$ y $f(n) \in \Omega(g(n))$. Esto suele ser más
+  sencillo que encontrar directamente $c_1$ y $c_2$ en la definición
+  de~$\Theta$.
+\end{remark}
+
+
+% ══════════════════════════════════════════════════════════════════
+\section{Aplicación: \texorpdfstring{$3n^2 + 5n \in \Theta(n^2)$}{3n²+5n ∈ Θ(n²)}}
+% ══════════════════════════════════════════════════════════════════
+
+Combinando los resultados anteriores:
+
+\begin{corollary}
+  $3n^2 + 5n \in \Theta(n^2)$.
+\end{corollary}
+
+\begin{proof}
+  \begin{align*}
+    &\text{Teorema~\ref{thm:3n2-bigo}:}\quad
+      3n^2 + 5n \in O(n^2)
+      \quad\text{con } c = 8,\; n_0 = 1. \\
+    &\text{Teorema~\ref{thm:3n2-omega}:}\quad
+      3n^2 + 5n \in \Omega(n^2)
+      \quad\text{con } c = 3,\; n_0 = 0. \\
+    &\text{Teorema~\ref{thm:theta-intersection}:}\quad
+      O(n^2) \cap \Omega(n^2) = \Theta(n^2).
+  \end{align*}
+
+  Por lo tanto, $3n^2 + 5n \in \Theta(n^2)$ con
+  $c_1 = 3$, $c_2 = 8$, $n_0 = \max(1, 0) = 1$.
+\end{proof}
+
+Esto significa que $3n^2 + 5n$ crece \emph{exactamente} como $n^2$:
+nunca más rápido que $8n^2$ (cota superior) ni más lento que $3n^2$
+(cota inferior). Los coeficientes $c_1 = 3$ y $c_2 = 8$ forman un
+``sándwich'' asintótico alrededor de $f(n)$.
+
+
+% ══════════════════════════════════════════════════════════════════
+\section{Generalización para polinomios}
+% ══════════════════════════════════════════════════════════════════
+
+Las demostraciones anteriores son casos particulares de un resultado
+general.
+
+\begin{theorem}[Clase asintótica de un polinomio]\label{thm:poly}
+  Sea
+  \[
+    f(n) = a_k n^k + a_{k-1} n^{k-1} + \cdots + a_1 n + a_0
+  \]
+  un polinomio de grado $k$ con coeficiente líder $a_k > 0$. Entonces
+  $f(n) \in \Theta(n^k)$.
+\end{theorem}
+
+\begin{proof}
+  \textbf{Cota superior} ($f(n) \in O(n^k)$).
+  Para $n \geq 1$, cada término satisface $|a_i|\, n^i \leq |a_i|\, n^k$
+  (porque $n^i \leq n^k$ cuando $i \leq k$ y $n \geq 1$). Entonces:
+  \[
+    f(n)
+    \;\leq\; \sum_{i=0}^{k} |a_i|\, n^k
+    \;=\; \underbrace{\left(\sum_{i=0}^{k} |a_i|\right)}_{=\, c_2}\, n^k.
+  \]
+  Tomamos $c_2 = \sum_{i=0}^{k} |a_i|$ y $n_0 = 1$.
+
+  \medskip
+  \textbf{Cota inferior} ($f(n) \in \Omega(n^k)$).
+  Separamos el término líder del residuo:
+  \[
+    f(n) = a_k n^k + r(n),
+    \qquad\text{donde}\quad
+    r(n) = a_{k-1} n^{k-1} + \cdots + a_0.
+  \]
+
+  El residuo $r(n)$ es un polinomio de grado $k-1$, así que por la cota
+  superior (aplicada a $|r|$), existe una constante $M > 0$ tal que
+  $|r(n)| \leq M \cdot n^{k-1}$ para todo $n \geq 1$. Entonces:
+  \[
+    f(n) \;\geq\; a_k n^k - |r(n)|
+         \;\geq\; a_k n^k - M n^{k-1}
+         \;=\; n^k \!\left(a_k - \frac{M}{n}\right).
+  \]
+
+  Para $n \geq \dfrac{2M}{a_k}$, se tiene
+  $a_k - \dfrac{M}{n} \geq a_k - \dfrac{a_k}{2} = \dfrac{a_k}{2} > 0$,
+  así que:
+  \[
+    f(n) \;\geq\; \frac{a_k}{2}\, n^k.
+  \]
+
+  Tomamos $c_1 = \dfrac{a_k}{2}$ y
+  $n_0 = \left\lceil \dfrac{2M}{a_k} \right\rceil$.
+
+  \medskip
+  Combinando ambas cotas y aplicando el Teorema~\ref{thm:theta-intersection}:
+  $f(n) \in \Theta(n^k)$.
+\end{proof}
+
+\begin{corollary}
+  Para determinar la clase asintótica de un polinomio, solo importa el
+  grado y el signo del coeficiente líder. Los demás coeficientes y
+  términos de menor orden son irrelevantes asintóticamente.
+\end{corollary}
+
+Esto justifica formalmente las reglas de simplificación del README.md:
+\begin{itemize}[nosep]
+  \item \textbf{Regla 1} (eliminar constantes multiplicativas):
+        $O(cn^k) = O(n^k)$.
+  \item \textbf{Regla 2} (eliminar términos de menor orden):
+        $O(n^k + n^{k-1} + \cdots) = O(n^k)$.
+\end{itemize}
+
+
+% ══════════════════════════════════════════════════════════════════
+\section{Resumen de técnicas de demostración}
+% ══════════════════════════════════════════════════════════════════
+
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  \textbf{Qué demostrar} & \textbf{Técnica} & \textbf{Patrón} \\
+  \midrule
+  $f \in O(g)$
+    & Exhibir testigos $c, n_0$
+    & Acotar $f$ por arriba \\
+  $f \in \Omega(g)$
+    & Exhibir testigos $c, n_0$
+    & Acotar $f$ por abajo \\
+  $f \in \Theta(g)$
+    & Probar $O$ $+$ $\Omega$ por separado
+    & Usar $\Theta = O \cap \Omega$ \\
+  $f \notin O(g)$
+    & Contradicción
+    & $n$ acotada por constante $\Rightarrow$ absurdo \\
+  $f \notin O(g)$
+    & Directa (negación)
+    & $\forall\, c, n_0$, exhibir $n$ que viola \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\bigskip\hrule\bigskip
+
+\begin{center}
+  \small
+  Compilar con: \texttt{pdflatex README\_EXTRA.tex}
+\end{center}
+
+\end{document}

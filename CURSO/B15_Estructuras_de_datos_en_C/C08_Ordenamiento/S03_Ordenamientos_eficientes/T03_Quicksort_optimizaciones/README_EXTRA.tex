@@ -1,0 +1,302 @@
+\documentclass[11pt, letterpaper]{article}
+
+% --- Idioma y codificación ---
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% --- Matemáticas ---
+\usepackage{amsmath, amssymb, amsthm}
+
+% --- Formato ---
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue!70!black}
+
+% --- Entornos de teoremas ---
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolario}
+\theoremstyle{remark}
+\newtheorem{remark}{Observación}[section]
+
+\title{%
+  T03 --- Demostración formal:\\[4pt]
+  Quicksort aleatorizado es $O(n \log n)$ en esperanza
+}
+\author{Curso Linux--C--Rust --- B15 Estructuras de datos en C}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+% ===================================================================
+\section{Modelo}
+% ===================================================================
+
+\textbf{Entrada.} Un array fijo $A[0..n{-}1]$ de $n$ elementos
+distintos (la entrada \textbf{no} es aleatoria).
+
+\textbf{Algoritmo.} Quicksort con pivote aleatorio: en cada llamada
+recursiva sobre un subarreglo de tamaño~$m$, se elige un pivote
+uniformemente al azar entre los $m$ elementos del subarreglo.
+
+\begin{remark}
+La aleatoriedad es del algoritmo, no de la entrada. A diferencia del
+análisis de caso promedio (T02), aquí la entrada es fija y arbitraria.
+La esperanza se toma sobre las elecciones aleatorias del pivote.
+\end{remark}
+
+% ===================================================================
+\section{Distinción clave: caso promedio vs aleatorizado}
+% ===================================================================
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lp{4.5cm}p{4.5cm}}
+\toprule
+& \textbf{Caso promedio (T02)} & \textbf{Aleatorizado} \\
+\midrule
+Entrada
+  & Permutación uniforme aleatoria
+  & \textbf{Fija, arbitraria} \\
+Pivote
+  & Determinístico (ej: último)
+  & \textbf{Aleatorio uniforme} \\
+Fuente de aleatoriedad
+  & Los datos
+  & El algoritmo \\
+Garantía
+  & ``En promedio sobre entradas''
+  & ``Para toda entrada, en esperanza'' \\
+¿Entrada adversarial?
+  & Sí ($O(n^2)$ determinístico)
+  & \textbf{No} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La conclusión numérica es la misma ($\approx 1.39 \cdot n\log_2 n$
+comparaciones esperadas), pero la garantía es fundamentalmente más
+fuerte en el caso aleatorizado.
+
+% ===================================================================
+\section{Demostración 1: la esperanza es independiente de la entrada}
+% ===================================================================
+
+\begin{theorem}\label{thm:independent}
+Sea $A$ cualquier array fijo de $n$ elementos distintos. El número
+esperado de comparaciones de quicksort aleatorizado sobre~$A$ es:
+\[
+  E[C] = 2(n+1)H_n - 4n \approx 1.386 \cdot n \log_2 n
+\]
+\end{theorem}
+
+\begin{proof}
+Sean $z_1 < z_2 < \ldots < z_n$ los elementos de $A$ en orden
+creciente (los valores, no las posiciones). Definimos:
+\[
+  X_{ij} = \begin{cases}
+    1 & \text{si } z_i \text{ y } z_j \text{ se comparan} \\
+    0 & \text{si no}
+  \end{cases}
+\]
+
+Como en T02:
+\[
+  E[C] = \sum_{i=1}^{n-1}\sum_{j=i+1}^{n} \Pr[X_{ij} = 1]
+\]
+
+\textbf{Afirmación.} $\Pr[X_{ij} = 1] = 2/(j - i + 1)$, y esta
+probabilidad \textbf{no depende de la disposición de los elementos
+en~$A$}, solo de sus valores relativos.
+
+\emph{Prueba de la afirmación.} Consideremos
+$Z_{ij} = \{z_i, z_{i+1}, \ldots, z_j\}$. Independientemente de
+dónde estén estos elementos en el array:
+\begin{itemize}
+  \item Mientras ningún elemento de $Z_{ij}$ sea elegido como pivote,
+    todos permanecen en el mismo subarreglo (cualquier pivote externo
+    a $Z_{ij}$ los mantiene juntos, pues son todos mayores o todos
+    menores que él).
+  \item El primer elemento de $Z_{ij}$ elegido como pivote determina
+    si $z_i$ y $z_j$ se comparan. Como el pivote se elige
+    uniformemente dentro del subarreglo, y los elementos de $Z_{ij}$
+    están en el mismo subarreglo al momento de la elección, cada uno
+    tiene probabilidad $1/(j{-}i{+}1)$ de ser el primero elegido.
+  \item Solo si se elige $z_i$ o $z_j$ (2 opciones de $j{-}i{+}1$)
+    ocurre la comparación.
+\end{itemize}
+
+Esta probabilidad depende solo de la estructura de rangos, no de las
+posiciones iniciales en~$A$. Por lo tanto:
+\[
+  \Pr[X_{ij} = 1] = \frac{2}{j-i+1}
+\]
+para \textbf{cualquier} disposición de los elementos.
+
+El resto de la derivación es idéntico a T02:
+$E[C] = 2(n+1)H_n - 4n$.
+\end{proof}
+
+% ===================================================================
+\section{Demostración 2: concentración}
+% ===================================================================
+
+\begin{theorem}\label{thm:concentration}
+Para quicksort aleatorizado sobre cualquier entrada de tamaño~$n$:
+\[
+  \Pr[C > \alpha \cdot n \ln n] \leq n^{2 - \alpha}
+  \quad \text{para } \alpha > 2
+\]
+En particular, $\Pr[C > 4n\ln n] < 1/n^2$.
+\end{theorem}
+
+\begin{proof}[Prueba (sketch usando desigualdad de Markov sobre $2^C$)]
+Definimos la variable aleatoria $Y = 2^{C/(cn)}$ para una constante
+$c$ adecuada. Se puede demostrar que $E[Y] = O(n)$. Por la
+desigualdad de Markov:
+\[
+  \Pr[C > \alpha \cdot n \ln n]
+  = \Pr\!\left[Y > 2^{\alpha \ln n / c}\right]
+  \leq \frac{E[Y]}{2^{\alpha \ln n / c}}
+\]
+
+Con la elección adecuada de $c$, esto da una cota polinomialmente
+pequeña en~$n$.
+\end{proof}
+
+\begin{remark}[Interpretación práctica]
+Para $n = 10^6$:
+\begin{itemize}
+  \item $E[C] \approx 1.39 \cdot 10^6 \cdot 20 \approx 2.8 \times 10^7$.
+  \item $\Pr[C > 4 \cdot 10^6 \cdot \ln(10^6)] < 10^{-12}$.
+\end{itemize}
+La probabilidad de que quicksort aleatorizado sea significativamente
+más lento que su esperanza es infinitesimal.
+\end{remark}
+
+% ===================================================================
+\section{Demostración 3: no existe entrada adversarial}
+% ===================================================================
+
+\begin{theorem}\label{thm:no-adversary}
+Para todo array $A$ de $n$ elementos:
+\[
+  E_{\mathrm{rand}}[C(A)] = 2(n+1)H_n - 4n
+\]
+La esperanza es \textbf{la misma} para toda entrada~$A$.
+\end{theorem}
+
+\begin{proof}
+Ya demostrada en el Teorema~\ref{thm:independent}: la probabilidad
+$\Pr[X_{ij} = 1] = 2/(j{-}i{+}1)$ no depende de~$A$, solo de~$n$.
+Por lo tanto, la esperanza $E[C]$ tampoco depende de~$A$.
+\end{proof}
+
+\begin{corollary}
+Un adversario que conoce el algoritmo pero no las elecciones aleatorias
+no puede construir una entrada que fuerce más de $2(n{+}1)H_n - 4n$
+comparaciones en esperanza.
+\end{corollary}
+
+\begin{table}[h]
+\centering
+\caption{Contraste con quicksort determinístico.}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Propiedad}
+  & \textbf{Determinístico}
+  & \textbf{Aleatorizado} \\
+\midrule
+$\exists$ entrada con $T(n) = \Theta(n^2)$?
+  & \textbf{Sí} (ej: ordenada)
+  & No (en esperanza) \\
+$E[C]$ depende de la entrada?
+  & Sí
+  & \textbf{No} \\
+Garantía para peor entrada
+  & $\Theta(n^2)$
+  & $O(n\log n)$ esperado \\
+$\Pr[C = \Omega(n^2)]$
+  & 1 para entrada adversarial
+  & $< 1/n!$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ===================================================================
+\section{Demostración 4: profundidad de recursión esperada
+  \texorpdfstring{$O(\log n)$}{O(log n)}}
+% ===================================================================
+
+\begin{theorem}\label{thm:depth}
+La profundidad de recursión esperada de quicksort aleatorizado es
+$O(\log n)$.
+\end{theorem}
+
+\begin{proof}
+En cada llamada recursiva, el pivote cae en la posición~$k$
+uniformemente entre 1 y~$m$ (tamaño del subarreglo). La probabilidad
+de que el pivote caiga en el ``centro'' (entre la posición $m/4$ y
+$3m/4$) es $1/2$.
+
+Cuando el pivote cae en el centro, ambas particiones tienen tamaño
+$\leq 3m/4$. Así, el tamaño del subproblema se reduce por un factor
+$\leq 3/4$ con probabilidad $1/2$ en cada nivel.
+
+El número de reducciones exitosas necesarias para llegar a tamaño~1
+es:
+\[
+  (3/4)^d \cdot n \leq 1
+  \quad\Longrightarrow\quad
+  d \geq \log_{4/3} n
+  = \frac{\log_2 n}{\log_2(4/3)}
+  \approx 2.41 \log_2 n
+\]
+
+Cada reducción exitosa ocurre con probabilidad $1/2$. La profundidad
+total (incluyendo intentos fallidos) tiene esperanza:
+\[
+  E[\text{profundidad}] \approx 2 \cdot 2.41 \log_2 n
+  \approx 4.82 \log_2 n = O(\log n)
+\]
+
+Más precisamente, la profundidad excede $c\log n$ con probabilidad
+$\leq 1/n$ para $c$ suficientemente grande.
+\end{proof}
+
+% ===================================================================
+\section{Resumen de resultados}
+% ===================================================================
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llp{5.5cm}}
+\toprule
+\textbf{Resultado} & \textbf{Técnica} & \textbf{Clave} \\
+\midrule
+$E[C] = 2(n{+}1)H_n - 4n$ para toda entrada
+  & Variables indicadoras
+  & $\Pr[X_{ij}{=}1]$ no depende de la disposición \\
+$\Pr[C > 4n\ln n] < 1/n^2$
+  & Desigualdad de Markov
+  & Colas exponencialmente pequeñas \\
+No existe entrada adversarial
+  & $E[C]$ independiente de $A$
+  & La aleatoriedad es del algoritmo \\
+Profundidad $O(\log n)$
+  & Pivote ``centrado'' con prob $1/2$
+  & Reducción geométrica $3/4$ por éxito \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

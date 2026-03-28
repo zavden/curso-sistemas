@@ -1,0 +1,8 @@
+FROM alpine:latest
+
+ARG GREETING=Hello
+ARG BUILD_ID=unknown
+
+RUN echo "Build: $GREETING (build=$BUILD_ID)" > /build-info.txt
+
+CMD ["sh", "-c", "echo '=== Build info ===' && cat /build-info.txt && echo '=== Runtime vars ===' && echo \"GREETING=$GREETING\" && echo \"BUILD_ID=$BUILD_ID\""]

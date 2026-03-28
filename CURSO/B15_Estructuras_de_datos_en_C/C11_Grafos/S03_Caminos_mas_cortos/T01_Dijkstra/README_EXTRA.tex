@@ -1,0 +1,313 @@
+\documentclass[11pt, letterpaper]{article}
+
+% --- Idioma y codificación ---
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% --- Matemáticas ---
+\usepackage{amsmath, amssymb, amsthm}
+
+% --- Formato ---
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue!70!black}
+
+% --- Entornos de teoremas ---
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolario}
+\theoremstyle{remark}
+\newtheorem{remark}{Observación}[section]
+
+\title{%
+  T01 --- Demostración formal:\\[4pt]
+  Correctitud y complejidad de Dijkstra
+}
+\author{Curso Linux--C--Rust --- B15 Estructuras de datos en C}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+% ===================================================================
+\section{Modelo}
+% ===================================================================
+
+\begin{definition}
+Grafo $G = (V, E)$ dirigido con función de peso
+$w: E \to \mathbb{R}_{\geq 0}$ (pesos no negativos). Fuente
+$s \in V$. Distancia:
+$\delta(s, v) = \min\{w(p) : p \text{ es camino de } s \text{ a } v\}$,
+donde $w(p) = \sum_{(u,v) \in p} w(u,v)$. Si no existe camino,
+$\delta(s,v) = \infty$.
+\end{definition}
+
+Dijkstra mantiene: $S$ (vértices finalizados),
+$\mathrm{dist}[v]$ (estimación, inicialmente $\infty$;
+$\mathrm{dist}[s] = 0$), y cola de prioridad $Q = V \setminus S$.
+En cada paso: extraer $u = \arg\min_{v \in Q} \mathrm{dist}[v]$,
+agregar $u$ a $S$, relajar aristas salientes de $u$.
+
+% ===================================================================
+\section{Lemas previos}
+% ===================================================================
+
+\begin{lemma}[Subestructura óptima]\label{lem:substructure}
+Si $p = s \leadsto u \to v$ es un camino más corto de $s$ a $v$,
+entonces el subcamino $s \leadsto u$ es un camino más corto de $s$
+a $u$.
+\end{lemma}
+
+\begin{proof}
+Si existiera $p'$ de $s$ a $u$ con $w(p') < w(s \leadsto u)$,
+entonces $p' \to v$ tendría peso
+$w(p') + w(u,v) < w(s \leadsto u) + w(u,v) = w(p)$, contradiciendo
+que $p$ es más corto.
+\end{proof}
+
+\begin{lemma}[Convergencia de la relajación]\label{lem:relax}
+Si $(u,v) \in E$ y $\mathrm{dist}[u] = \delta(s,u)$ al relajar
+$(u,v)$, entonces tras la relajación:
+$\mathrm{dist}[v] \leq \delta(s,v)$.
+\end{lemma}
+
+\begin{proof}
+Tras relajar:
+$\mathrm{dist}[v] \leq \mathrm{dist}[u] + w(u,v)
+= \delta(s,u) + w(u,v)$.
+Si el camino más corto a $v$ pasa por $u$:
+$\delta(s,v) = \delta(s,u) + w(u,v)$, y la desigualdad vale.
+En cualquier caso, $\mathrm{dist}[v]$ nunca baja de $\delta(s,v)$
+por el invariante de cota superior (Lema~\ref{lem:upper}).
+\end{proof}
+
+\begin{lemma}[Invariante de cota superior]\label{lem:upper}
+En todo momento, $\mathrm{dist}[v] \geq \delta(s,v)$ para todo
+$v \in V$.
+\end{lemma}
+
+\begin{proof}
+Por inducción sobre el número de relajaciones.
+
+\emph{Base.} $\mathrm{dist}[s] = 0 = \delta(s,s)$ y
+$\mathrm{dist}[v] = \infty \geq \delta(s,v)$ para $v \neq s$.
+\checkmark
+
+\emph{Paso.} La relajación de $(u,v)$ pone
+$\mathrm{dist}[v] \leftarrow \mathrm{dist}[u] + w(u,v)$.
+Por hipótesis inductiva, $\mathrm{dist}[u] \geq \delta(s,u)$:
+\[
+  \delta(s,v) \leq \delta(s,u) + w(u,v)
+  \leq \mathrm{dist}[u] + w(u,v)
+  = \mathrm{dist}[v]_{\text{nuevo}} \qedhere
+\]
+\end{proof}
+
+% ===================================================================
+\section{Demostración 1: correctitud}
+% ===================================================================
+
+\begin{theorem}\label{thm:correctness}
+Al extraer el vértice $u$ de la cola de prioridad,
+$\mathrm{dist}[u] = \delta(s,u)$.
+\end{theorem}
+
+\begin{proof}
+Por contradicción. Sea $u$ el \textbf{primer} vértice extraído con
+$\mathrm{dist}[u] \neq \delta(s,u)$. Por el
+Lema~\ref{lem:upper}, $\mathrm{dist}[u] > \delta(s,u)$. En
+particular, $\delta(s,u) < \infty$ y existe un camino de $s$ a $u$.
+
+\textbf{Paso 1.} Sea $p = s \leadsto u$ un camino más corto. Como
+$s \in S$ y $u \notin S$, el camino cruza la frontera de $S$. Sea
+$(x,y)$ la primera arista con $x \in S$, $y \notin S$:
+\[
+  p: \underbrace{s \leadsto x}_{\in S}
+  \to \underbrace{y \leadsto u}_{\notin S}
+\]
+
+\textbf{Paso 2.} Como $x$ fue extraído antes de $u$ y $u$ es el
+primer error, $\mathrm{dist}[x] = \delta(s,x)$. Al extraer $x$, se
+relajó $(x,y)$. Por el Lema~\ref{lem:relax}:
+\[
+  \mathrm{dist}[y] \leq \delta(s,x) + w(x,y) = \delta(s,y)
+\]
+(igualdad por subestructura óptima, Lema~\ref{lem:substructure}).
+Por el Lema~\ref{lem:upper}:
+$\mathrm{dist}[y] \geq \delta(s,y)$. Combinando:
+$\mathrm{dist}[y] = \delta(s,y)$.
+
+\textbf{Paso 3.} Como $y$ está en el camino óptimo y
+$w \geq 0$:
+\[
+  \mathrm{dist}[y] = \delta(s,y) \leq \delta(s,u)
+  < \mathrm{dist}[u]
+\]
+
+Pero $u$ fue extraído antes que $y$ (extract-min), así que
+$\mathrm{dist}[u] \leq \mathrm{dist}[y]$.
+Contradicción.
+\end{proof}
+
+% ===================================================================
+\section{Demostración 2: necesidad de $w \geq 0$}
+% ===================================================================
+
+\begin{theorem}\label{thm:nonneg}
+Si existe una arista con peso negativo, Dijkstra puede producir
+distancias incorrectas.
+\end{theorem}
+
+\begin{proof}
+Contraejemplo. Grafo:
+$s \xrightarrow{2} a$, $s \xrightarrow{3} b \xrightarrow{-2} a$.
+Distancia real: $\delta(s,a) = \min(2, 3{+}({-}2)) = 1$.
+
+Ejecución:
+\begin{enumerate}
+  \item Extraer $s$: $\mathrm{dist}[a] = 2$,
+    $\mathrm{dist}[b] = 3$.
+  \item Extraer $a$ ($\mathrm{dist} = 2$). Se finaliza con
+    $\mathrm{dist}[a] = 2$.
+  \item Extraer $b$ ($\mathrm{dist} = 3$). Relajar $(b,a)$:
+    $3 + ({-}2) = 1 < 2$, pero $a$ ya fue finalizado.
+\end{enumerate}
+
+Dijkstra retorna $\mathrm{dist}[a] = 2 \neq 1 = \delta(s,a)$.
+
+\textbf{Dónde falla la prueba.} En el Paso~3 del
+Teorema~\ref{thm:correctness}, usamos
+$\delta(s,y) \leq \delta(s,u)$ porque el subcamino $y \leadsto u$
+tiene peso $\geq 0$. Con pesos negativos, podría ser que
+$\delta(s,y) > \delta(s,u)$, y la contradicción no se produce.
+\end{proof}
+
+% ===================================================================
+\section{Demostración 3: complejidad
+  \texorpdfstring{$O((n+m)\log n)$}{O((n+m) log n)}}
+% ===================================================================
+
+\begin{theorem}\label{thm:complexity}
+Dijkstra con min-heap binario ejecuta en $O((n+m)\log n)$.
+\end{theorem}
+
+\begin{proof}
+Contamos las operaciones sobre el heap:
+
+\emph{Inserciones.} Cada relajación exitosa produce una inserción.
+Una arista $(u,v)$ se relaja a lo sumo una vez (al extraer $u$). Hay
+a lo sumo $m$ inserciones, cada una $O(\log n)$:
+\[
+  C_{\text{insert}} = O(m \log n)
+\]
+
+\emph{Extracciones.} Se extraen a lo sumo $m$ entradas del heap
+(incluyendo obsoletas con lazy deletion), cada una $O(\log n)$:
+\[
+  C_{\text{extract}} = O(m \log n)
+\]
+
+Total, incluyendo inicialización $O(n)$:
+\[
+  T = O(n + m\log n) = O((n+m)\log n) \qedhere
+\]
+\end{proof}
+
+% ===================================================================
+\section{Demostración 4: optimalidad del array para grafos densos}
+% ===================================================================
+
+\begin{theorem}\label{thm:array}
+Dijkstra con array lineal ejecuta en $O(n^2)$, que es óptimo para
+grafos con $m = \Omega(n^2/\log n)$.
+\end{theorem}
+
+\begin{proof}
+Con array lineal: \texttt{extract\_min} escanea $n$ elementos en
+$O(n)$, ejecutado $n$ veces: $O(n^2)$. Relajación: $O(1)$ por
+arista, total $O(m)$.
+\[
+  T_{\text{array}} = O(n^2 + m) = O(n^2)
+  \quad \text{(si } m = O(n^2)\text{)}
+\]
+
+Con heap: $T_{\text{heap}} = O((n+m)\log n)$. Para
+$m = \Theta(n^2)$:
+\[
+  T_{\text{heap}} = O(n^2 \log n) > O(n^2) = T_{\text{array}}
+\]
+
+Punto de cruce: $m = n^2/\log n$. Para grafos más densos, el
+array gana.
+\end{proof}
+
+% ===================================================================
+\section{Demostración 5: los arcos parent forman un árbol}
+% ===================================================================
+
+\begin{theorem}\label{thm:tree}
+Los arcos
+$\{(\mathrm{parent}[v], v) : v \neq s,\, \delta(s,v) < \infty\}$
+forman un árbol enraizado en~$s$.
+\end{theorem}
+
+\begin{proof}
+Sea $T_\pi$ el subgrafo inducido por los arcos parent. Sea $V'$ el
+conjunto de vértices alcanzables.
+
+\textbf{Conexo desde $s$.} Para todo $v$ con
+$\delta(s,v) < \infty$, la cadena
+$v, \mathrm{parent}[v], \mathrm{parent}[\mathrm{parent}[v]], \ldots$
+termina en $s$ (cada parent tiene distancia estrictamente menor, y
+la distancia es finita y no negativa).
+
+\textbf{Acíclico.} Si hubiera un ciclo
+$v_1 \to v_2 \to \cdots \to v_k \to v_1$, entonces
+$\mathrm{dist}[v_1] > \mathrm{dist}[v_2] > \cdots >
+\mathrm{dist}[v_k] > \mathrm{dist}[v_1]$, lo que es imposible.
+
+\textbf{$|V'| - 1$ aristas.} Cada $v \neq s$ tiene exactamente un
+parent: $|E(T_\pi)| = |V'| - 1$.
+
+Conexo, acíclico, $|V'| - 1$ aristas: $T_\pi$ es un árbol.
+\end{proof}
+
+% ===================================================================
+\section{Resumen de resultados}
+% ===================================================================
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llp{5.5cm}}
+\toprule
+\textbf{Resultado} & \textbf{Técnica} & \textbf{Clave} \\
+\midrule
+$\mathrm{dist}[u] = \delta(s,u)$ al extraer
+  & Contradicción
+  & Primer vértice fuera de $S$ en camino óptimo tiene
+    $\mathrm{dist}[y] \leq \mathrm{dist}[u]$ \\
+Necesidad de $w \geq 0$
+  & Contraejemplo
+  & Vértice finalizado prematuramente \\
+$O((n{+}m)\log n)$ con heap
+  & Contar operaciones
+  & $\leq m$ inserciones y extracciones, $O(\log n)$ c/u \\
+$O(n^2)$ óptimo si $m = \Omega(n^2/\log n)$
+  & Comparación directa
+  & $n^2 < m\log n$ cuando $m > n^2/\log n$ \\
+Arcos parent: árbol
+  & Conexo + acíclico + conteo
+  & Cadena finita; sin ciclos por dist.\ decrecientes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

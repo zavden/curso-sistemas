@@ -1,0 +1,35 @@
+# Makefile.autovars -- Show the value of every automatic variable
+# using echo before performing actual compilation.
+
+CC     = gcc
+CFLAGS = -Wall -Wextra -std=c11 -g -Isrc
+
+# Intentionally list src/main.o twice to see $^ vs $+
+build/app: src/main.o src/utils.o src/main.o
+	@echo "=== Automatic variables in the link rule ==="
+	@echo "  \$$@   (target):            $@"
+	@echo "  \$$<   (first prereq):      $<"
+	@echo "  \$$^   (all prereqs, unique):$^"
+	@echo "  \$$+   (all prereqs, dupes): $+"
+	@echo "  \$$(@D) (target dir):        $(@D)"
+	@echo "  \$$(@F) (target file):       $(@F)"
+	@echo "  \$$(<D) (first prereq dir):  $(<D)"
+	@echo "  \$$(<F) (first prereq file): $(<F)"
+	@echo "============================================"
+	mkdir -p $(@D)
+	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+
+%.o: %.c
+	@echo "--- Pattern rule: %.o: %.c ---"
+	@echo "  \$$@  (target):  $@"
+	@echo "  \$$<  (source):  $<"
+	@echo "  \$$*  (stem):    $*"
+	@echo "  \$$(@D) (dir):   $(@D)"
+	@echo "  \$$(@F) (file):  $(@F)"
+	@echo "--------------------------------"
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+
+clean:
+	rm -rf build/ src/*.o
+
+.PHONY: clean

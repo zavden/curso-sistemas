@@ -1,0 +1,12 @@
+services:
+  api:
+    image: alpine:latest
+    command: sh -c 'echo "API started at $$(date +%T)" && sleep 3600'
+
+  db:
+    image: alpine:latest
+    command: sh -c 'echo "DB started at $$(date +%T)" && sleep 3600'
+
+  cache:
+    image: alpine:latest
+    command: sh -c 'echo "Cache started at $$(date +%T)" && sleep 3600'

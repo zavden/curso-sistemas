@@ -1,0 +1,285 @@
+Instalación de las Maquinas Virtuales - Servidor - parte 1
+23:19
+Instalación de las Maquinas Virtuales - Servidor - parte 2
+5:14
+Ejecutando el script en el Server Master - parte 1
+22:43
+Ejecutando el script en el Server Master - parte 2
+10:09
+Ejecutando el script en el Server Master - CentOS 8
+34:26
+Instalación de las Maquinas Virtuales - Cliente - parte 1
+7:35
+Instalación de las Maquinas Virtuales - Cliente - parte 2
+12:39
+Instalación de las Maquinas Virtuales - Cliente - parte 2 Arreglado
+12:39
+Instalación y configuración en Virtual Box
+9:20
+Descubriendo RHEL 8
+6:57
+Introducción a Instalación y actualización de paquetes de software
+1:14
+Registro de sistemas para soporte de Red Hat
+19:23
+Instalación y actualización de paquetes de software con Yum
+13:41
+Instalando y eliminando grupos de software con yum
+7:37
+Lab 1
+12:51
+Creando y Habilitando los repositorios de software de Yum
+16:38
+Yum Update y Trabajo con llaves gpgkey - parte 1
+19:12
+Yum Update y Trabajo con llaves gpgkey - parte 2
+11:28
+Gestión de flujos de módulos de paquetes
+5:17
+Gestionando módulos y Habilitando flujos de módulos
+9:56
+Eliminar módulos y deshabilitar flujos de módulos
+3:46
+Módulo de conmutación de flujos
+7:01
+Lab 2
+8:06
+Introducción a Controlando Servicio y Proceso de Arranque
+2:30
+Identificación de procesos del sistema
+13:05
+Listando y analizando units con systemctl
+10:39
+Estados de servicio de visualización y verificación
+13:06
+Lab 1
+10:49
+Control de servicios del sistema
+14:44
+Enmascaramiento y Desenmascaramiento de Servicios
+7:50
+Habilitación de servicios para iniciar o detener en el arranque + Resumen
+11:43
+Seleccionando el objetivo (target) de arranque
+16:17
+Establecer un objetivo (target) predeterminado
+5:33
+Selección de un target diferente en el momento del arranque
+7:54
+Restablecer la contraseña de root
+15:44
+Solución de problemas del sistema de archivos en el arranque
+11:46
+Introducción a Gestión del almacenamiento básico
+1:17
+Agregar particiones, sistemas de archivos y montajes persistentes
+12:48
+Lab 1
+17:05
+Lab 2
+12:55
+Creación de sistemas de archivos
+10:51
+Sistemas de archivos de montaje persistente
+17:51
+Montaje y desmontaje de sistemas de archivos
+5:32
+Gestionando Swap Space
+10:48
+Configuración de la prioridad de espacio de swap
+11:36
+Introducción a Implementación de funciones avanzadas de almacenamiento
+1:09
+Creando volúmenes lógicos
+7:39
+Lab 1 - Creando un volumen lógico
+31:11
+Información de estado de LVM
+7:54
+Lab 2 - Creación de volúmenes lógicos - GPT
+13:52
+Ampliación de volúmenes lógicos
+28:52
+Extendiendo un volumen lógico - ext4
+10:01
+Extendiendo un volumen lógico - swap
+6:38
+Almacenamiento en capas con Stratis
+21:09
+Lab 3 - Almacenamiento en capas con Stratis
+13:32
+Compresión de almacenamiento con VDO
+16:47
+Lab 4 - Compresión y Deduplicación de almacenamiento con VDO
+17:57
+Introducción a Acceso al almacenamiento conectado a la red
+1:04
+Montaje de almacenamiento NFS
+10:24
+La herramienta nfsconf
+9:45
+Lab 1 - Public NFS
+10:28
+Automatizar el Montaje de Recursos de Red NFS
+14:35
+Direct and Indirect Mount con autofs
+5:31
+Lab 2 - Monstando Recursos NFS - Indirect-direct
+17:25
+Introducción a Análisis y almacenamiento de registros del sistema
+1:00
+Configuración de chronyd - NTP
+6:54
+Configurando y Monitoreando Chronyd
+17:53
+Preservando el diario del sistema - Journald
+11:49
+Revisar las entradas de diario del sistema - Journald
+12:25
+Un poco más de Journald
+12:25
+Analizando Registro del sistema y Revisión de archivos Syslog
+7:36
+Syslog
+8:45
+Rotación del archivo de registro
+15:01
+Lab 1 - Syslog
+12:32
+Introducción a Gestionando la Seguridad con SELinux
+1:27
+Cambio del modo de SELinux
+13:32
+Cambiando el modo SELinux
+10:46
+SELinux - Controlando los Contextos de los Archivos
+18:08
+Lab 1 - SELinux, Controlando contextos de archivos
+17:30
+Boolean - Ajustando la política de SELinux
+16:54
+Investigando y resolviendo problemas de SELinux
+21:07
+Introducción a Manejar y Gestionar la seguridad de la red
+0:47
+Administración del firewall con firewalld
+8:29
+Conociendo firewall-cmd
+9:26
+Lab 1 - Administrando el firewall en cockpit
+9:21
+Lab 2 - Administrando el firewall en cockpit
+22:38
+Introducción a Gestión de usuarios y grupos locales
+0:55
+Describiendo conceptos de usuario
+6:06
+Describiendo conceptos de grupo
+8:39
+Acceso de Superusuario
+4:06
+Comandos con sudo
+12:40
+Lab 1
+3:00
+Cuentas de usuarios locales
+9:52
+Lab 2
+5:52
+Cuentas de grupo locales
+8:31
+Lab 3
+9:53
+Contraseñas de usuario
+17:37
+Restringiendo el acceso
+6:33
+Lab 4
+9:11
+Introducción a Acceso a Archivos-Permisos de sistema-Permisos Predeterminados
+1:29
+Gestión de permisos de sistema de archivos - parte 1
+12:44
+Gestión de permisos de sistema de archivos - parte 2
+13:19
+Cambio de la propiedad del usuario o grupo
+11:03
+Lab 1
+13:02
+Permisos Especiales
+5:12
+Lab 2
+7:29
+Calculando umask
+11:59
+Lab 3 - parte 1
+32:35
+Lab 3 - parte 2
+9:57
+Lab 1 - Final
+11:59
+Coffee Break
+7:05
+Introducción a Ajuste del rendimiento del sistema
+0:53
+Kill - Entendiendo el procedimiento de matanza ( kill )
+5:39
+Comandos para enviar señales
+16:51
+Desconectando a los Usuarios
+10:16
+Lab 1
+9:51
+Proceso de monitoreo
+6:49
+Procesos en tiempo real
+14:38
+Lab 2
+11:32
+Ajuste de Perfiles Tuned
+1:58
+Continuamos hablando de Tuned
+17:03
+Ajustes de Perfiles Tuned en Cockpit
+1:40
+Prioridad de Procesos
+9:56
+Mini Lab
+4:55
+Lab y Resumen
+10:56
+Introducción a Acceso a sistemas
+0:47
+Accediendo a la línea de comandos
+14:07
+Iniciar sesión - Local y Remoto
+12:50
+Configuración de la autenticación basada en clave SSH
+9:58
+Compartiendo la clave pública - parte 1
+10:26
+Compartiendo la clave pública - parte 2
+19:31
+Programación de trabajos de usuario recurrentes
+12:08
+Lab 1
+15:53
+Gestión de archivos temporales - parte 1
+4:48
+Gestión de archivos temporales - parte 2
+5:09
+Gestión de archivos temporales - parte 3
+13:27
+Lab 2
+5:28
+Introducción al módulo BONUS
+0:28
+Configurar un sistema para usar un servicio de autenticación existente
+13:42
+Montando directorio de inicio con autofs
+8:05
+Crear y administrar listas de control de acceso - ACL
+15:25
+Montar Sistema de Archivos usando Systemd
+19:47
+Montar Recursos de Red (NFS) usando Systemd

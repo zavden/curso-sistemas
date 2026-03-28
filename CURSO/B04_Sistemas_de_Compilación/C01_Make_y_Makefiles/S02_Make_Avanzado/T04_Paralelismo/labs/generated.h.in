@@ -1,0 +1,5 @@
+/* This file is a template. The Makefile generates generated.h from it. */
+#ifndef GENERATED_H
+#define GENERATED_H
+#define BUILD_TAG "lab-parallel"
+#endif /* GENERATED_H */

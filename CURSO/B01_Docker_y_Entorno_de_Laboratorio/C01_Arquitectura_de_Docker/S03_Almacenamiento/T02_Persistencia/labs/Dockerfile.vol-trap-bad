@@ -1,0 +1,14 @@
+FROM alpine:latest
+
+WORKDIR /app/data
+
+# Declare VOLUME first
+VOLUME /app/data
+
+# This write happens AFTER VOLUME — it will be LOST
+# because Docker has already marked /app/data as an
+# anonymous volume mount point. Any changes to this
+# path in subsequent layers are discarded at runtime.
+RUN echo "this data will be lost" > /app/data/important.txt
+
+CMD ["cat", "/app/data/important.txt"]

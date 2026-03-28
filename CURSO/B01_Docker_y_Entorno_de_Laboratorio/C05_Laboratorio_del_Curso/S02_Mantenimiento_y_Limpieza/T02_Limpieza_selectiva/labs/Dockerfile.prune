@@ -1,0 +1,6 @@
+FROM alpine:latest
+
+ARG VERSION=1
+RUN echo "version ${VERSION}" > /version.txt
+
+CMD ["cat", "/version.txt"]

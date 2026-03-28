@@ -1,0 +1,354 @@
+\documentclass[11pt, letterpaper]{article}
+
+% --- Idioma y codificación ---
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% --- Matemáticas ---
+\usepackage{amsmath, amssymb, amsthm}
+
+% --- Formato ---
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue!70!black}
+
+% --- Entornos de teoremas ---
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolario}
+\theoremstyle{remark}
+\newtheorem{remark}{Observación}[section]
+
+\title{%
+  T03 --- Demostración formal:\\[4pt]
+  Inserción amortizada en vector dinámico
+}
+\author{Curso Linux--C--Rust --- B15 Estructuras de datos en C}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+% ===================================================================
+\section{Preliminar: método del potencial}
+% ===================================================================
+
+\begin{definition}[Función de potencial]
+Sea $D_i$ el estado de una estructura de datos después de la $i$-ésima
+operación. Una \emph{función de potencial} es una función
+$\Phi : \text{estados} \to \mathbb{R}$ que satisface:
+\begin{enumerate}
+  \item $\Phi(D_0) = 0$ \quad (potencial inicial nulo).
+  \item $\Phi(D_i) \geq 0$ para todo $i \geq 0$ \quad (potencial no negativo).
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Costo amortizado]
+El \emph{costo amortizado} de la $i$-ésima operación es:
+\begin{equation}\label{eq:amortized}
+  \hat{c}_i = c_i + \Phi(D_i) - \Phi(D_{i-1})
+\end{equation}
+donde $c_i$ es el costo real de la operación.
+\end{definition}
+
+La propiedad fundamental es que la suma de costos amortizados acota
+superiormente la suma de costos reales:
+\begin{equation}\label{eq:fundamental}
+  \sum_{i=1}^{n} c_i
+  = \sum_{i=1}^{n} \hat{c}_i - \Phi(D_n) + \Phi(D_0)
+  \leq \sum_{i=1}^{n} \hat{c}_i
+\end{equation}
+ya que $\Phi(D_n) \geq 0 = \Phi(D_0)$.
+
+% ===================================================================
+\section{Modelo formal}
+% ===================================================================
+
+Consideramos un vector dinámico con las siguientes convenciones:
+
+\begin{itemize}
+  \item $s$ = \textbf{size}: número de elementos almacenados.
+  \item $C$ = \textbf{capacity}: número de posiciones alocadas.
+  \item \textbf{Invariante}: $s \leq C$ siempre.
+  \item \textbf{Estrategia de crecimiento}: cuando $s = C$ y se ejecuta
+    un push, se aloca un nuevo arreglo de tamaño $2C$, se copian los
+    $C$ elementos y se inserta el nuevo. Inicialmente $s = 0$, $C = 0$;
+    el primer push aloca con capacidad~1.
+  \item \textbf{Modelo de costo}: cada escritura (inserción o copia)
+    cuesta~1. Un push sin realloc cuesta~1; un push con realloc que
+    copia $k$ elementos cuesta $k + 1$.
+\end{itemize}
+
+% ===================================================================
+\section{Demostración 1: \texorpdfstring{$O(1)$}{O(1)} amortizado
+  por método del potencial}
+% ===================================================================
+
+\begin{theorem}\label{thm:potential}
+La operación \texttt{push} en un vector dinámico con estrategia de
+duplicación tiene costo amortizado $O(1)$.
+\end{theorem}
+
+Definimos la función de potencial:
+\begin{equation}\label{eq:phi}
+  \Phi = 2s - C
+\end{equation}
+
+\begin{lemma}[$\Phi \geq 0$ siempre]\label{lem:phi-nonneg}
+Para todo $i \geq 0$, $\Phi(D_i) \geq 0$.
+\end{lemma}
+
+\begin{proof}
+Por inducción sobre el número de operaciones.
+
+\textbf{Base.} Estado inicial: $s = 0$, $C = 0$.
+$\Phi = 2(0) - 0 = 0 \geq 0$. \checkmark
+
+Tras el primer push (con realloc, $C: 0 \to 1$): $s = 1$, $C = 1$.
+$\Phi = 2(1) - 1 = 1 > 0$. \checkmark
+
+\textbf{Paso inductivo.} Supongamos $\Phi \geq 0$ antes de la
+$i$-ésima operación. Hay dos casos:
+
+\emph{Caso 1} (sin realloc, $s < C$): Después del push, $s' = s + 1$,
+$C' = C$.
+\[
+  \Phi' = 2(s+1) - C = (2s - C) + 2 = \Phi + 2 \geq 0 + 2 > 0. \quad \checkmark
+\]
+
+\emph{Caso 2} (con realloc, $s = C$): Después del push, $s' = s + 1$,
+$C' = 2C = 2s$.
+\[
+  \Phi' = 2(s+1) - 2s = 2 > 0. \quad \checkmark
+\]
+
+En ambos casos $\Phi' > 0$, completando la inducción.
+\end{proof}
+
+\begin{proof}[Prueba del Teorema~\ref{thm:potential}]
+Calculamos el costo amortizado $\hat{c} = c + \Delta\Phi$ en cada caso.
+
+\textbf{Caso 1: push sin realloc} ($s < C$).
+\begin{align*}
+  c        &= 1 \\
+  \Delta\Phi &= \Phi' - \Phi = [2(s+1) - C] - [2s - C] = 2 \\
+  \hat{c}  &= 1 + 2 = 3
+\end{align*}
+
+\textbf{Caso 2: push con realloc} ($s = C = k$).
+Se copian $k$ elementos y se inserta~1:
+\begin{align*}
+  c          &= k + 1 \\
+  \Phi       &= 2k - k = k \\
+  \Phi'      &= 2(k+1) - 2k = 2 \\
+  \Delta\Phi &= 2 - k \\
+  \hat{c}    &= (k+1) + (2-k) = 3
+\end{align*}
+
+En ambos casos, $\hat{c} = 3$. Por la propiedad fundamental
+(\ref{eq:fundamental}):
+\[
+  \sum_{i=1}^{n} c_i \leq \sum_{i=1}^{n} \hat{c}_i = 3n.
+\]
+
+Por lo tanto, push es $O(1)$ amortizado con constante~3.
+\end{proof}
+
+% ===================================================================
+\section{Demostración 2: \texorpdfstring{$O(1)$}{O(1)} amortizado
+  por método agregado}
+% ===================================================================
+
+\begin{theorem}\label{thm:aggregate}
+El costo total de $n$ operaciones push en un vector dinámico con
+duplicación es menor que $3n$.
+\end{theorem}
+
+\begin{proof}
+Separamos el costo total:
+\[
+  T(n) = \underbrace{n}_{\text{inserciones}}
+       + \underbrace{\sum_{\text{reallocs}} \text{copias}}_{\text{copias por realloc}}
+\]
+
+Partiendo de capacidad~1, los reallocs ocurren en los pushes
+$1, 2, 4, 8, \ldots, 2^{\lfloor \log_2 n \rfloor}$. En el realloc del
+push $2^j$ se copian $2^j$ elementos. Las copias totales son:
+\[
+  \sum_{j=0}^{\lfloor \log_2 n \rfloor} 2^j
+  = 2^{\lfloor \log_2 n \rfloor + 1} - 1
+\]
+
+Acotamos usando $2^{\lfloor \log_2 n \rfloor} \leq n$:
+\[
+  2^{\lfloor \log_2 n \rfloor + 1} - 1
+  = 2 \cdot 2^{\lfloor \log_2 n \rfloor} - 1
+  \leq 2n - 1
+  < 2n
+\]
+
+Por lo tanto:
+\[
+  T(n) < n + 2n = 3n
+\]
+
+El costo amortizado por operación es $T(n)/n < 3 = O(1)$.
+\end{proof}
+
+% ===================================================================
+\section{Demostración 3: generalización para factor
+  \texorpdfstring{$\alpha > 1$}{α > 1}}
+% ===================================================================
+
+\begin{theorem}\label{thm:alpha}
+Sea $\alpha > 1$ el factor de crecimiento (la capacidad se multiplica
+por $\alpha$ en cada realloc). Entonces push es $O(1)$ amortizado, con
+cota:
+\[
+  \hat{c} < \frac{2\alpha - 1}{\alpha - 1}
+\]
+\end{theorem}
+
+\begin{proof}
+Usamos el método agregado. Con capacidad inicial~1, los reallocs ocurren
+cuando el size alcanza $\alpha^0, \alpha^1, \alpha^2, \ldots$
+(redondeando a enteros). Sea $m = \lfloor \log_\alpha n \rfloor$ el
+número de reallocs en $n$ pushes. Las copias totales son:
+\[
+  \sum_{j=0}^{m} \alpha^j
+  = \frac{\alpha^{m+1} - 1}{\alpha - 1}
+\]
+
+Como $\alpha^m \leq n$:
+\[
+  \frac{\alpha^{m+1} - 1}{\alpha - 1}
+  \leq \frac{\alpha \cdot n - 1}{\alpha - 1}
+  < \frac{\alpha}{\alpha - 1} \cdot n
+\]
+
+El costo total es:
+\[
+  T(n) < n + \frac{\alpha}{\alpha - 1} \cdot n
+       = \frac{2\alpha - 1}{\alpha - 1} \cdot n
+\]
+
+El costo amortizado por operación:
+\[
+  \frac{T(n)}{n} < \frac{2\alpha - 1}{\alpha - 1} = O(1)
+\]
+\end{proof}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{cc}
+\toprule
+Factor $\alpha$ & Cota amortizada $\dfrac{2\alpha - 1}{\alpha - 1}$ \\
+\midrule
+1.5 & 4.0   \\
+2   & 3.0   \\
+3   & 2.5   \\
+4   & 2.33\ldots \\
+\bottomrule
+\end{tabular}
+\caption{La cota mejora conforme $\alpha$ crece: menos reallocs implica
+menos copias. Sin embargo, el desperdicio de memoria en el peor caso es
+$(\alpha - 1)/\alpha$.}
+\end{table}
+
+\begin{remark}
+Para $\alpha = 2$ recuperamos la cota $\hat{c} < 3$ del
+Teorema~\ref{thm:aggregate}. Para $\alpha = 1.5$ (MSVC
+\texttt{std::vector}) la cota es~4. Factores mayores reducen el
+amortizado pero desperdician más memoria: $\alpha = 2$ desperdicia
+hasta 50\%; $\alpha = 3$ hasta 67\%.
+\end{remark}
+
+% ===================================================================
+\section{Demostración 4: crecimiento aditivo da
+  \texorpdfstring{$\Theta(n)$}{Θ(n)} amortizado}
+% ===================================================================
+
+\begin{theorem}\label{thm:additive}
+Si la capacidad crece sumando una constante $d > 0$ (en lugar de
+multiplicar), el costo total de $n$ pushes es $\Theta(n^2)$ y el costo
+amortizado es $\Theta(n)$.
+\end{theorem}
+
+\begin{proof}
+Con capacidad inicial $d$, los reallocs ocurren en los pushes
+$d{+}1,\; 2d{+}1,\; 3d{+}1,\; \ldots$ En los primeros $n$ pushes hay
+$m = \bigl\lfloor (n-1)/d \bigr\rfloor$ reallocs. El $j$-ésimo realloc
+copia $jd$ elementos.
+
+\textbf{Cota superior.} Las copias totales:
+\[
+  \sum_{j=1}^{m} jd = d \cdot \frac{m(m+1)}{2}
+\]
+
+Como $m \leq n/d$:
+\[
+  d \cdot \frac{m(m+1)}{2}
+  \leq d \cdot \frac{(n/d)(n/d + 1)}{2}
+  = \frac{n^2}{2d} + \frac{n}{2}
+  = O(n^2)
+\]
+
+\textbf{Cota inferior.} Para $n \geq 2d$, tenemos $m \geq n/(2d)$:
+\[
+  \sum_{j=1}^{m} jd
+  \geq d \cdot \frac{(n/(2d))(n/(2d)+1)}{2}
+  \geq d \cdot \frac{n^2/(4d^2)}{2}
+  = \frac{n^2}{8d}
+  = \Omega(n^2)
+\]
+
+Combinando: $T(n) = n + \Theta(n^2) = \Theta(n^2)$.
+
+El costo amortizado:
+\[
+  \frac{T(n)}{n} = \Theta(n)
+\]
+\end{proof}
+
+\begin{corollary}
+La multiplicación por un factor $\alpha > 1$ es la condición necesaria
+y suficiente para obtener $O(1)$ amortizado. El crecimiento aditivo,
+sin importar cuán grande sea $d$, siempre resulta en costo amortizado
+lineal.
+\end{corollary}
+
+% ===================================================================
+\section{Resumen de resultados}
+% ===================================================================
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llc}
+\toprule
+\textbf{Resultado} & \textbf{Método} & \textbf{Cota} \\
+\midrule
+Push con duplicación: $O(1)$ amort.
+  & Potencial ($\Phi = 2s - C$)
+  & $\hat{c} = 3$ \\
+Costo total de $n$ pushes $< 3n$
+  & Agregado (serie geométrica)
+  & $T(n) < 3n$ \\
+Push con factor $\alpha > 1$: $O(1)$ amort.
+  & Agregado
+  & $\hat{c} < \frac{2\alpha{-}1}{\alpha{-}1}$ \\
+Push con crecimiento $+d$: $\Theta(n)$ amort.
+  & Agregado (serie aritmética)
+  & $T(n) = \Theta(n^2)$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

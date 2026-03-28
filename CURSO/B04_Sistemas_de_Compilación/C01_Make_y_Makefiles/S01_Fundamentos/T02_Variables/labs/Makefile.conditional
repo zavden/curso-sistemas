@@ -1,0 +1,17 @@
+# Makefile.conditional -- Demonstrates ?= (conditional assignment)
+# ?= only assigns if the variable is not already defined.
+
+# NOTE: CC has a built-in default (cc) in Make, so CC ?= gcc
+# does NOT work as expected -- CC is already "cc".
+# This is demonstrated in the lab.
+
+CC ?= gcc
+PREFIX ?= /usr/local
+VERBOSE ?= no
+
+$(info CC      = $(CC))
+$(info PREFIX  = $(PREFIX))
+$(info VERBOSE = $(VERBOSE))
+
+all:
+	@echo "Done"

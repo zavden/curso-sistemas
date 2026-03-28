@@ -1,0 +1,22 @@
+# Makefile.substitution -- Demonstrates variable substitution
+# $(VAR:pattern=replacement) replaces suffix in each word.
+
+SRCS := main.c utils.c hello.c
+OBJS := $(SRCS:.c=.o)
+DEPS := $(SRCS:.c=.d)
+
+$(info SRCS = $(SRCS))
+$(info OBJS = $(OBJS))
+$(info DEPS = $(DEPS))
+
+# Substitution only matches at the END of each word:
+MIXED := foo.c bar.c.bak baz.c
+MIXED_OBJS := $(MIXED:.c=.o)
+
+$(info )
+$(info MIXED      = $(MIXED))
+$(info MIXED_OBJS = $(MIXED_OBJS))
+$(info Notice: bar.c.bak did NOT change -- .c is not at the end)
+
+all:
+	@echo "Done"

@@ -1,0 +1,4 @@
+FROM alpine:latest
+
+# Shell form: /bin/sh is PID 1, does NOT propagate SIGTERM to sleep
+ENTRYPOINT sleep 300

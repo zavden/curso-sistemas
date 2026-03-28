@@ -1,0 +1,8 @@
+services:
+  app:
+    image: alpine:latest
+    environment:
+      APP_NAME: from-environment
+    env_file:
+      - app.env
+    command: sh -c 'echo "APP_NAME=$$APP_NAME" && echo "DB_HOST=$$DB_HOST" && echo "DB_PORT=$$DB_PORT"'

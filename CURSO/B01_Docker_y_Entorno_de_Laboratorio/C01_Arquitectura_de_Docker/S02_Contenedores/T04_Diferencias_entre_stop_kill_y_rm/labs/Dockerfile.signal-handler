@@ -1,0 +1,9 @@
+FROM debian:bookworm
+WORKDIR /app
+COPY signal-handler.c /app/signal-handler.c
+RUN apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev \
+    && gcc -o /app/signal-handler /app/signal-handler.c \
+    && apt-get purge -y gcc libc6-dev \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/* /app/signal-handler.c
+CMD ["/app/signal-handler"]

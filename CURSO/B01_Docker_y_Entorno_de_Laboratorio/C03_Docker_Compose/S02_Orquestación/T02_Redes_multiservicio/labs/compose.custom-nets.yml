@@ -1,0 +1,23 @@
+services:
+  proxy:
+    image: alpine:latest
+    command: sleep 3600
+    networks:
+      - frontend
+
+  api:
+    image: alpine:latest
+    command: sleep 3600
+    networks:
+      - frontend
+      - backend
+
+  db:
+    image: alpine:latest
+    command: sleep 3600
+    networks:
+      - backend
+
+networks:
+  frontend:
+  backend:

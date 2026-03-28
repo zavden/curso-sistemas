@@ -1,0 +1,15 @@
+FROM alpine:latest
+
+# Install a small web server that needs to bind to port 80
+RUN apk add --no-cache busybox-extras
+
+# Create a non-root user
+RUN adduser -D -s /bin/sh appuser
+
+# Create a directory for test files
+RUN mkdir -p /srv/www && \
+    echo "<html><body>Capability test OK</body></html>" > /srv/www/index.html && \
+    chown -R appuser:appuser /srv/www
+
+# Default: run as root so we can test capability effects
+CMD ["httpd", "-f", "-p", "80", "-h", "/srv/www"]

@@ -1,0 +1,349 @@
+\documentclass[11pt, letterpaper]{article}
+
+% --- Idioma y codificación ---
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% --- Matemáticas ---
+\usepackage{amsmath, amssymb, amsthm}
+
+% --- Formato ---
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue!70!black}
+
+% --- Entornos de teoremas ---
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolario}
+\theoremstyle{remark}
+\newtheorem{remark}{Observación}[section]
+
+\title{%
+  T05 --- Demostración formal:\\[4pt]
+  Inserción con rehash es $O(1)$ amortizado
+}
+\author{Curso Linux--C--Rust --- B15 Estructuras de datos en C}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+% ===================================================================
+\section{Modelo}
+% ===================================================================
+
+\begin{definition}
+Tabla hash dinámica con capacidad inicial~$m_0$, factor de
+crecimiento $\times 2$, umbral de carga $\alpha_{\max}$ (constante).
+Cuando una inserción haría que $n > \alpha_{\max} \cdot m$, se crea
+una nueva tabla de capacidad~$2m$ y se reinsertan los $n$ elementos
+(rehash completo).
+\end{definition}
+
+\textbf{Costos unitarios:}
+\begin{itemize}
+  \item Inserción sin resize: $c_{\text{ins}} = 1$.
+  \item Reinserción durante rehash: $c_{\text{re}} = 1$.
+  \item Resize con $n$ elementos: $c_{\text{resize}} = n$.
+\end{itemize}
+
+\textbf{Objetivo.} Demostrar que $n$ inserciones consecutivas
+(empezando con tabla vacía) cuestan $O(n)$ en total.
+
+% ===================================================================
+\section{Demostración 1: método agregado}
+% ===================================================================
+
+\begin{theorem}\label{thm:aggregate}
+El costo total de $n$ inserciones es a lo sumo $3n$.
+\end{theorem}
+
+\begin{proof}
+Partimos de una tabla vacía con capacidad~$m_0$. Sea
+$n_k = \alpha_{\max} \cdot 2^k m_0$ el número de elementos que
+dispara el $k$-ésimo resize.
+
+\textbf{1) Inserciones ordinarias.} Cada una de las $n$ inserciones
+cuesta~1:
+\[
+  C_{\text{ins}} = n
+\]
+
+\textbf{2) Rehashes.} Sea $K$ el número total de resizes. El
+$k$-ésimo resize reinserta $n_k$ elementos:
+\[
+  C_{\text{rehash}}
+  = \sum_{k=0}^{K} n_k
+  = \sum_{k=0}^{K} \alpha_{\max} \cdot 2^k m_0
+  = \alpha_{\max} m_0 \cdot \frac{2^{K+1} - 1}{2 - 1}
+  = \alpha_{\max} m_0 (2^{K+1} - 1)
+\]
+
+Como $n_K = \alpha_{\max} \cdot 2^K m_0 \leq n$, tenemos
+$2^K \leq n/(\alpha_{\max} m_0)$:
+\[
+  C_{\text{rehash}}
+  \leq \alpha_{\max} m_0
+    \left(\frac{2n}{\alpha_{\max} m_0} - 1\right)
+  = 2n - \alpha_{\max} m_0 < 2n
+\]
+
+\textbf{Total:}
+\[
+  C_{\text{total}} = C_{\text{ins}} + C_{\text{rehash}}
+  < n + 2n = 3n
+\]
+
+Costo amortizado por inserción:
+$\hat{c} = C_{\text{total}}/n < 3 = O(1)$.
+\end{proof}
+
+% ===================================================================
+\section{Demostración 2: método del banquero (créditos)}
+% ===================================================================
+
+\begin{theorem}\label{thm:banker}
+Si cada inserción paga 3 unidades de costo, el saldo de créditos
+nunca es negativo.
+\end{theorem}
+
+\begin{proof}
+Cada inserción usa sus 3 unidades así:
+\begin{itemize}
+  \item \textbf{1 unidad}: paga la inserción misma.
+  \item \textbf{2 unidades}: se depositan como crédito, asociadas al
+    elemento insertado.
+\end{itemize}
+
+\textbf{Invariante de crédito.} Después de cada operación, cada
+elemento insertado desde el último resize tiene al menos 2 créditos.
+
+\textbf{Verificación al momento del resize.} Cuando se dispara un
+resize, la tabla tiene $n_{\text{cur}} = \alpha_{\max} \cdot m$
+elementos. De estos, $n_{\text{cur}}/2$ fueron insertados desde el
+resize anterior (cuando la tabla tenía $\alpha_{\max} \cdot m/2$
+elementos y se expandió a capacidad~$m$, quedando con factor
+$\alpha_{\max}/2$).
+
+Créditos disponibles:
+\[
+  \text{créditos} = 2 \cdot \frac{n_{\text{cur}}}{2} = n_{\text{cur}}
+\]
+
+Costo del resize:
+\[
+  \text{costo resize} = n_{\text{cur}}
+\]
+
+Los créditos \textbf{cubren exactamente} el costo. Cada nuevo
+elemento paga por sí mismo y por un viejo.
+
+Después del resize, todos los créditos se consumieron, pero el
+invariante se restablece conforme llegan nuevas inserciones con
+2~créditos cada una. El saldo nunca es negativo. \checkmark
+\end{proof}
+
+% ===================================================================
+\section{Demostración 3: método del potencial}
+% ===================================================================
+
+\begin{theorem}\label{thm:potential}
+Con la función de potencial $\Phi = 2n - \alpha_{\max} \cdot m$, el
+costo amortizado de cada inserción es exactamente~3.
+\end{theorem}
+
+\begin{proof}
+Definimos $\Phi = 2n - \alpha_{\max} \cdot m$ donde $n$ es el número
+de elementos y $m$ la capacidad actual.
+
+\textbf{Propiedades del potencial:}
+\begin{itemize}
+  \item Tras un resize: $n = \alpha_{\max} \cdot m/2$, así que
+    $\Phi = 2 \cdot \alpha_{\max} m/2 - \alpha_{\max} m = 0$.
+  \item Justo antes del siguiente resize: $n = \alpha_{\max} \cdot m$,
+    así que $\Phi = 2\alpha_{\max} m - \alpha_{\max} m = n$.
+  \item $\Phi \geq 0$ siempre: entre resizes, $n$ crece desde
+    $\alpha_{\max} m/2$ hasta $\alpha_{\max} m$, y
+    $\Phi = 2n - \alpha_{\max} m$ va de~0 a~$n$.
+\end{itemize}
+
+\textbf{Caso 1: inserción sin resize.} $n$ aumenta en~1, $m$ no
+cambia:
+\[
+  \hat{c} = c_{\text{real}} + \Delta\Phi
+  = 1 + [2(n{+}1) - \alpha_{\max} m] - [2n - \alpha_{\max} m]
+  = 1 + 2 = 3
+\]
+
+\textbf{Caso 2: inserción con resize.} Justo antes:
+$n = \alpha_{\max} m$, $\Phi_{\text{antes}} = n$. El resize cambia
+$m \to 2m$, luego se inserta: $n \to n + 1$.
+\[
+  \Phi_{\text{después}}
+  = 2(n{+}1) - \alpha_{\max} \cdot 2m
+  = 2(n{+}1) - 2n = 2
+\]
+
+Costo real: $c_{\text{real}} = n + 1$ (reinsertar $n$ + insertar el
+nuevo):
+\[
+  \hat{c} = c_{\text{real}} + \Delta\Phi
+  = (n + 1) + (2 - n) = 3
+\]
+
+\textbf{En ambos casos, $\hat{c} = 3$.}
+
+Costo total real:
+\[
+  \sum_{i=1}^{n} c_i
+  = \sum_{i=1}^{n} \hat{c}_i - \Phi_n + \Phi_0
+  \leq 3n - \Phi_n + 0 \leq 3n \qedhere
+\]
+\end{proof}
+
+% ===================================================================
+\section{Demostración 4: crecimiento aditivo es
+  \texorpdfstring{$\Theta(n)$}{Theta(n)} amortizado}
+% ===================================================================
+
+\begin{theorem}\label{thm:additive}
+Si la tabla crece sumando una constante~$c$ (en vez de multiplicar),
+el costo amortizado por inserción es $\Theta(n)$, no $O(1)$.
+\end{theorem}
+
+\begin{proof}
+Con crecimiento aditivo ($m \to m + c$), los resizes ocurren cuando
+$n$ alcanza $\alpha_{\max}(m_0 + kc)$ para $k = 0, 1, 2, \ldots$
+
+El $k$-ésimo resize reinserta $\alpha_{\max}(m_0 + kc)$ elementos.
+El número de resizes hasta insertar $n$ elementos es
+$K = \Theta(n/c)$.
+
+Costo total de los rehashes:
+\[
+  C_{\text{rehash}}
+  = \sum_{k=0}^{K} \alpha_{\max}(m_0 + kc)
+  = \alpha_{\max}\!\left(Km_0 + c \cdot \frac{K(K{+}1)}{2}\right)
+  = \Theta(K^2)
+  = \Theta(n^2/c)
+\]
+
+Costo amortizado:
+$\hat{c} = \Theta(n^2/c) / n = \Theta(n/c) = \Theta(n)$.
+\end{proof}
+
+\begin{remark}
+La diferencia es suma aritmética $\sum k = \Theta(K^2)$ vs suma
+geométrica $\sum 2^k = \Theta(2^K)$. Por esto las tablas hash usan
+crecimiento multiplicativo.
+\end{remark}
+
+% ===================================================================
+\section{Demostración 5: shrink con histéresis preserva $O(1)$}
+% ===================================================================
+
+\begin{theorem}\label{thm:shrink}
+Si la tabla encoge a la mitad cuando
+$\alpha < \alpha_{\min}$ con
+$\alpha_{\min} \leq \alpha_{\max}/4$, entonces una secuencia
+intercalada de $n$ inserciones y eliminaciones tiene costo amortizado
+$O(1)$.
+\end{theorem}
+
+\begin{proof}
+Extendemos el potencial:
+\[
+  \Phi = \begin{cases}
+    2n - \alpha_{\max} \cdot m
+      & \text{si } n \geq \alpha_{\max} \cdot m / 2 \\
+    \alpha_{\min} \cdot m - n
+      & \text{si } n < \alpha_{\max} \cdot m / 2
+  \end{cases}
+\]
+
+\textbf{Propiedad clave:} $\Phi = 0$ cuando
+$n = \alpha_{\max} m / 2$ (punto medio), y $\Phi \geq 0$ siempre.
+\begin{itemize}
+  \item Antes de un grow: $n = \alpha_{\max} m$, $\Phi = n$. El
+    costo del grow ($= n$) se paga con el potencial.
+  \item Antes de un shrink: con
+    $\alpha_{\min} \leq \alpha_{\max}/4$, se acumulan suficientes
+    eliminaciones entre el punto medio y el umbral para financiar el
+    rehash.
+\end{itemize}
+
+\textbf{Anti-thrashing.} Después de un grow,
+$\alpha = \alpha_{\max}/2$. Para disparar un shrink, $\alpha$ debe
+bajar hasta $\alpha_{\min} \leq \alpha_{\max}/4$, requiriendo al
+menos $\alpha_{\max} m / 4$ eliminaciones. Cada una aporta potencial.
+Después de un shrink, $\alpha = 2\alpha_{\min} \leq \alpha_{\max}/2$,
+lejos de ambos umbrales. No hay oscilación.
+\end{proof}
+
+% ===================================================================
+\section{Verificación numérica}
+% ===================================================================
+
+Tabla con $m_0 = 8$, $\alpha_{\max} = 0.75$, factor $\times 2$:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{cccccc}
+\toprule
+Inserción $i$ & $n$ & ¿Resize? & Costo real & Créd.\ usados
+  & Créd.\ rest. \\
+\midrule
+1--6   & 1--6  & No  & 1 c/u   & 0  & $6 \times 2 = 12$ \\
+7      & 7     & Sí ($8 \to 16$)  & $6{+}1=7$   & 6  & $12{-}6{+}2=8$ \\
+8--12  & 8--12 & No  & 1 c/u   & 0  & $8{+}5{\times}2=18$ \\
+13     & 13    & Sí ($16 \to 32$) & $12{+}1=13$ & 12 & $18{-}12{+}2=8$ \\
+14--24 & 14--24 & No & 1 c/u   & 0  & $8{+}11{\times}2=30$ \\
+25     & 25    & Sí ($32 \to 64$) & $24{+}1=25$ & 24 & $30{-}24{+}2=8$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Costo total para 25 inserciones: $25 + 6 + 12 + 24 = 67$.
+Cota del teorema: $3 \times 25 = 75$. \checkmark \quad ($67 < 75$).
+
+Costo amortizado observado: $67/25 = 2.68 < 3$. \checkmark
+
+% ===================================================================
+\section{Resumen de resultados}
+% ===================================================================
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llp{5.5cm}}
+\toprule
+\textbf{Resultado} & \textbf{Técnica} & \textbf{Clave} \\
+\midrule
+$C_{\text{total}} < 3n$
+  & Método agregado
+  & Serie geométrica $\sum 2^k < 2n$ \\
+3 unidades/ins.\ bastan
+  & Método del banquero
+  & 2 créditos/elem.; cada nuevo paga por sí mismo y un viejo \\
+$\hat{c} = 3$ exacto
+  & Potencial $\Phi = 2n {-} \alpha_{\max}m$
+  & $\Phi = 0$ tras resize, $\Phi = n$ antes \\
+Crecimiento aditivo: $\Theta(n)$
+  & Suma aritmética vs geométrica
+  & $\sum k = \Theta(K^2)$ vs $\sum 2^k = \Theta(2^K)$ \\
+Shrink con histéresis: $O(1)$
+  & Potencial extendido
+  & $\alpha_{\min} \leq \alpha_{\max}/4$ evita thrashing \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

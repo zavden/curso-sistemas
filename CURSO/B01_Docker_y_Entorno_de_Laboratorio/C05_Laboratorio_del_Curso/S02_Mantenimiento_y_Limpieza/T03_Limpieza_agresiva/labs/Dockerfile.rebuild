@@ -1,0 +1,6 @@
+FROM alpine:latest
+
+RUN apk add --no-cache curl
+RUN echo "lab image for prune testing" > /info.txt
+
+CMD ["cat", "/info.txt"]

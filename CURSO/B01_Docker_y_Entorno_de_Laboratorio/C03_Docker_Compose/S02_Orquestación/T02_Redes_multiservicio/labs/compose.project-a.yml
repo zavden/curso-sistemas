@@ -1,0 +1,10 @@
+services:
+  service_a:
+    image: alpine:latest
+    command: sleep 3600
+    networks:
+      - shared
+
+networks:
+  shared:
+    name: lab-shared-network

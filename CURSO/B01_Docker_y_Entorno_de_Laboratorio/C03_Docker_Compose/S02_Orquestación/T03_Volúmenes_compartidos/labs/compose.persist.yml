@@ -1,0 +1,9 @@
+services:
+  db:
+    image: alpine:latest
+    volumes:
+      - db-data:/data
+    command: sleep 3600
+
+volumes:
+  db-data:

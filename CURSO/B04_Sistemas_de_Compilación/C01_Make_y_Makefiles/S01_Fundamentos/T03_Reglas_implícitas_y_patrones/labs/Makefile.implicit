@@ -1,0 +1,16 @@
+# Makefile.implicit -- Demonstrate that Make's built-in rules
+# can compile without explicit recipes.
+#
+# Only variables and a link rule are defined here.
+# Make applies its implicit rule for %.o: %.c automatically.
+
+CC     = gcc
+CFLAGS = -Wall -Wextra -std=c11 -g -Isrc
+
+program: main.o utils.o
+	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+
+clean:
+	rm -f program main.o utils.o
+
+.PHONY: clean

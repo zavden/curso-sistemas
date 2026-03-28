@@ -1,0 +1,297 @@
+\documentclass[11pt, letterpaper]{article}
+
+% --- Idioma y codificación ---
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% --- Matemáticas ---
+\usepackage{amsmath, amssymb, amsthm}
+
+% --- Formato ---
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue!70!black}
+
+% --- Código ---
+\lstset{
+  language=C, basicstyle=\ttfamily\small,
+  keywordstyle=\bfseries, commentstyle=\itshape,
+  numbers=left, numberstyle=\tiny, frame=single,
+  breaklines=true
+}
+
+% --- Entornos de teoremas ---
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolario}
+\theoremstyle{remark}
+\newtheorem{remark}{Observación}[section]
+
+\title{%
+  T02 --- Demostración formal:\\[4pt]
+  Correctitud y terminación de búsqueda binaria
+}
+\author{Curso Linux--C--Rust --- B15 Estructuras de datos en C}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+% ===================================================================
+\section{El algoritmo}
+% ===================================================================
+
+\begin{lstlisting}
+int binary_search(int arr[], int n, int target) {
+    int lo = 0;                              // S1
+    int hi = n - 1;                          // S2
+    while (lo <= hi) {                       // L1
+        int mid = lo + (hi - lo) / 2;        // L2
+        if (arr[mid] == target)               // L3
+            return mid;                       // L4
+        if (arr[mid] < target)                // L5
+            lo = mid + 1;                     // L6
+        else                                  // L7
+            hi = mid - 1;                     // L8
+    }
+    return -1;                               // S3
+}
+\end{lstlisting}
+
+\textbf{Precondición.} \texttt{arr[0..n)} está ordenado en orden no
+decreciente:
+$\texttt{arr}[0] \leq \texttt{arr}[1] \leq \ldots \leq \texttt{arr}[n{-}1]$.
+
+\textbf{Postcondición.} El valor retornado es un índice $m$ tal que
+$\texttt{arr}[m] = \texttt{target}$ (si existe), o $-1$ si
+\texttt{target} no aparece en \texttt{arr[0..n)}.
+
+% ===================================================================
+\section{Demostración 1: correctitud (invariante de bucle)}
+% ===================================================================
+
+\begin{definition}[Invariante]
+\[
+  \textbf{INV}(\mathit{lo}, \mathit{hi}):
+  \text{Si \texttt{target} existe en \texttt{arr[0..n)}, entonces}
+  \;\exists\, k \text{ con } \mathit{lo} \leq k \leq \mathit{hi}
+  \text{ tal que } \texttt{arr}[k] = \texttt{target}.
+\]
+\end{definition}
+
+\begin{theorem}\label{thm:correctness}
+\texttt{binary\_search} es correcta: satisface la postcondición.
+\end{theorem}
+
+\begin{proof}
+Probamos el invariante en tres etapas.
+
+\textbf{Inicialización} (después de S1--S2: $\mathit{lo} = 0$,
+$\mathit{hi} = n - 1$). El rango $[\mathit{lo}, \mathit{hi}] = [0, n{-}1]$
+es todo el array. Si \texttt{target} existe en el array, ciertamente
+está en $\texttt{arr}[0..n{-}1]$. \checkmark
+
+\textbf{Mantenimiento} (si el bucle continúa). Asumimos
+$\text{INV}(\mathit{lo}, \mathit{hi})$ con $\mathit{lo} \leq \mathit{hi}$.
+Se calcula $\mathit{mid} = \mathit{lo} +
+\lfloor(\mathit{hi} - \mathit{lo})/2\rfloor$. Observación:
+$\mathit{lo} \leq \mathit{mid} \leq \mathit{hi}$.
+
+\emph{Caso A: $\texttt{arr}[\mathit{mid}] = \texttt{target}$} (L3--L4).
+Se retorna $\mathit{mid}$. La postcondición se satisface directamente.
+\checkmark
+
+\emph{Caso B: $\texttt{arr}[\mathit{mid}] < \texttt{target}$} (L5--L6).
+Se actualiza $\mathit{lo} = \mathit{mid} + 1$. Como el array está
+ordenado:
+\[
+  \texttt{arr}[j] \leq \texttt{arr}[\mathit{mid}] < \texttt{target}
+  \quad \forall\, j \leq \mathit{mid}
+\]
+Ningún elemento en $\texttt{arr}[0..\mathit{mid}]$ puede ser igual a
+\texttt{target}. Si existe, debe estar en
+$\texttt{arr}[\mathit{mid}{+}1..\mathit{hi}]$.
+$\text{INV}(\mathit{mid}{+}1, \mathit{hi})$ vale. \checkmark
+
+\emph{Caso C: $\texttt{arr}[\mathit{mid}] > \texttt{target}$} (L7--L8).
+Se actualiza $\mathit{hi} = \mathit{mid} - 1$. Como el array está
+ordenado:
+\[
+  \texttt{arr}[j] \geq \texttt{arr}[\mathit{mid}] > \texttt{target}
+  \quad \forall\, j \geq \mathit{mid}
+\]
+Si \texttt{target} existe, debe estar en
+$\texttt{arr}[\mathit{lo}..\mathit{mid}{-}1]$.
+$\text{INV}(\mathit{lo}, \mathit{mid}{-}1)$ vale. \checkmark
+
+\textbf{Terminación} ($\mathit{lo} > \mathit{hi}$). El rango
+$[\mathit{lo}, \mathit{hi}]$ es vacío. Por el invariante, si
+\texttt{target} existiera, estaría en ese rango vacío. Contradicción.
+Retornar $-1$ es correcto. \checkmark
+\end{proof}
+
+% ===================================================================
+\section{Demostración 2: terminación (función de decrecimiento)}
+% ===================================================================
+
+\begin{theorem}\label{thm:termination}
+El bucle de búsqueda binaria termina en a lo sumo
+$\lfloor \log_2 n \rfloor + 1$ iteraciones.
+\end{theorem}
+
+\begin{proof}
+Definimos la función de decrecimiento (variant):
+\[
+  V = \mathit{hi} - \mathit{lo} + 1
+\]
+que es el tamaño del rango de búsqueda.
+
+\textbf{Cota inferior.} El bucle solo ejecuta si
+$\mathit{lo} \leq \mathit{hi}$, es decir, $V \geq 1$. Cuando el
+bucle termina, $V \leq 0$.
+
+\textbf{Decrecimiento estricto.} En cada iteración (que no retorna
+en L4), $V$ decrece estrictamente.
+
+\emph{Caso B} ($\mathit{lo} = \mathit{mid} + 1$):
+\[
+  V' = \mathit{hi} - (\mathit{mid} + 1) + 1
+     = \mathit{hi} - \mathit{mid}
+\]
+Como $\mathit{mid} = \mathit{lo} +
+\lfloor(\mathit{hi}{-}\mathit{lo})/2\rfloor$:
+\[
+  V' = \mathit{hi} - \mathit{lo}
+     - \lfloor(\mathit{hi}{-}\mathit{lo})/2\rfloor
+     = \lceil(\mathit{hi}{-}\mathit{lo})/2\rceil
+     \leq \lfloor V/2 \rfloor
+\]
+
+\emph{Caso C} ($\mathit{hi} = \mathit{mid} - 1$):
+\[
+  V' = (\mathit{mid} - 1) - \mathit{lo} + 1
+     = \mathit{mid} - \mathit{lo}
+     = \lfloor(\mathit{hi}{-}\mathit{lo})/2\rfloor
+     \leq \lfloor V/2 \rfloor
+\]
+
+\textbf{En ambos casos: $V' \leq \lfloor V/2 \rfloor$.} El rango se
+reduce a la mitad (o menos) en cada iteración.
+
+\textbf{Número de iteraciones.} Partiendo de $V_0 = n$ y reduciéndose
+al menos a la mitad:
+\[
+  V_k \leq \left\lfloor \frac{n}{2^k} \right\rfloor
+\]
+
+El bucle termina cuando $V_k \leq 0$, lo que ocurre cuando
+$\lfloor n/2^k \rfloor = 0$, es decir, $2^k > n$:
+\[
+  k > \log_2 n
+  \quad\Longrightarrow\quad
+  k \geq \lfloor \log_2 n \rfloor + 1 \qedhere
+\]
+\end{proof}
+
+% ===================================================================
+\section{Demostración 3: complejidad
+  \texorpdfstring{$\Theta(\log n)$}{Theta(log n)} en el peor caso}
+% ===================================================================
+
+\begin{theorem}\label{thm:complexity}
+La búsqueda binaria ejecuta $\Theta(\log n)$ comparaciones en el peor
+caso.
+\end{theorem}
+
+\begin{proof}
+\emph{Cota superior.} Demostrada en el Teorema~\ref{thm:termination}:
+a lo sumo $\lfloor\log_2 n\rfloor + 1$ iteraciones, cada una con
+$O(1)$ comparaciones.
+
+\emph{Cota inferior.} Cualquier algoritmo de búsqueda basado en
+comparaciones en un array ordenado de $n$ elementos necesita
+$\Omega(\log n)$ comparaciones en el peor caso.
+
+Argumento por árbol de decisión: cada comparación tiene 3 resultados
+posibles ($<$, $=$, $>$), produciendo un árbol ternario. Hay $n$
+resultados posibles (el elemento está en la posición $0, 1, \ldots,
+n{-}1$) más 1 resultado ``no encontrado'', dando $n + 1$ hojas. Un
+árbol ternario de altura~$h$ tiene a lo sumo $3^h$ hojas:
+\[
+  n + 1 \leq 3^h
+  \quad\Longrightarrow\quad
+  h \geq \log_3(n+1) = \Omega(\log n)
+\]
+
+Combinando: la búsqueda binaria es $\Theta(\log n)$ en el peor caso,
+y por lo tanto es asintóticamente óptima.
+\end{proof}
+
+% ===================================================================
+\section{Demostración 4: correctitud del cálculo de \texttt{mid}}
+% ===================================================================
+
+\begin{lemma}\label{lem:mid}
+Si $0 \leq \mathit{lo} \leq \mathit{hi} < 2^{31}$, entonces
+$\mathit{mid} = \mathit{lo} + (\mathit{hi} - \mathit{lo})/2$ no
+produce overflow en aritmética de enteros de 32~bits con signo.
+\end{lemma}
+
+\begin{proof}
+\begin{enumerate}
+  \item $\mathit{hi} - \mathit{lo} \geq 0$ (porque
+    $\mathit{lo} \leq \mathit{hi}$). No hay underflow.
+  \item $\mathit{hi} - \mathit{lo} \leq \mathit{hi} < 2^{31}$. La
+    diferencia cabe en un \texttt{int}.
+  \item $(\mathit{hi} - \mathit{lo})/2 \leq \mathit{hi}/2 < 2^{30}$.
+    La división reduce el valor.
+  \item $\mathit{lo} + (\mathit{hi} - \mathit{lo})/2 \leq
+    \mathit{lo} + (\mathit{hi} - \mathit{lo}) = \mathit{hi} < 2^{31}$.
+    La suma no excede \texttt{hi}, que cabe en un \texttt{int}.
+\end{enumerate}
+\end{proof}
+
+\begin{remark}[Contraste con la versión con bug]
+$\mathit{mid} = (\mathit{lo} + \mathit{hi})/2$: si
+$\mathit{lo} = \mathit{hi} = 2^{30}$, entonces
+$\mathit{lo} + \mathit{hi} = 2^{31}$, que excede
+$\texttt{INT\_MAX} = 2^{31} - 1$. Overflow con comportamiento
+indefinido en C.
+\end{remark}
+
+% ===================================================================
+\section{Resumen de resultados}
+% ===================================================================
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llp{5.5cm}}
+\toprule
+\textbf{Resultado} & \textbf{Técnica} & \textbf{Clave} \\
+\midrule
+Correctitud
+  & Invariante de bucle
+  & Si target existe, está en \texttt{arr[lo..hi]} \\
+Terminación
+  & Función de decrecimiento
+  & $V' \leq \lfloor V/2 \rfloor$ en cada iteración \\
+Peor caso $\Theta(\log n)$
+  & Cota superior + árbol de decisión
+  & $\lfloor\log_2 n\rfloor + 1$ iter.; $\Omega(\log n)$ hojas \\
+\texttt{mid} sin overflow
+  & Análisis aritmético
+  & $\mathit{lo} + (\mathit{hi}{-}\mathit{lo})/2 \leq \mathit{hi} < 2^{31}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

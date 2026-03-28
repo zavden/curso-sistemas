@@ -1,0 +1,353 @@
+\documentclass[11pt, letterpaper]{article}
+
+% --- Idioma y codificación ---
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% --- Matemáticas ---
+\usepackage{amsmath, amssymb, amsthm}
+
+% --- Formato ---
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue!70!black}
+
+% --- Entornos de teoremas ---
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolario}
+\theoremstyle{remark}
+\newtheorem{remark}{Observación}[section]
+
+\title{%
+  T02 --- Demostración formal:\\[4pt]
+  Fórmulas de Knuth para sonda lineal
+}
+\author{Curso Linux--C--Rust --- B15 Estructuras de datos en C}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+% ===================================================================
+\section{Modelo}
+% ===================================================================
+
+\begin{definition}
+Array $T[0..m{-}1]$ con $m$ slots. Cada slot está vacío u ocupado por
+exactamente un elemento. Para insertar o buscar la clave~$k$, se
+examina la secuencia:
+\[
+  h(k),\; h(k){+}1,\; h(k){+}2,\; \ldots \pmod{m}
+\]
+hasta encontrar un slot vacío (búsqueda fallida / inserción) o la
+clave buscada (búsqueda exitosa). Bajo hashing uniforme,
+$h(k) \sim \mathrm{Uniforme}\{0, \ldots, m{-}1\}$.
+Notación: $n$ elementos, $m$ capacidad, $\alpha = n/m < 1$.
+Contamos \textbf{sondeos} (slots examinados).
+\end{definition}
+
+% ===================================================================
+\section{Demostración 1: búsqueda fallida
+  \texorpdfstring{$\frac{1}{2}\!\left(1 + \frac{1}{(1-\alpha)^2}\right)$}%
+  {1/2(1 + 1/(1-alpha)\^2)}}
+% ===================================================================
+
+\begin{theorem}\label{thm:miss}
+El número esperado de sondeos en una búsqueda fallida con sonda lineal
+es:
+\[
+  E[\text{sondeos fallida}]
+  \approx \frac{1}{2}\left(1 + \frac{1}{(1-\alpha)^2}\right)
+\]
+\end{theorem}
+
+\begin{proof}[Derivación]
+Definimos $A_k$ = evento de que se necesitan al menos $k$ sondeos.
+Esto ocurre si los $k{-}1$ primeros slots examinados están todos
+ocupados. El número esperado de sondeos es:
+\[
+  E[\text{sondeos}]
+  = \sum_{k=1}^{m} \Pr[A_k]
+  = 1 + \sum_{k=2}^{m} \Pr[A_k]
+\]
+
+Bajo hashing uniforme, la probabilidad de que $k{-}1$ slots
+consecutivos específicos estén todos ocupados es:
+\[
+  \Pr[A_k]
+  = \frac{n(n{-}1)\cdots(n{-}k{+}2)}{m(m{-}1)\cdots(m{-}k{+}2)}
+  \approx \alpha^{k-1}
+\]
+
+La aproximación $\alpha^{k-1}$ ignora las \textbf{correlaciones del
+clustering primario}. Un cluster de longitud~$L$ absorbe inserciones
+destinadas a $L + 1$ posiciones (las $L$ del cluster más la
+inmediatamente posterior), creando un sesgo que hace que los clusters
+largos sean más probables.
+
+Knuth demostró, mediante un análisis combinatorio fino (TAOCP Vol.~3,
+\S6.4) usando funciones generatrices para la distribución exacta de
+longitudes de cluster, que el efecto del clustering transforma
+$1/(1{-}\alpha)$ (caso sin clustering) en $1/(1{-}\alpha)^2$:
+\[
+  E[\text{sondeos fallida}]
+  \approx \frac{1}{2}\left(1 + \frac{1}{(1-\alpha)^2}\right) \qedhere
+\]
+\end{proof}
+
+% ===================================================================
+\section{Demostración 2: búsqueda exitosa
+  \texorpdfstring{$\frac{1}{2}\!\left(1 + \frac{1}{1-\alpha}\right)$}%
+  {1/2(1 + 1/(1-alpha))}}
+% ===================================================================
+
+\begin{theorem}\label{thm:hit}
+El número esperado de sondeos en una búsqueda exitosa con sonda lineal
+es:
+\[
+  E[\text{sondeos exitosa}]
+  \approx \frac{1}{2}\left(1 + \frac{1}{1-\alpha}\right)
+\]
+\end{theorem}
+
+\begin{proof}
+El costo de encontrar un elemento es igual al costo que tuvo
+\textbf{insertarlo}. Cuando se insertó el $i$-ésimo elemento, la
+tabla contenía $i - 1$ elementos con factor de carga
+$\alpha_i = (i{-}1)/m$. El costo de esa inserción (= búsqueda
+fallida con $i{-}1$ elementos) fue:
+\[
+  C_i \approx \frac{1}{2}\left(1 + \frac{1}{(1 - (i{-}1)/m)^2}\right)
+\]
+
+El costo promedio de búsqueda exitosa es:
+\[
+  E[\text{exitosa}]
+  = \frac{1}{n} \sum_{i=1}^{n} C_i
+  = \frac{1}{2} + \frac{1}{2n}
+    \sum_{i=0}^{n-1} \frac{1}{(1 - i/m)^2}
+\]
+
+Aproximamos la suma por una integral. Con $x = i/m$, $dx = 1/m$:
+\[
+  \frac{1}{n} \sum_{i=0}^{n-1} \frac{1}{(1 - i/m)^2}
+  \approx \frac{m}{n} \int_0^{n/m} \frac{dx}{(1-x)^2}
+  = \frac{1}{\alpha} \int_0^{\alpha} \frac{dx}{(1-x)^2}
+\]
+
+Calculamos la integral:
+\[
+  \int_0^{\alpha} \frac{dx}{(1-x)^2}
+  = \left[\frac{1}{1-x}\right]_0^{\alpha}
+  = \frac{1}{1-\alpha} - 1
+  = \frac{\alpha}{1-\alpha}
+\]
+
+Sustituyendo:
+\[
+  E[\text{exitosa}]
+  \approx \frac{1}{2}\left(1 + \frac{1}{\alpha}
+    \cdot \frac{\alpha}{1-\alpha}\right)
+  = \frac{1}{2}\left(1 + \frac{1}{1-\alpha}\right) \qedhere
+\]
+\end{proof}
+
+% ===================================================================
+\section{Demostración 3: divergencia cuando
+  \texorpdfstring{$\alpha \to 1$}{alpha -> 1}}
+% ===================================================================
+
+\begin{theorem}\label{thm:divergence}
+Ambas fórmulas divergen cuando $\alpha \to 1^-$.
+\end{theorem}
+
+\begin{proof}
+Inmediata de las fórmulas:
+
+\emph{Búsqueda fallida:}
+\[
+  \frac{1}{2}\left(1 + \frac{1}{(1-\alpha)^2}\right)
+  \xrightarrow{\alpha \to 1^-} +\infty
+  \qquad \text{porque } (1{-}\alpha)^2 \to 0^+
+\]
+
+\emph{Búsqueda exitosa:}
+\[
+  \frac{1}{2}\left(1 + \frac{1}{1-\alpha}\right)
+  \xrightarrow{\alpha \to 1^-} +\infty
+  \qquad \text{porque } (1{-}\alpha) \to 0^+
+\]
+
+\textbf{Tasa de divergencia.} La búsqueda fallida diverge
+\textbf{mucho más rápido}:
+\[
+  \frac{E[\text{fallida}]}{E[\text{exitosa}]}
+  \approx \frac{1/(1{-}\alpha)^2}{1/(1{-}\alpha)}
+  = \frac{1}{1-\alpha}
+  \xrightarrow{\alpha \to 1^-} +\infty
+\]
+Para $\alpha = 0.95$: fallida $\approx 200.5$, exitosa $\approx 10.5$.
+Ratio $\approx 19$.
+\end{proof}
+
+\begin{remark}
+Una tabla casi llena con sonda lineal es catastrófica para búsquedas
+de claves inexistentes. Esto motiva que el umbral de
+redimensionamiento sea $\alpha \leq 0.7$--$0.75$.
+\end{remark}
+
+% ===================================================================
+\section{Demostración 4: comparación con hashing uniforme}
+% ===================================================================
+
+\begin{theorem}\label{thm:uniform}
+Bajo hashing uniforme (sin clustering), los costos son:
+\[
+  E[\text{fallida, uniforme}] = \frac{1}{1-\alpha}, \qquad
+  E[\text{exitosa, uniforme}] = \frac{1}{\alpha}
+    \ln\frac{1}{1-\alpha}
+\]
+que son estrictamente menores que los de sonda lineal.
+\end{theorem}
+
+\begin{proof}
+\emph{Caso fallido.} La probabilidad de que el primer sondeo caiga en
+un slot ocupado es~$\alpha$. Si es así, el segundo sondeo (aleatorio
+independiente) cae en un slot ocupado con probabilidad
+$(n{-}1)/(m{-}1) \approx \alpha$. Se necesitan exactamente $k$
+sondeos con probabilidad $\alpha^{k-1}(1{-}\alpha)$ (distribución
+geométrica):
+\[
+  E[\text{sondeos}] = \frac{1}{1-\alpha}
+\]
+
+\emph{Caso exitoso.} Análogo a la Demostración~2, pero con costo de
+inserción $1/(1{-}\alpha_i)$ en vez de $1/(1{-}\alpha_i)^2$:
+\[
+  E[\text{exitosa}]
+  = \frac{1}{n}\sum_{i=0}^{n-1}\frac{1}{1{-}i/m}
+  \approx \frac{1}{\alpha}\int_0^{\alpha}\frac{dx}{1{-}x}
+  = \frac{1}{\alpha}\ln\frac{1}{1{-}\alpha} \qedhere
+\]
+\end{proof}
+
+El clustering primario cuesta un factor de $1/(1{-}\alpha)$ adicional:
+
+\begin{table}[h]
+\centering
+\caption{Costo del clustering: sonda lineal vs hashing uniforme.}
+\begin{tabular}{cccc}
+\toprule
+$\alpha$ & Fallida (lineal) & Fallida (uniforme)
+  & Ratio \\
+\midrule
+0.50 & 2.50  & 2.00 & 1.25 \\
+0.70 & 6.06  & 3.33 & 1.82 \\
+0.80 & 13.0  & 5.00 & 2.60 \\
+0.90 & 50.5  & 10.0 & 5.05 \\
+0.95 & 200.5 & 20.0 & 10.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ===================================================================
+\section{Demostración 5: peor caso
+  \texorpdfstring{$\Theta(n^2)$}{Theta(n\^2)}}
+% ===================================================================
+
+\begin{theorem}\label{thm:worst}
+En el peor caso, $n$ inserciones con sonda lineal cuestan
+$\Theta(n^2)$ sondeos totales.
+\end{theorem}
+
+\begin{proof}
+Considérese el caso en que todas las $n$ claves hashean al mismo
+slot~$j$. La $i$-ésima inserción requiere $i$ sondeos (recorrer los
+$i{-}1$ slots ocupados más el slot vacío):
+\[
+  \text{Sondeos totales}
+  = \sum_{i=1}^{n} i
+  = \frac{n(n+1)}{2}
+  = \Theta(n^2)
+\]
+
+Cada búsqueda de la clave insertada en la posición~$i$ cuesta $i$
+sondeos. La búsqueda exitosa promedio:
+\[
+  E[\text{exitosa}]
+  = \frac{1}{n}\sum_{i=1}^{n} i
+  = \frac{n+1}{2}
+  = \Theta(n) \qedhere
+\]
+\end{proof}
+
+\begin{remark}
+Bajo SUHA, el costo esperado es $O(1/(1{-}\alpha))$. El gap entre
+caso esperado $O(1)$ (con $\alpha$ constante) y peor caso $\Theta(n)$
+subraya la importancia de una buena función hash.
+\end{remark}
+
+% ===================================================================
+\section{Verificación numérica}
+% ===================================================================
+
+\begin{table}[h]
+\centering
+\begin{tabular}{cccc}
+\toprule
+$\alpha$
+  & $\frac{1}{2}(1 + 1/(1{-}\alpha))$
+  & $\frac{1}{2}(1 + 1/(1{-}\alpha)^2)$
+  & Ratio \\
+\midrule
+0.10 & 1.056  & 1.117   & 1.06 \\
+0.25 & 1.167  & 1.389   & 1.19 \\
+0.50 & 1.500  & 2.500   & 1.67 \\
+0.70 & 2.167  & 6.056   & 2.80 \\
+0.75 & 2.500  & 8.500   & 3.40 \\
+0.80 & 3.000  & 13.00   & 4.33 \\
+0.90 & 5.500  & 50.50   & 9.18 \\
+0.95 & 10.50  & 200.5   & 19.1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ===================================================================
+\section{Resumen de resultados}
+% ===================================================================
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llp{5.5cm}}
+\toprule
+\textbf{Resultado} & \textbf{Técnica} & \textbf{Clave} \\
+\midrule
+Fallida: $\frac{1}{2}(1 + 1/(1{-}\alpha)^2)$
+  & Análisis de Knuth
+  & Clustering eleva $1/(1{-}\alpha)$ a $1/(1{-}\alpha)^2$ \\
+Exitosa: $\frac{1}{2}(1 + 1/(1{-}\alpha))$
+  & Promedio de costos de inserción
+  & $\int_0^\alpha dx/(1{-}x)^2 = \alpha/(1{-}\alpha)$ \\
+Divergencia en $\alpha \to 1$
+  & Análisis de límites
+  & Fallida diverge como $1/(1{-}\alpha)^2$ \\
+Clustering: ${\times}\,1/(1{-}\alpha)$ vs uniforme
+  & Comparación de modelos
+  & Sonda lineal vs hashing uniforme \\
+Peor caso $\Theta(n^2)$
+  & Todas las claves al mismo slot
+  & $\sum i = n(n{+}1)/2$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

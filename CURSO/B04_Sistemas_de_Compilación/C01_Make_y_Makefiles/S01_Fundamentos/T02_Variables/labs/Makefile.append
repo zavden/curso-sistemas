@@ -1,0 +1,26 @@
+# Makefile.append -- Demonstrates += (append)
+# Builds flags incrementally.
+
+CFLAGS := -std=c17
+
+$(info [1] CFLAGS = $(CFLAGS))
+
+CFLAGS += -Wall -Wextra
+
+$(info [2] CFLAGS = $(CFLAGS))
+
+CFLAGS += -Wpedantic
+
+$(info [3] CFLAGS = $(CFLAGS))
+
+# Conditional append based on DEBUG variable
+ifdef DEBUG
+  CFLAGS += -g -O0 -DDEBUG
+  $(info [4] DEBUG mode: CFLAGS = $(CFLAGS))
+else
+  CFLAGS += -O2
+  $(info [4] RELEASE mode: CFLAGS = $(CFLAGS))
+endif
+
+all:
+	@echo "Final CFLAGS: $(CFLAGS)"

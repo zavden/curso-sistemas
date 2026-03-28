@@ -1,0 +1,337 @@
+\documentclass[11pt, letterpaper]{article}
+
+% --- Idioma y codificación ---
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% --- Matemáticas ---
+\usepackage{amsmath, amssymb, amsthm}
+
+% --- Formato ---
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue!70!black}
+
+% --- Entornos de teoremas ---
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolario}
+\theoremstyle{remark}
+\newtheorem{remark}{Observación}[section]
+
+\title{%
+  T02 --- Demostración formal:\\[4pt]
+  Cota inferior $\Omega(n \log n)$ para ordenamiento por comparación
+}
+\author{Curso Linux--C--Rust --- B15 Estructuras de datos en C}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+% ===================================================================
+\section{Definiciones}
+% ===================================================================
+
+\begin{definition}[Modelo de comparación]
+Un algoritmo opera en el modelo de comparación si la única forma de
+obtener información sobre los elementos de entrada es mediante
+comparaciones de la forma $a_i \leq a_j$ (o $<$, $>$, $=$), cada una
+con resultado binario.
+\end{definition}
+
+\begin{definition}[Árbol de decisión]
+Un árbol de decisión para ordenar $n$ elementos es un árbol binario
+donde:
+\begin{itemize}
+  \item Cada nodo interno contiene una comparación $a_i \leq a_j$.
+  \item La rama izquierda corresponde al resultado ``sí''.
+  \item La rama derecha corresponde al resultado ``no''.
+  \item Cada hoja está etiquetada con una permutación
+    $\pi \in S_n$.
+\end{itemize}
+La ejecución del algoritmo sobre una entrada concreta corresponde a un
+camino raíz$\to$hoja en el árbol. La altura del árbol es el número de
+comparaciones en el peor caso.
+\end{definition}
+
+% ===================================================================
+\section{Lema 1: un árbol binario de altura $h$ tiene a lo sumo
+  \texorpdfstring{$2^h$}{2\^h} hojas}
+% ===================================================================
+
+\begin{lemma}\label{lem:leaves}
+Sea $T$ un árbol binario de altura $h$. Entonces $T$ tiene a lo sumo
+$2^h$ hojas.
+\end{lemma}
+
+\begin{proof}
+Por inducción sobre $h$.
+
+\textbf{Base ($h = 0$).} Un árbol de altura~0 es un solo nodo (hoja).
+Hojas $= 1 = 2^0$. \checkmark
+
+\textbf{Paso inductivo.} Sea $T$ un árbol de altura $h \geq 1$ con
+raíz~$r$. Los subárboles izquierdo y derecho de~$r$ tienen altura a lo
+sumo $h - 1$. Por hipótesis inductiva, cada uno tiene a lo sumo
+$2^{h-1}$ hojas. Las hojas de~$T$ son exactamente las hojas de sus
+subárboles:
+\[
+  L(T) = L(T_{\text{izq}}) + L(T_{\text{der}})
+  \leq 2^{h-1} + 2^{h-1} = 2^h \qedhere
+\]
+\end{proof}
+
+% ===================================================================
+\section{Lema 2: el árbol de decisión tiene al menos $n!$ hojas}
+% ===================================================================
+
+\begin{lemma}\label{lem:nfact}
+Todo árbol de decisión que ordena correctamente $n$ elementos tiene al
+menos $n!$ hojas.
+\end{lemma}
+
+\begin{proof}
+Por contradicción. Supongamos que el árbol tiene menos de $n!$ hojas.
+Como hay $n!$ permutaciones posibles de la entrada, por el principio
+del palomar existen dos permutaciones distintas $\pi_1$ y $\pi_2$ que
+llegan a la misma hoja~$\ell$.
+
+La hoja~$\ell$ está etiquetada con una única permutación de salida
+$\sigma$. Esto significa que el algoritmo produce la misma salida
+$\sigma$ para las entradas $\pi_1$ y $\pi_2$.
+
+Pero $\pi_1 \neq \pi_2$ implica que las permutaciones de ordenamiento
+correctas son distintas: $\sigma_1 \neq \sigma_2$ (donde $\sigma_i$ es
+la permutación que ordena $\pi_i$). El algoritmo aplica $\sigma$ a
+ambas, por lo que al menos una queda mal ordenada.
+
+Contradicción con la hipótesis de que el algoritmo ordena
+correctamente. Por lo tanto, $L \geq n!$.
+\end{proof}
+
+% ===================================================================
+\section{Teorema principal:
+  \texorpdfstring{$\Omega(n \log n)$}{Omega(n log n)} comparaciones}
+% ===================================================================
+
+\begin{theorem}\label{thm:lower-bound}
+Todo algoritmo de ordenamiento basado en comparaciones requiere
+$\Omega(n \log n)$ comparaciones en el peor caso.
+\end{theorem}
+
+\begin{proof}
+Sea $T$ el árbol de decisión de un algoritmo que ordena $n$ elementos,
+con altura~$h$ ($=$ peor caso de comparaciones).
+
+Por el Lema~\ref{lem:leaves}: $L(T) \leq 2^h$.
+Por el Lema~\ref{lem:nfact}: $L(T) \geq n!$.
+
+Combinando:
+\[
+  n! \leq 2^h
+  \quad\Longrightarrow\quad
+  h \geq \log_2(n!)
+\]
+
+Resta probar que $\log_2(n!) = \Omega(n \log n)$, lo que se hace en la
+Sección~\ref{sec:logfact}.
+\end{proof}
+
+% ===================================================================
+\section{Demostración de
+  \texorpdfstring{$\log_2(n!) = \Theta(n \log n)$}{log2(n!) = Theta(n log n)}}
+\label{sec:logfact}
+% ===================================================================
+
+\subsection{Método 1: cota inferior directa (sin Stirling)}
+
+\begin{lemma}\label{lem:logfact-lower}
+$\log_2(n!) \geq \dfrac{n}{2}\,\log_2\!\left(\dfrac{n}{2}\right)$.
+\end{lemma}
+
+\begin{proof}
+En el producto $n! = 1 \cdot 2 \cdot 3 \cdots n$, los factores
+$\lceil n/2 \rceil, \lceil n/2 \rceil + 1, \ldots, n$ son todos
+$\geq n/2$. Hay al menos $\lfloor n/2 \rfloor$ tales factores.
+Descartando los factores menores:
+\[
+  n! = \prod_{i=1}^{n} i
+  \geq \prod_{i=\lceil n/2 \rceil}^{n} i
+  \geq \left(\frac{n}{2}\right)^{\!\lfloor n/2 \rfloor}
+  \geq \left(\frac{n}{2}\right)^{\!n/2}
+\]
+
+Tomando $\log_2$:
+\[
+  \log_2(n!) \geq \frac{n}{2}\,\log_2\!\left(\frac{n}{2}\right)
+  = \frac{n}{2}(\log_2 n - 1)
+\]
+
+Para $n \geq 4$: $\log_2 n \geq 2$, así que
+$\log_2 n - 1 \geq \frac{1}{2}\log_2 n$:
+\[
+  \log_2(n!) \geq \frac{n}{2} \cdot \frac{1}{2}\log_2 n
+  = \frac{n \log_2 n}{4}
+  \quad\Longrightarrow\quad
+  \log_2(n!) = \Omega(n \log n) \qedhere
+\]
+\end{proof}
+
+\subsection{Método 2: cota superior (para obtener $\Theta$)}
+
+\begin{lemma}\label{lem:logfact-upper}
+$\log_2(n!) \leq n \log_2 n$.
+\end{lemma}
+
+\begin{proof}
+Cada factor del producto es $\leq n$:
+\[
+  n! = \prod_{i=1}^{n} i \leq n^n
+  \quad\Longrightarrow\quad
+  \log_2(n!) \leq \log_2(n^n) = n \log_2 n \qedhere
+\]
+\end{proof}
+
+Combinando ambas cotas:
+\[
+  \frac{n \log_2 n}{4} \leq \log_2(n!) \leq n \log_2 n
+  \quad\Longrightarrow\quad
+  \log_2(n!) = \Theta(n \log n)
+\]
+
+\subsection{Método 3: aproximación de Stirling (cota más precisa)}
+
+\begin{theorem}[Stirling]
+Para $n \geq 1$:
+\[
+  n! = \sqrt{2\pi n}\left(\frac{n}{e}\right)^{\!n}
+  \left(1 + O\!\left(\frac{1}{n}\right)\right)
+\]
+\end{theorem}
+
+Derivación de $\log_2(n!)$ usando Stirling:
+\[
+  \log_2(n!)
+  = \log_2\!\left(\sqrt{2\pi n}\right)
+  + n\,\log_2\!\left(\frac{n}{e}\right)
+  + O\!\left(\frac{1}{n}\right)
+\]
+
+Expandimos cada término:
+\begin{align*}
+  &= \frac{1}{2}\log_2(2\pi n) + n\log_2 n - n\log_2 e
+    + O\!\left(\frac{1}{n}\right) \\
+  &= n\log_2 n - n\log_2 e + \frac{1}{2}\log_2(2\pi)
+    + \frac{1}{2}\log_2 n + O\!\left(\frac{1}{n}\right)
+\end{align*}
+
+Como $\log_2 e \approx 1.4427$:
+\[
+  \log_2(n!) = n\log_2 n - 1.4427\,n + O(\log n)
+\]
+
+\begin{table}[h]
+\centering
+\caption{Verificación numérica de la aproximación de Stirling.}
+\begin{tabular}{ccc}
+\toprule
+$n$ & $\log_2(n!)$ exacto & $n\log_2 n - 1.443n$ \\
+\midrule
+10   & 21.79   & 18.78  \\
+100  & 524.76  & 520.57 \\
+1000 & 8529.66 & 8527.14 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Conclusión:
+$\log_2(n!) = n\log_2 n - \Theta(n) = \Theta(n \log n)$.
+
+% ===================================================================
+\section{Corolario: optimalidad de merge sort y heapsort}
+% ===================================================================
+
+\begin{corollary}\label{cor:optimal}
+Los algoritmos merge sort y heapsort son asintóticamente óptimos en el
+modelo de comparación.
+\end{corollary}
+
+\begin{proof}
+Ambos ejecutan $O(n \log n)$ comparaciones en el peor caso. La cota
+inferior demuestra que ningún algoritmo basado en comparaciones puede
+hacer menos de $\Omega(n \log n)$. Por lo tanto, su complejidad de
+$\Theta(n \log n)$ es óptima.
+\end{proof}
+
+\begin{remark}
+Quicksort tiene peor caso $O(n^2)$, así que no es óptimo en el peor
+caso. Sin embargo, su caso promedio es $O(n \log n)$, que coincide con
+la cota inferior. Quicksort randomizado tiene esperanza $O(n \log n)$,
+que es óptimo en expectativa.
+\end{remark}
+
+% ===================================================================
+\section{Corolario: los sorting lineales no contradicen la cota}
+% ===================================================================
+
+\begin{corollary}\label{cor:linear}
+Counting sort ($O(n + k)$), radix sort ($O(d(n + k))$) y bucket sort
+($O(n)$ esperado) no contradicen la cota de $\Omega(n \log n)$.
+\end{corollary}
+
+\begin{proof}
+Estos algoritmos \textbf{no} operan en el modelo de comparación:
+\begin{itemize}
+  \item Counting sort usa valores como índices de array.
+  \item Radix sort examina dígitos individuales.
+  \item Bucket sort distribuye por rangos.
+\end{itemize}
+La cota $\Omega(n \log n)$ solo aplica a algoritmos que obtienen
+información exclusivamente mediante comparaciones binarias. Los
+algoritmos lineales explotan propiedades adicionales de los datos
+(rango acotado, representación digital), lo que les permite esquivar
+la cota.
+\end{proof}
+
+% ===================================================================
+\section{Resumen de resultados}
+% ===================================================================
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llp{5.5cm}}
+\toprule
+\textbf{Resultado} & \textbf{Técnica} & \textbf{Clave} \\
+\midrule
+Árbol de altura~$h$: $\leq 2^h$ hojas
+  & Inducción
+  & $L(T_{\text{izq}}) + L(T_{\text{der}}) \leq 2^{h-1} + 2^{h-1}$ \\
+Árbol de decisión: $\geq n!$ hojas
+  & Principio del palomar
+  & Dos permutaciones distintas $\to$ misma hoja $\to$ error \\
+$h \geq \log_2(n!)$
+  & Combinar los dos lemas
+  & $n! \leq 2^h$ \\
+$\log_2(n!) = \Omega(n \log n)$
+  & Mitad de factores $\geq n/2$
+  & $(n/2)^{n/2} \leq n!$ \\
+$\log_2(n!) = n\log_2 n - 1.443n + O(\log n)$
+  & Stirling
+  & Asíntota precisa \\
+Merge sort / heapsort óptimos
+  & Cota inferior vs superior
+  & $\Theta(n \log n)$ ambas \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

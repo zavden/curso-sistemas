@@ -1,0 +1,33 @@
+# Makefile.conventional -- Demonstrates conventional variable names
+# These variables are used by Make's implicit rules.
+
+CC       := gcc
+CFLAGS   := -Wall -Wextra -std=c17
+LDFLAGS  :=
+LDLIBS   :=
+
+SRCS := main.c utils.c
+OBJS := $(SRCS:.c=.o)
+TARGET := myapp
+
+$(info CC      = $(CC))
+$(info CFLAGS  = $(CFLAGS))
+$(info LDFLAGS = $(LDFLAGS))
+$(info LDLIBS  = $(LDLIBS))
+$(info SRCS    = $(SRCS))
+$(info OBJS    = $(OBJS))
+$(info TARGET  = $(TARGET))
+
+$(TARGET): $(OBJS)
+	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+main.o: main.c utils.h
+utils.o: utils.c utils.h
+
+clean:
+	rm -f $(TARGET) $(OBJS)
+
+.PHONY: clean

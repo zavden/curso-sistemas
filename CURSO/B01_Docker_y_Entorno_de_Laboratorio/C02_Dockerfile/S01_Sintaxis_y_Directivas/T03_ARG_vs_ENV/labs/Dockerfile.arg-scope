@@ -1,0 +1,15 @@
+# Multi-stage ARG scope demo
+FROM alpine:latest AS stage1
+ARG SHARED_ARG=from-build
+RUN echo "Stage 1: SHARED_ARG=$SHARED_ARG" > /stage1.txt
+
+FROM alpine:latest AS stage2
+# SHARED_ARG is NOT inherited from stage1
+RUN echo "Stage 2 (before re-declare): SHARED_ARG=$SHARED_ARG" > /stage2.txt
+ARG SHARED_ARG
+RUN echo "Stage 2 (after re-declare): SHARED_ARG=$SHARED_ARG" >> /stage2.txt
+
+# Copy result from stage1 for comparison
+COPY --from=stage1 /stage1.txt /stage1.txt
+
+CMD ["sh", "-c", "cat /stage1.txt && cat /stage2.txt"]

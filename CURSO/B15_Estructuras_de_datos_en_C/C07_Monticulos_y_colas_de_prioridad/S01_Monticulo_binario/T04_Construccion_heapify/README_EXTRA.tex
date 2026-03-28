@@ -1,0 +1,341 @@
+\documentclass[11pt, letterpaper]{article}
+
+% --- Idioma y codificación ---
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% --- Matemáticas ---
+\usepackage{amsmath, amssymb, amsthm}
+
+% --- Formato ---
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue!70!black}
+
+% --- Entornos de teoremas ---
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolario}
+\theoremstyle{remark}
+\newtheorem{remark}{Observación}[section]
+
+\title{%
+  T04 --- Demostración formal:\\[4pt]
+  Build-heap bottom-up es $O(n)$
+}
+\author{Curso Linux--C--Rust --- B15 Estructuras de datos en C}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+% ===================================================================
+\section{Modelo}
+% ===================================================================
+
+Consideramos un heap binario almacenado en un array de $n$ elementos.
+La altura del heap es $h = \lfloor \log_2 n \rfloor$.
+
+\begin{definition}[Convención de niveles]
+Numeramos los niveles desde abajo: el nivel~0 son las hojas, el
+nivel~$k$ tiene nodos a distancia $k$ del nivel de hojas, y el
+nivel~$h$ es la raíz.
+\end{definition}
+
+\begin{definition}[Costo de sift-down]
+Un sift-down en un nodo de nivel $k$ (medido desde abajo) puede
+descender a lo sumo $k$ niveles, con $O(1)$ de trabajo por nivel.
+Su costo es $O(k)$.
+\end{definition}
+
+\begin{definition}[Algoritmo de Floyd]
+Ejecuta sift-down para cada nodo interno, de derecha a izquierda y
+de abajo hacia arriba (desde el índice
+$\lfloor n/2 \rfloor - 1$ hasta~0).
+\end{definition}
+
+% ===================================================================
+\section{Demostración 1: conteo de nodos por nivel}
+% ===================================================================
+
+\begin{lemma}\label{lem:nodes-per-level}
+En un heap completo de $n$ nodos, el número de nodos en el nivel~$k$
+(desde abajo) es a lo sumo $\lfloor n / 2^{k+1} \rfloor$.
+\end{lemma}
+
+\begin{proof}
+En un árbol binario completo con $n$ nodos, el nivel~$d$ (desde arriba)
+tiene a lo sumo $2^d$ nodos. El nivel~$d$ desde arriba corresponde al
+nivel $k = h - d$ desde abajo, donde $h = \lfloor \log_2 n \rfloor$.
+
+Los nodos en el nivel~$k$ desde abajo tienen profundidad $h - k$
+desde arriba, así que hay a lo sumo $2^{h-k}$ nodos.
+Como $2^h \leq n < 2^{h+1}$:
+\[
+  2^{h-k} = \frac{2^h}{2^k} \leq \frac{n}{2^k}
+\]
+
+Además, cada nodo de nivel~$k$ es raíz de un subárbol de altura~$k$.
+Cada subárbol tiene al menos $2^k$ nodos (si es completo), así que
+los subárboles son disjuntos y abarcan como máximo $n$ nodos:
+\[
+  \text{nodos en nivel } k \leq \left\lfloor \frac{n}{2^k} \right\rfloor
+\]
+
+Para el algoritmo de Floyd, solo nos interesan los nodos internos
+(nivel $k \geq 1$). El número de nodos internos en nivel~$k$ es a lo
+sumo $\lfloor n / 2^{k+1} \rfloor$ (ya que las hojas, nivel~0, ocupan
+$\lceil n/2 \rceil$ posiciones).
+\end{proof}
+
+% ===================================================================
+\section{Demostración 2: la serie
+  \texorpdfstring{$\sum k x^k = x/(1-x)^2$}{sum kx\^k = x/(1-x)\^2}}
+% ===================================================================
+
+\begin{theorem}\label{thm:series}
+Para $|x| < 1$:
+\[
+  \sum_{k=0}^{\infty} k \cdot x^k = \frac{x}{(1 - x)^2}
+\]
+\end{theorem}
+
+\begin{proof}
+Partimos de la serie geométrica:
+\[
+  \sum_{k=0}^{\infty} x^k = \frac{1}{1-x} \qquad \text{para } |x| < 1
+\]
+
+Derivamos ambos lados respecto a $x$. El lado izquierdo (la derivación
+término a término es válida dentro del radio de convergencia):
+\[
+  \frac{d}{dx} \sum_{k=0}^{\infty} x^k
+  = \sum_{k=1}^{\infty} k \cdot x^{k-1}
+\]
+
+El lado derecho:
+\[
+  \frac{d}{dx} \frac{1}{1-x} = \frac{1}{(1-x)^2}
+\]
+
+Así:
+\[
+  \sum_{k=1}^{\infty} k \cdot x^{k-1} = \frac{1}{(1-x)^2}
+\]
+
+Multiplicamos ambos lados por $x$:
+\[
+  \sum_{k=1}^{\infty} k \cdot x^{k} = \frac{x}{(1-x)^2}
+\]
+
+Como el término $k=0$ aporta $0 \cdot x^0 = 0$:
+\[
+  \sum_{k=0}^{\infty} k \cdot x^{k} = \frac{x}{(1-x)^2} \qedhere
+\]
+\end{proof}
+
+\begin{corollary}\label{cor:series-half}
+Evaluando en $x = 1/2$:
+\[
+  \sum_{k=0}^{\infty} \frac{k}{2^k}
+  = \frac{1/2}{(1 - 1/2)^2}
+  = \frac{1/2}{1/4} = 2
+\]
+\end{corollary}
+
+\begin{table}[h]
+\centering
+\caption{Verificación parcial de la serie $\sum k/2^k$.}
+\begin{tabular}{ccc}
+\toprule
+$k$ & $k/2^k$ & Suma parcial \\
+\midrule
+0 & 0       & 0      \\
+1 & 0.5     & 0.5    \\
+2 & 0.5     & 1.0    \\
+3 & 0.375   & 1.375  \\
+4 & 0.25    & 1.625  \\
+5 & 0.15625 & 1.78125 \\
+6 & 0.09375 & 1.875  \\
+10 & 0.00977 & 1.98047 \\
+$\infty$ & --- & \textbf{2} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ===================================================================
+\section{Demostración 3: build-heap es
+  \texorpdfstring{$O(n)$}{O(n)}}
+% ===================================================================
+
+\begin{theorem}\label{thm:build-heap}
+El algoritmo build-heap bottom-up (Floyd) ejecuta a lo sumo $n$
+comparaciones de sift-down. Su complejidad es $O(n)$.
+\end{theorem}
+
+\begin{proof}
+El trabajo total $W$ es la suma de los costos de sift-down sobre
+todos los nodos internos:
+\[
+  W = \sum_{k=1}^{h}
+      (\text{nodos en nivel } k) \times
+      (\text{costo de sift-down en nivel } k)
+\]
+
+El costo de sift-down para un nodo en nivel~$k$ es a lo sumo $k$.
+El número de nodos en nivel~$k$ es a lo sumo
+$\lfloor n / 2^{k+1} \rfloor$ (por el Lema~\ref{lem:nodes-per-level}):
+\[
+  W \leq \sum_{k=1}^{h}
+         \left\lfloor \frac{n}{2^{k+1}} \right\rfloor \cdot k
+\]
+
+Acotamos eliminando los pisos ($\lfloor x \rfloor \leq x$):
+\[
+  W \leq \sum_{k=1}^{h} \frac{n}{2^{k+1}} \cdot k
+       = \frac{n}{2} \sum_{k=1}^{h} \frac{k}{2^k}
+\]
+
+Acotamos la suma parcial por la serie infinita
+(Corolario~\ref{cor:series-half}):
+\[
+  \sum_{k=1}^{h} \frac{k}{2^k}
+  \leq \sum_{k=0}^{\infty} \frac{k}{2^k} = 2
+\]
+
+Por lo tanto:
+\[
+  W \leq \frac{n}{2} \cdot 2 = n \qedhere
+\]
+\end{proof}
+
+% ===================================================================
+\section{Demostración 4: build-heap es
+  \texorpdfstring{$\Omega(n)$}{Omega(n)}}
+% ===================================================================
+
+\begin{theorem}\label{thm:lower-bound}
+Cualquier algoritmo que construya un heap a partir de un array
+arbitrario requiere $\Omega(n)$ operaciones.
+\end{theorem}
+
+\begin{proof}
+Cada uno de los $n$ elementos debe ser examinado al menos una vez:
+un elemento no examinado podría ser el mínimo (o máximo) y estar en
+una posición incorrecta. Cualquier algoritmo que lo ignore podría
+producir un heap inválido.
+
+Formalmente: para $n$ entradas arbitrarias, cualquier algoritmo basado
+en comparaciones necesita leer al menos $n$ valores. Esto da una cota
+inferior de $\Omega(n)$.
+
+Combinando con el Teorema~\ref{thm:build-heap}:
+build-heap bottom-up es $\Theta(n)$.
+\end{proof}
+
+% ===================================================================
+\section{Demostración 5: build-heap top-down es
+  \texorpdfstring{$\Theta(n \log n)$}{Theta(n log n)}}
+% ===================================================================
+
+\begin{theorem}\label{thm:top-down}
+La construcción top-down (insertar uno a uno con sift-up) tiene
+complejidad $\Theta(n \log n)$.
+\end{theorem}
+
+\begin{proof}
+\emph{Cota superior.} Cada inserción $i$ ejecuta un sift-up de costo
+a lo sumo $\lfloor \log_2 i \rfloor$:
+\[
+  W \leq \sum_{i=1}^{n} \lfloor \log_2 i \rfloor
+    \leq \sum_{i=1}^{n} \log_2 n
+    = n \log_2 n = O(n \log n)
+\]
+
+\emph{Cota inferior.} Los nodos en la segunda mitad del array
+($i > n/2$) están a profundidad
+$\geq \lfloor \log_2(n/2) \rfloor = \lfloor \log_2 n \rfloor - 1$.
+Para una entrada adversarial (por ejemplo, secuencia decreciente en un
+max-heap), cada uno de estos $n/2$ nodos ejecuta un sift-up de longitud
+$\geq \lfloor \log_2 n \rfloor - 1$:
+\[
+  W \geq \frac{n}{2} \cdot
+    (\lfloor \log_2 n \rfloor - 1) = \Omega(n \log n)
+\]
+
+Combinando: $W = \Theta(n \log n)$.
+\end{proof}
+
+% ===================================================================
+\section{Por qué la diferencia entre top-down y bottom-up}
+% ===================================================================
+
+\begin{remark}
+La asimetría se resume así:
+\begin{itemize}
+  \item \textbf{Bottom-up (sift-down):} Muchos nodos ($n/2$ hojas)
+    hacen 0~trabajo; pocos nodos (la raíz) hacen $O(\log n)$ trabajo.
+    Los pocos nodos caros no compensan los muchos baratos.
+  \item \textbf{Top-down (sift-up):} Muchos nodos ($n/2$ en el fondo)
+    hacen $O(\log n)$ trabajo; pocos nodos (la raíz) hacen 0~trabajo.
+    Los muchos nodos caros dominan.
+\end{itemize}
+\end{remark}
+
+Formalmente, la diferencia se reduce a qué serie se suma:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Método} & \textbf{Serie} & \textbf{Valor} \\
+\midrule
+Bottom-up & $\displaystyle\sum_{k=0}^{h} k / 2^k$ & $2$ (converge) \\[6pt]
+Top-down  & $\displaystyle\sum_{k=0}^{h} k \cdot 2^k / n$
+          & $\Theta(\log n)$ por nodo \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+En bottom-up, los pesos ($1/2^k$) decrecen exponencialmente con $k$,
+haciendo que la serie converja. En top-down, los pesos ($2^k$) crecen
+exponencialmente, haciendo que los términos grandes dominen.
+
+% ===================================================================
+\section{Resumen de resultados}
+% ===================================================================
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llp{5.5cm}}
+\toprule
+\textbf{Resultado} & \textbf{Técnica} & \textbf{Clave} \\
+\midrule
+Nodos en nivel~$k$: $\leq n/2^{k+1}$
+  & Conteo en árbol binario
+  & Subárboles disjuntos de altura~$k$ \\
+$\sum k/2^k = 2$
+  & Derivar serie geométrica
+  & $d/dx\,[1/(1{-}x)] = 1/(1{-}x)^2$ \\
+Build-heap bottom-up: $O(n)$
+  & Sumar trabajo por nivel
+  & $W \leq (n/2) \cdot 2 = n$ \\
+Build-heap bottom-up: $\Omega(n)$
+  & Cota inferior trivial
+  & Cada elemento debe examinarse \\
+Build-heap top-down: $\Theta(n \log n)$
+  & Cotas superior e inferior
+  & $n/2$ nodos hacen $\Omega(\log n)$ trabajo \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

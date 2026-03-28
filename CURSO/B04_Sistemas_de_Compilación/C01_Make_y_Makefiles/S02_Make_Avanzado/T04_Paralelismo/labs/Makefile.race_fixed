@@ -1,0 +1,27 @@
+CC     = gcc
+CFLAGS = -std=c11 -Wall -Wextra -Wpedantic -O0
+
+.DELETE_ON_ERROR:
+
+all: app_race
+
+generated.h: generated.h.in
+	@echo "  [generating header...]"
+	sleep 1
+	cp generated.h.in generated.h
+	@echo "  [generated.h created]"
+
+# CORREGIDO: generated.h declarado como prerequisite.
+# Ahora Make sabe que debe generar generated.h ANTES de compilar app_generated.o.
+app_generated.o: app_generated.c funcs.h generated.h
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+alpha.o: alpha.c funcs.h
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+app_race: app_generated.o alpha.o
+	$(CC) $(CFLAGS) -o $@ $^
+
+.PHONY: all clean
+clean:
+	rm -f app_generated.o alpha.o app_race generated.h

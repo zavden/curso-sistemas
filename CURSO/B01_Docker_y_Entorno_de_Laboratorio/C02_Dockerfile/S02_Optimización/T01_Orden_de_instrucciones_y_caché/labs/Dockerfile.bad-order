@@ -1,0 +1,14 @@
+FROM alpine:latest
+
+WORKDIR /app
+
+# BAD: source code BEFORE dependencies
+# Any change to any file invalidates this layer and all subsequent ones
+COPY . .
+RUN chmod +x app.sh
+
+# This re-runs every time ANY file changes (including app.sh)
+RUN apk add --no-cache curl wget
+RUN echo "Dependencies: $(cat deps.txt | tr '\n' ' ')"
+
+CMD ["./app.sh"]

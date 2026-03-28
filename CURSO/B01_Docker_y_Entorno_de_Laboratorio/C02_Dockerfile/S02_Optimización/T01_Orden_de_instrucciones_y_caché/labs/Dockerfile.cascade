@@ -1,0 +1,9 @@
+FROM alpine:latest
+
+RUN echo "Layer 1: base setup"
+RUN echo "Layer 2: install deps"
+COPY app.sh /app/app.sh
+RUN echo "Layer 3: after COPY"
+RUN echo "Layer 4: final config"
+
+CMD ["cat", "/app/app.sh"]

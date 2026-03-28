@@ -1,0 +1,4 @@
+FROM alpine:latest
+
+# Exec form: sleep is PID 1, receives SIGTERM directly
+ENTRYPOINT ["sleep", "300"]

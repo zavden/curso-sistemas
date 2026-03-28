@@ -1,0 +1,44 @@
+# --- macOS ---
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# --- Linux ---
+*~
+.directory
+.Trash-*
+
+# --- Editors / IDEs ---
+*.swp
+*.swo
+*.swn
+.vscode/
+.idea/
+
+# --- LaTeX auxiliares ---
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.synctex(busy)
+*.bbl
+*.blg
+*.nav
+*.snm
+*.vrb
+
+# --- C compilados ---
+*.o
+*.d
+*.out
+a.out
+
+# --- Varios ---
+*.bak
+*.tmp

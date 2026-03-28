@@ -1,0 +1,14 @@
+FROM debian:bookworm
+
+RUN useradd --create-home --uid 1000 devuser
+
+# COPY with --chown: file belongs to devuser
+COPY --chown=devuser:devuser sample-config.txt /app/owned-by-devuser.txt
+
+# COPY without --chown: file belongs to root (default)
+COPY sample-config.txt /app/owned-by-root.txt
+
+USER devuser
+WORKDIR /app
+
+CMD ["ls", "-la", "/app/"]

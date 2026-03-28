@@ -1,0 +1,14 @@
+FROM alpine:latest
+
+LABEL maintainer="student@lab.local"
+LABEL version="1.0"
+LABEL description="Lab - metadata instructions demo"
+
+EXPOSE 8080
+EXPOSE 443/tcp
+
+WORKDIR /app
+RUN echo "Hello from the metadata lab" > greeting.txt
+
+# CMD: default command, can be overridden with docker run arguments
+CMD ["cat", "/app/greeting.txt"]

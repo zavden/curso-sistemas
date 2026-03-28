@@ -1,0 +1,28 @@
+CC       = gcc
+CFLAGS   = -std=c11 -Wall -Wextra -Wpedantic -O0
+BUILDDIR = build
+TARGET   = $(BUILDDIR)/parallel_demo
+SRCS     = main_parallel.c alpha.c bravo.c charlie.c delta.c \
+           echo_func.c foxtrot.c golf.c hotel.c india.c juliet.c
+OBJS     = $(SRCS:%.c=$(BUILDDIR)/%.o)
+
+.DELETE_ON_ERROR:
+
+all: $(TARGET)
+
+# BIEN: order-only prerequisite (| build/).
+# build/ se crea UNA SOLA VEZ antes de lanzar las compilaciones.
+# Los cambios de timestamp de build/ NO provocan recompilacion.
+$(BUILDDIR)/%.o: %.c funcs.h | $(BUILDDIR)/
+	@echo "  [compiling $<]"
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(TARGET): $(OBJS) | $(BUILDDIR)/
+	$(CC) $(CFLAGS) -o $@ $^
+
+$(BUILDDIR)/:
+	mkdir -p $@
+
+.PHONY: all clean
+clean:
+	rm -rf $(BUILDDIR)

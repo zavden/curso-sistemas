@@ -1,0 +1,11 @@
+FROM alpine:latest
+
+WORKDIR /app
+
+# COPY keeps the tarball as a compressed file
+COPY data.tar.gz /app/via-copy/data.tar.gz
+
+# ADD auto-extracts the tarball into the destination directory
+ADD data.tar.gz /app/via-add/
+
+CMD ["sh", "-c", "echo '=== COPY result (tarball intact) ===' && ls -la /app/via-copy/ && echo '' && echo '=== ADD result (auto-extracted) ===' && ls -la /app/via-add/"]

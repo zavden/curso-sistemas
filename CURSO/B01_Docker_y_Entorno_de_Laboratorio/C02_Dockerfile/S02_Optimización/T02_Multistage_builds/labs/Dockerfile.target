@@ -1,0 +1,12 @@
+FROM alpine:latest AS base
+RUN apk add --no-cache python3
+WORKDIR /app
+COPY app.py .
+
+FROM base AS development
+RUN apk add --no-cache py3-pip py3-ipython
+CMD ["python3", "-i", "-c", "print('Development mode: interactive Python')"]
+
+FROM base AS production
+USER nobody
+CMD ["python3", "app.py"]

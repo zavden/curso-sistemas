@@ -1,0 +1,10 @@
+FROM alpine:latest
+
+# Create a file BEFORE declaring VOLUME
+RUN mkdir -p /app/data && \
+    echo "initial data from image" > /app/data/seed.txt
+
+# Declare an anonymous volume mount point
+VOLUME /app/data
+
+CMD ["cat", "/app/data/seed.txt"]

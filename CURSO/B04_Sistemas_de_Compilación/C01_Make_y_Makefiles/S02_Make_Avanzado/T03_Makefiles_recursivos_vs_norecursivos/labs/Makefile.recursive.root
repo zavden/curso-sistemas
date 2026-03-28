@@ -1,0 +1,19 @@
+# Root Makefile (recursive version)
+# Coordinates sub-makes in lib/ and app/
+
+SUBDIRS := lib app
+
+.PHONY: all clean $(SUBDIRS)
+
+all: $(SUBDIRS)
+
+# app depends on lib being built first:
+app: lib
+
+$(SUBDIRS):
+	$(MAKE) -C $@
+
+clean:
+	@for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir clean; \
+	done

@@ -1,0 +1,5 @@
+# lib/module.mk
+# Fragment included by the root Makefile
+
+LIB_SRCS := lib/calc.c
+LIB      := lib/libcalc.a

@@ -1,0 +1,40 @@
+# Makefile.builddir -- Separate build directory with pattern rules.
+# Source files live in src/, objects go to build/.
+
+CC       = gcc
+CFLAGS   = -Wall -Wextra -std=c11 -g
+CPPFLAGS = -Isrc
+
+SRCDIR   = src
+BUILDDIR = build
+TARGET   = $(BUILDDIR)/program
+
+SRCS = $(wildcard $(SRCDIR)/*.c)
+OBJS = $(SRCS:$(SRCDIR)/%.c=$(BUILDDIR)/%.o)
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	@echo "[link] $^ -> $@"
+	mkdir -p $(@D)
+	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+
+# Pattern rule: build/%.o depends on src/%.c
+# $(@D) = build  (used by mkdir -p to ensure directory exists)
+# $<    = src/xxx.c
+# $@    = build/xxx.o
+# $*    = xxx    (the stem)
+$(BUILDDIR)/%.o: $(SRCDIR)/%.c
+	@echo "[compile] $< -> $@  (stem: $*, dir: $(@D))"
+	mkdir -p $(@D)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+
+clean:
+	rm -rf $(BUILDDIR)
+
+info:
+	@echo "SRCS: $(SRCS)"
+	@echo "OBJS: $(OBJS)"
+	@echo "TARGET: $(TARGET)"
+
+.PHONY: all clean info

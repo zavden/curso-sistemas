@@ -1,0 +1,11 @@
+FROM debian:bookworm
+RUN apt-get update && apt-get install -y --no-install-recommends procps \
+    && rm -rf /var/lib/apt/lists/*
+RUN echo '#!/bin/bash' > /entrypoint.sh \
+    && echo 'echo "PID 1 started at $(date)"' >> /entrypoint.sh \
+    && echo 'echo "Hostname: $(hostname)"' >> /entrypoint.sh \
+    && echo 'echo "Working dir: $(pwd)"' >> /entrypoint.sh \
+    && echo 'exec sleep 600' >> /entrypoint.sh \
+    && chmod +x /entrypoint.sh
+WORKDIR /app
+CMD ["/entrypoint.sh"]

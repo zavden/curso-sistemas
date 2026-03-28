@@ -1,0 +1,8 @@
+FROM nginx:alpine
+
+EXPOSE 80
+EXPOSE 8080
+
+# EXPOSE only declares metadata — it does NOT publish ports.
+# This image documents that it uses ports 80 and 8080,
+# but neither will be accessible from the host without -p.

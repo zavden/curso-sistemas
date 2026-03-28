@@ -1,0 +1,17 @@
+# Makefile.lazy -- Demonstrates recursively expanded variables (=)
+# The value is NOT evaluated at definition time.
+# It is re-evaluated every time the variable is referenced.
+
+X = hello
+A = $(X) world
+
+$(info --- Before redefining X ---)
+$(info A = $(A))
+
+X = goodbye
+
+$(info --- After redefining X ---)
+$(info A = $(A))
+
+all:
+	@echo "Done"

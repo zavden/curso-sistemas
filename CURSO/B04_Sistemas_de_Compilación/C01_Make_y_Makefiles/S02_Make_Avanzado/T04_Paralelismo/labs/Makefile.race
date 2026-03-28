@@ -1,0 +1,32 @@
+CC     = gcc
+CFLAGS = -std=c11 -Wall -Wextra -Wpedantic -O0
+
+# --- BUG INTENCIONAL ---
+# app_generated.o depende de generated.h en el codigo (#include),
+# pero la dependencia NO esta declarada en esta regla.
+# Con -j1 funciona "por suerte" porque generated.h se genera primero.
+# Con -j, app_generated.o puede compilarse ANTES de que generated.h exista.
+
+all: app_race
+
+# generated.h se genera a partir de generated.h.in con un sleep artificial
+# para aumentar la probabilidad de race condition.
+generated.h: generated.h.in
+	@echo "  [generating header...]"
+	sleep 1
+	cp generated.h.in generated.h
+	@echo "  [generated.h created]"
+
+# BUG: falta generated.h como prerequisite.
+app_generated.o: app_generated.c funcs.h
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+alpha.o: alpha.c funcs.h
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+app_race: app_generated.o alpha.o
+	$(CC) $(CFLAGS) -o $@ $^
+
+.PHONY: all clean
+clean:
+	rm -f app_generated.o alpha.o app_race generated.h

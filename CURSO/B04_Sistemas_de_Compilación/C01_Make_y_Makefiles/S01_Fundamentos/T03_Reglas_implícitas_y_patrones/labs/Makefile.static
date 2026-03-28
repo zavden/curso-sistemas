@@ -1,0 +1,22 @@
+# Makefile.static -- Static pattern rules: apply a pattern
+# only to a specific list of targets.
+
+CC       = gcc
+CFLAGS   = -Wall -Wextra -std=c11 -g
+CPPFLAGS = -Isrc
+
+SRC_OBJS  = src/main.o src/utils.o
+
+# Static pattern rule: only the targets listed in $(SRC_OBJS)
+# are matched by this rule.
+$(SRC_OBJS): %.o: %.c
+	@echo "[static pattern] Compiling $< -> $@ (stem: $*)"
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+
+program: $(SRC_OBJS)
+	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+
+clean:
+	rm -f program $(SRC_OBJS)
+
+.PHONY: clean

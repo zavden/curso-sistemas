@@ -1,0 +1,9 @@
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    environment:
+      APP_NAME: lab-compose
+      APP_ENV: production
+    restart: unless-stopped

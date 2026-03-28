@@ -1,0 +1,5 @@
+# Application configuration
+app_name=docker-lab
+listen_port=8080
+log_level=info
+workers=4

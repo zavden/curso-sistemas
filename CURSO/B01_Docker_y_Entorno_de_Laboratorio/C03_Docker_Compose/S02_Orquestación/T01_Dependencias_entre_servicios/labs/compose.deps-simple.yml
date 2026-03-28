@@ -1,0 +1,16 @@
+services:
+  api:
+    image: alpine:latest
+    depends_on:
+      - db
+    command: >
+      sh -c '
+        echo "API started at $$(date +%T)"
+        nc -z db 5432 2>/dev/null && echo "DB: connected" || echo "DB: connection FAILED"
+        sleep 3600
+      '
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: secret

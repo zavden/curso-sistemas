@@ -1,0 +1,339 @@
+\documentclass[11pt, letterpaper]{article}
+
+% --- Idioma y codificación ---
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% --- Matemáticas ---
+\usepackage{amsmath, amssymb, amsthm}
+
+% --- Formato ---
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue!70!black}
+
+% --- Código ---
+\lstset{
+  language=C, basicstyle=\ttfamily\small,
+  keywordstyle=\bfseries, commentstyle=\itshape,
+  numbers=left, numberstyle=\tiny, frame=single,
+  breaklines=true
+}
+
+% --- Entornos de teoremas ---
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolario}
+\theoremstyle{remark}
+\newtheorem{remark}{Observación}[section]
+
+\title{%
+  T01 --- Demostración formal:\\[4pt]
+  Correctitud del heapsort
+}
+\author{Curso Linux--C--Rust --- B15 Estructuras de datos en C}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+% ===================================================================
+\section{El algoritmo}
+% ===================================================================
+
+Referencia del código cuya correctitud probamos:
+
+\begin{lstlisting}
+void heapsort(int arr[], int n) {
+    // Fase 1: build max-heap
+    for (int i = n / 2 - 1; i >= 0; i--)        // bucle B
+        sift_down(arr, n, i);
+
+    // Fase 2: extraer maximo
+    for (int i = n - 1; i > 0; i--) {            // bucle E
+        swap(&arr[0], &arr[i]);
+        sift_down(arr, i, 0);
+    }
+}
+\end{lstlisting}
+
+La prueba se divide en tres partes: correctitud de la Fase~1 (build),
+correctitud de la Fase~2 (extract), y complejidad.
+
+% ===================================================================
+\section{Definiciones}
+% ===================================================================
+
+\begin{definition}[Max-heap en subrango]
+Decimos que \texttt{arr[0..m)} es un max-heap si para todo
+$0 \leq j < m$:
+\begin{itemize}
+  \item Si $2j+1 < m$: $\texttt{arr}[j] \geq \texttt{arr}[2j+1]$
+    \quad (padre $\geq$ hijo izquierdo).
+  \item Si $2j+2 < m$: $\texttt{arr}[j] \geq \texttt{arr}[2j+2]$
+    \quad (padre $\geq$ hijo derecho).
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Partición heap-sorted]
+Decimos que el array tiene una partición~$(i)$ si:
+\begin{enumerate}
+  \item[\textbf{P1.}] \texttt{arr[0..i+1)} es un max-heap de tamaño
+    $i+1$.
+  \item[\textbf{P2.}] \texttt{arr[i+1..n)} contiene los $n-(i+1)$
+    mayores elementos del array original, en orden ascendente.
+  \item[\textbf{P3.}] Todo elemento en \texttt{arr[0..i+1)} es $\leq$
+    todo elemento en \texttt{arr[i+1..n)}.
+\end{enumerate}
+\end{definition}
+
+% ===================================================================
+\section{Demostración 1: correctitud de la Fase 1 (build-heap)}
+% ===================================================================
+
+\begin{theorem}\label{thm:build}
+Al terminar el bucle~B, \texttt{arr[0..n)} es un max-heap válido.
+\end{theorem}
+
+\begin{definition}[Invariante del bucle B]
+\[
+  \textbf{INV\_B}(i): \text{Para todo } j \text{ con } i < j < n,
+  \text{ el nodo } j \text{ es raíz de un max-heap válido dentro de
+  \texttt{arr[0..n)}}.
+\]
+\end{definition}
+
+\begin{proof}[Prueba del Teorema~\ref{thm:build}]
+Probamos el invariante en tres etapas.
+
+\textbf{Inicialización} ($i = \lfloor n/2 \rfloor - 1$, antes de la
+primera iteración). Los nodos con índice $j \geq \lfloor n/2 \rfloor$
+son hojas. Una hoja es trivialmente un max-heap de tamaño~1 (no tiene
+hijos que violen la propiedad). Para todo
+$j > \lfloor n/2 \rfloor - 1$: el nodo~$j$ es hoja $\to$ raíz de un
+max-heap válido. \checkmark
+
+\textbf{Mantenimiento} (iteración~$i$). Al inicio de la iteración,
+$\text{INV\_B}(i)$ dice que todos los nodos con índice $> i$ son
+raíces de max-heaps válidos. En particular, los hijos de~$i$ (índices
+$2i+1$ y $2i+2$, si existen) son raíces de max-heaps válidos.
+
+Se ejecuta \texttt{sift\_down(arr, n, i)}. La operación sift-down
+tiene la precondición de que ambos subárboles del nodo son max-heaps,
+que se cumple por el invariante. Después de sift-down, el subárbol
+enraizado en~$i$ es un max-heap válido.
+
+Al decrementar $i$ a $i-1$, el invariante $\text{INV\_B}(i-1)$ dice
+que todos los nodos con índice $> i - 1$ (es decir, $\geq i$) son
+raíces de max-heaps. Como acabamos de reparar~$i$, esto se cumple.
+\checkmark
+
+\textbf{Terminación} ($i = -1$). El bucle termina cuando $i < 0$. El
+invariante $\text{INV\_B}(-1)$ dice que todos los nodos con índice
+$> -1$ (es decir, todos los nodos $0, 1, \ldots, n{-}1$) son raíces
+de max-heaps válidos. En particular, el nodo~0 (la raíz) es raíz de
+un max-heap válido sobre \texttt{arr[0..n)}.
+\end{proof}
+
+% ===================================================================
+\section{Demostración 2: correctitud de la Fase 2 (extract)}
+% ===================================================================
+
+\begin{theorem}\label{thm:extract}
+Al terminar el bucle~E, \texttt{arr[0..n)} está ordenado en orden
+ascendente.
+\end{theorem}
+
+\begin{definition}[Invariante del bucle E]
+$\textbf{INV\_E}(i)$: al inicio de cada iteración con valor~$i$:
+\begin{enumerate}
+  \item[\textbf{E1.}] \texttt{arr[0..i+1)} es un max-heap de tamaño
+    $i+1$.
+  \item[\textbf{E2.}] \texttt{arr[i+1..n)} contiene los $n-(i+1)$
+    mayores elementos del array original, en orden ascendente.
+  \item[\textbf{E3.}] Todo elemento en \texttt{arr[0..i+1)} es $\leq$
+    todo elemento en \texttt{arr[i+1..n)}.
+\end{enumerate}
+\end{definition}
+
+\begin{proof}[Prueba del Teorema~\ref{thm:extract}]
+\textbf{Inicialización} ($i = n - 1$, antes de la primera iteración).
+\begin{itemize}
+  \item (E1): \texttt{arr[0..n)} es un max-heap de tamaño~$n$ (por la
+    Fase~1). \checkmark
+  \item (E2): \texttt{arr[n..n)} es vacío. La condición se satisface
+    trivialmente. \checkmark
+  \item (E3): No hay elementos en \texttt{arr[n..n)}, condición
+    trivial. \checkmark
+\end{itemize}
+
+\textbf{Mantenimiento} (iteración~$i$). Asumimos $\text{INV\_E}(i)$.
+
+\emph{Paso~1: \texttt{swap(\&arr[0], \&arr[i])}.} Por~(E1),
+\texttt{arr[0]} es el máximo de \texttt{arr[0..i+1)} (propiedad del
+max-heap: la raíz es el mayor). Por~(E3), este máximo es $\leq$ todos
+los elementos en \texttt{arr[i+1..n)}. Después del swap:
+\texttt{arr[i]} contiene el antiguo máximo de \texttt{arr[0..i+1)}, y
+\texttt{arr[0]} contiene el antiguo \texttt{arr[i]}.
+
+\emph{Paso~2: \texttt{sift\_down(arr, i, 0)}.} Después del swap,
+\texttt{arr[0..i)} puede no ser un max-heap (porque \texttt{arr[0]}
+fue reemplazado). Sin embargo, los subárboles de la raíz (enraizados
+en índices~1 y~2) siguen siendo max-heaps válidos: el swap solo afectó
+a \texttt{arr[0]} y \texttt{arr[i]}, y el nodo \texttt{arr[i]} ya no
+es parte de la zona de heap \texttt{[0..i)}. La precondición de
+sift-down se cumple. Después de \texttt{sift\_down(arr, i, 0)},
+\texttt{arr[0..i)} es un max-heap de tamaño~$i$.
+
+\emph{Verificación del invariante para $i - 1$:}
+\begin{itemize}
+  \item (E1): \texttt{arr[0..i)} = \texttt{arr[0..(i{-}1)+1)} es un
+    max-heap de tamaño $i = (i{-}1)+1$. \checkmark
+  \item (E2): \texttt{arr[i..n)} contiene el antiguo máximo de
+    \texttt{arr[0..i+1)} (ahora en \texttt{arr[i]}) seguido de
+    \texttt{arr[i+1..n)} (que por hipótesis contenía los $n-i-1$
+    mayores en orden). El antiguo máximo es, por~(E3), $\leq$ todos
+    los elementos en \texttt{arr[i+1..n)}, y es $\geq$ todos los de
+    \texttt{arr[0..i+1)}. Así, $\texttt{arr}[i] \leq \texttt{arr}[i+1]$,
+    y \texttt{arr[i..n)} contiene los $n-i$ mayores en orden
+    ascendente. \checkmark
+  \item (E3): El máximo de \texttt{arr[0..i)} (que es \texttt{arr[0]}
+    tras sift-down) era un elemento de \texttt{arr[0..i+1)} antes del
+    swap. Por~(E3) del paso anterior, era $\leq$ todos los de
+    \texttt{arr[i+1..n)}. Como \texttt{arr[i]} es el antiguo máximo de
+    \texttt{arr[0..i+1)}, tenemos
+    $\texttt{arr}[0] \leq \texttt{arr}[i] \leq \texttt{arr}[i+1]$.
+    \checkmark
+\end{itemize}
+
+\textbf{Terminación} ($i = 0$). El bucle termina cuando $i = 0$.
+El invariante $\text{INV\_E}(0)$ dice:
+\begin{itemize}
+  \item (E1): \texttt{arr[0..1)} es un max-heap de tamaño~1
+    (trivialmente cierto).
+  \item (E2): \texttt{arr[1..n)} contiene los $n-1$ mayores elementos
+    en orden ascendente.
+  \item (E3): $\texttt{arr}[0] \leq$ todos los elementos en
+    \texttt{arr[1..n)}.
+\end{itemize}
+
+Combinando: \texttt{arr[0]} es el menor elemento, y \texttt{arr[1..n)}
+son los $n-1$ mayores en orden ascendente. Por lo tanto,
+\texttt{arr[0..n)} está completamente ordenado.
+\end{proof}
+
+% ===================================================================
+\section{Demostración 3: complejidad
+  \texorpdfstring{$\Theta(n \log n)$}{Theta(n log n)}}
+% ===================================================================
+
+\begin{theorem}\label{thm:complexity}
+Heapsort tiene complejidad $\Theta(n \log n)$ en el peor caso.
+\end{theorem}
+
+\begin{proof}
+\emph{Cota superior.} La Fase~1 (build-heap) cuesta $O(n)$ (demostrado
+en T04/README\_EXTRA). La Fase~2 ejecuta $n-1$ extracciones, cada una
+con un swap $O(1)$ y un sift-down $O(\log i)$ (la zona de heap tiene
+tamaño~$i$):
+\[
+  T_2 = \sum_{i=1}^{n-1} O(\log i)
+  \leq \sum_{i=1}^{n-1} O(\log n) = O(n \log n)
+\]
+Total: $O(n) + O(n \log n) = O(n \log n)$.
+
+\emph{Cota inferior.} Heapsort es un algoritmo de ordenamiento basado
+en comparaciones. Por la cota inferior de $\Omega(n \log n)$ para
+ordenamiento por comparación (demostrada en C08/README\_EXTRA), todo
+algoritmo de este tipo requiere $\Omega(n \log n)$ comparaciones en el
+peor caso.
+
+Combinando: heapsort es $\Theta(n \log n)$ en el peor caso.
+\end{proof}
+
+\begin{corollary}[Complejidad en todos los casos]
+\mbox{}
+\end{corollary}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcp{6cm}}
+\toprule
+\textbf{Caso} & \textbf{Complejidad} & \textbf{Razón} \\
+\midrule
+Mejor    & $O(n \log n)$
+  & Incluso si el array ya está ordenado, la Fase~2 hace $n{-}1$
+    sift-downs \\
+Promedio & $O(n \log n)$
+  & Los sift-downs en la Fase~2 descienden $\Theta(\log n)$ niveles
+    en promedio \\
+Peor     & $O(n \log n)$
+  & Cada sift-down desciende a lo sumo
+    $\lfloor \log_2 n \rfloor$ niveles \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{remark}
+Heapsort es uno de los pocos algoritmos con la \emph{misma}
+complejidad asintótica en los tres casos.
+\end{remark}
+
+% ===================================================================
+\section{Demostración 4: heapsort es in-place}
+% ===================================================================
+
+\begin{theorem}\label{thm:inplace}
+Heapsort usa $O(1)$ memoria auxiliar.
+\end{theorem}
+
+\begin{proof}
+El algoritmo opera sobre el array de entrada sin alocar estructuras
+adicionales. Las únicas variables auxiliares son:
+\begin{itemize}
+  \item Índices del bucle ($i$, \texttt{index}, \texttt{left},
+    \texttt{right}, \texttt{largest}): $O(1)$.
+  \item Variable temporal para swap: $O(1)$.
+\end{itemize}
+
+No se usan arrays auxiliares ni recursión (sift-down es iterativo). La
+versión recursiva de sift-down usaría $O(\log n)$ stack, pero la
+versión iterativa (con \texttt{while}) es $O(1)$.
+\end{proof}
+
+% ===================================================================
+\section{Resumen de resultados}
+% ===================================================================
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llp{5.5cm}}
+\toprule
+\textbf{Resultado} & \textbf{Técnica} & \textbf{Clave} \\
+\midrule
+Fase~1 produce max-heap
+  & Invariante de bucle~B
+  & Hojas son heaps triviales, sift-down repara subárboles \\
+Fase~2 produce array ordenado
+  & Invariante de bucle~E (3 cláusulas)
+  & Máximo del heap va a la zona ordenada \\
+Complejidad $\Theta(n \log n)$
+  & Suma + cota inferior
+  & $O(n) + O(n\log n)$; $\Omega(n\log n)$ por comparaciones \\
+In-place $O(1)$
+  & Análisis de variables
+  & Solo índices y temporal de swap \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

@@ -1,0 +1,23 @@
+# Makefile CON dependencias automaticas -- resuelve el bug de headers.
+CC       = gcc
+CFLAGS   = -Wall -Wextra -std=c11
+DEPFLAGS = -MMD -MP
+
+SRCS = main.c engine.c logger.c
+OBJS = $(SRCS:.c=.o)
+DEPS = $(OBJS:.o=.d)
+
+all: app
+
+app: $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+
+%.o: %.c
+	$(CC) $(CFLAGS) $(DEPFLAGS) -c -o $@ $<
+
+clean:
+	$(RM) app $(OBJS) $(DEPS)
+
+.PHONY: all clean
+
+-include $(DEPS)

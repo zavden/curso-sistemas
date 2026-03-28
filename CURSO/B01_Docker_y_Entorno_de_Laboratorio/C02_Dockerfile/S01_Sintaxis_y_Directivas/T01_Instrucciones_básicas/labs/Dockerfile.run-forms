@@ -1,0 +1,13 @@
+FROM alpine:latest
+
+ENV APP_VERSION="2.0"
+
+# Shell form: /bin/sh -c wraps the command
+# The shell expands $APP_VERSION before echo runs
+RUN echo "Shell form: APP_VERSION=$APP_VERSION"
+
+# Exec form: command runs directly, NO shell
+# $APP_VERSION is passed as a literal string
+RUN ["echo", "Exec form: APP_VERSION=$APP_VERSION"]
+
+CMD ["echo", "Build complete"]

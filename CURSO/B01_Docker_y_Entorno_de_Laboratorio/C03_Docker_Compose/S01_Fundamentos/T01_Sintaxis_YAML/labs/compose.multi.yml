@@ -1,0 +1,9 @@
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+
+  api:
+    image: alpine:latest
+    command: sh -c 'while true; do echo "API running at $$(date)"; sleep 5; done'

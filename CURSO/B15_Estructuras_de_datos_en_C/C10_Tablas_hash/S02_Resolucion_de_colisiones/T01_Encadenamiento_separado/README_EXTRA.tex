@@ -1,0 +1,276 @@
+\documentclass[11pt, letterpaper]{article}
+
+% --- Idioma y codificación ---
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% --- Matemáticas ---
+\usepackage{amsmath, amssymb, amsthm}
+
+% --- Formato ---
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue!70!black}
+
+% --- Entornos de teoremas ---
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolario}
+\theoremstyle{remark}
+\newtheorem{remark}{Observación}[section]
+
+\title{%
+  T01 --- Demostración formal:\\[4pt]
+  Costos de búsqueda en encadenamiento separado
+}
+\author{Curso Linux--C--Rust --- B15 Estructuras de datos en C}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+% ===================================================================
+\section{Modelo}
+% ===================================================================
+
+\begin{definition}
+Array $T[0..m{-}1]$ con encadenamiento separado: cada bucket $T[j]$
+contiene una lista enlazada. Nuevos elementos se insertan al
+\textbf{inicio} de la lista (prepend). Bajo SUHA:
+$\Pr[h(k) = j] = 1/m$ para toda clave~$k$, independientemente de las
+demás. Notación: $n$ elementos, $m$ buckets,
+$\alpha = n/m$, $L_j$ = longitud de la cadena en~$T[j]$.
+Del T03: $E[L_j] = \alpha$ para todo~$j$.
+\end{definition}
+
+% ===================================================================
+\section{Demostración 1: búsqueda fallida
+  \texorpdfstring{$\Theta(1 + \alpha)$}{Theta(1 + alpha)}}
+% ===================================================================
+
+\begin{theorem}\label{thm:miss}
+El número esperado de comparaciones en una búsqueda fallida es
+exactamente $\alpha$.
+\end{theorem}
+
+\begin{proof}
+Sea $k$ una clave que no está en la tabla. La búsqueda calcula
+$j = h(k)$ en $O(1)$ y recorre \textbf{toda} la lista en $T[j]$,
+comparando $k$ con cada elemento sin encontrarlo. El número de
+comparaciones es exactamente~$L_j$.
+
+Bajo SUHA, $h(k)$ es uniformemente aleatorio e independiente de los
+$n$ elementos ya insertados:
+\[
+  E[\text{comparaciones}]
+  = E[L_{h(k)}]
+  = \sum_{j=0}^{m-1} \Pr[h(k) = j] \cdot E[L_j]
+  = \sum_{j=0}^{m-1} \frac{1}{m} \cdot \alpha
+  = \alpha
+\]
+
+Incluyendo el costo $O(1)$ de calcular el hash y acceder al bucket:
+\[
+  T_{\text{miss}} = \Theta(1 + \alpha) \qedhere
+\]
+\end{proof}
+
+% ===================================================================
+\section{Demostración 2: búsqueda exitosa
+  \texorpdfstring{$\Theta(1 + \alpha/2)$}{Theta(1 + alpha/2)}}
+% ===================================================================
+
+\begin{theorem}\label{thm:hit}
+El número esperado de comparaciones en una búsqueda exitosa es:
+\[
+  1 + \frac{\alpha}{2} - \frac{1}{2m}
+\]
+\end{theorem}
+
+\begin{proof}
+Supongamos que los $n$ elementos fueron insertados en orden
+$k_1, k_2, \ldots, k_n$. Buscamos un elemento elegido uniformemente
+al azar entre los $n$ almacenados.
+
+\textbf{Paso 1: comparaciones para encontrar $k_i$.} El elemento
+$k_i$ fue el $i$-ésimo insertado. Los elementos insertados
+\textbf{después} de~$k_i$ en el \textbf{mismo bucket} se colocan
+delante de~$k_i$ (por el prepend). El número de comparaciones es:
+\[
+  C_i = 1 + \sum_{r=i+1}^{n} Y_{ri}
+\]
+donde $Y_{ri} = \mathbf{1}[h(k_r) = h(k_i)]$. El $1$ cuenta la
+comparación final con~$k_i$.
+
+\textbf{Paso 2: esperanza de $C_i$.} Por SUHA,
+$\Pr[h(k_r) = h(k_i)] = 1/m$:
+\[
+  E[C_i] = 1 + \sum_{r=i+1}^{n} \frac{1}{m} = 1 + \frac{n - i}{m}
+\]
+
+\textbf{Paso 3: promedio sobre todos los elementos.}
+\begin{align*}
+  E[\text{comparaciones}]
+  &= \frac{1}{n} \sum_{i=1}^{n} E[C_i]
+   = \frac{1}{n} \sum_{i=1}^{n} \left(1 + \frac{n - i}{m}\right) \\
+  &= 1 + \frac{1}{nm} \sum_{i=1}^{n} (n - i)
+   = 1 + \frac{1}{nm} \cdot \frac{n(n{-}1)}{2}
+   = 1 + \frac{n-1}{2m}
+\end{align*}
+
+Expresando en función de $\alpha = n/m$:
+\[
+  1 + \frac{n-1}{2m} = 1 + \frac{\alpha}{2} - \frac{1}{2m}
+  \approx 1 + \frac{\alpha}{2}
+\]
+
+Incluyendo el costo $O(1)$ de hash y acceso:
+$T_{\text{hit}} = \Theta(1 + \alpha/2)$.
+\end{proof}
+
+% ===================================================================
+\section{Demostración 3: ambos costos son $O(1)$ cuando
+  \texorpdfstring{$\alpha = O(1)$}{alpha = O(1)}}
+% ===================================================================
+
+\begin{theorem}\label{thm:constant}
+Si la tabla se redimensiona para mantener
+$\alpha \leq \alpha_{\max}$ (constante fija), entonces búsqueda,
+inserción y eliminación son $O(1)$ en esperanza.
+\end{theorem}
+
+\begin{proof}
+Si $\alpha \leq \alpha_{\max}$ en todo momento:
+\begin{itemize}
+  \item Búsqueda fallida:
+    $\Theta(1 + \alpha) \leq \Theta(1 + \alpha_{\max}) = O(1)$.
+  \item Búsqueda exitosa:
+    $\Theta(1 + \alpha/2) \leq \Theta(1 + \alpha_{\max}/2) = O(1)$.
+  \item Inserción (con verificación de duplicados): dominada por
+    búsqueda fallida: $O(1)$.
+  \item Eliminación: dominada por búsqueda exitosa: $O(1)$.
+\end{itemize}
+El costo de redimensionar es $O(n)$ por resize, pero se amortiza a
+$O(1)$ por inserción (demostrado en T05).
+\end{proof}
+
+\begin{remark}
+Esto es lo que hace que las tablas hash sean $O(1)$ en la práctica:
+no es que las operaciones sean $O(1)$ para cualquier~$\alpha$, sino
+que el redimensionamiento mantiene $\alpha$ acotado.
+\end{remark}
+
+% ===================================================================
+\section{Demostración 4: la búsqueda exitosa es estrictamente más
+  barata que la fallida}
+% ===================================================================
+
+\begin{theorem}\label{thm:hit-cheaper}
+Para todo $\alpha > 0$:
+$T_{\text{hit}} < T_{\text{miss}}$.
+\end{theorem}
+
+\begin{proof}
+Comparamos los costos totales (hash + recorrido):
+\[
+  T_{\text{miss}} = 1 + \alpha, \qquad
+  T_{\text{hit}} = 1 + \frac{\alpha}{2} - \frac{1}{2m}
+\]
+
+$T_{\text{hit}} < T_{\text{miss}}$ equivale a:
+\[
+  1 + \frac{\alpha}{2} - \frac{1}{2m} < 1 + \alpha
+  \iff -\frac{1}{2m} < \frac{\alpha}{2}
+\]
+que vale siempre que $\alpha > 0$. \checkmark
+\end{proof}
+
+\begin{remark}
+En una búsqueda exitosa, encontramos el elemento antes de llegar al
+final de la lista (en promedio, a mitad de camino). En una fallida,
+recorremos toda la lista.
+\end{remark}
+
+% ===================================================================
+\section{Demostración 5: prepend $\equiv$ append para
+  \texorpdfstring{$C_{\text{hit}}$}{C\_hit}}
+% ===================================================================
+
+\begin{theorem}\label{thm:prepend-append}
+Si los nuevos elementos se insertan al \textbf{final} de la cadena
+(append) en vez de al inicio, el costo de búsqueda exitosa es el
+mismo:
+\[
+  E[C_{\text{hit}}^{\text{append}}] = 1 + \frac{n-1}{2m}
+\]
+\end{theorem}
+
+\begin{proof}
+Con inserción al final, el elemento~$k_i$ está precedido por los
+elementos insertados \textbf{antes} que~$k_i$ en el mismo bucket:
+\[
+  C_i^{\text{append}} = 1 + \sum_{r=1}^{i-1} Y_{ri}'
+\]
+donde $Y_{ri}' = \mathbf{1}[h(k_r) = h(k_i)]$.
+\[
+  E[C_i^{\text{append}}] = 1 + \frac{i - 1}{m}
+\]
+
+Promediando:
+\[
+  E[C_{\text{hit}}^{\text{append}}]
+  = \frac{1}{n}\sum_{i=1}^{n}\left(1 + \frac{i-1}{m}\right)
+  = 1 + \frac{1}{nm}\sum_{i=1}^{n}(i{-}1)
+  = 1 + \frac{1}{nm} \cdot \frac{n(n{-}1)}{2}
+  = 1 + \frac{n-1}{2m}
+\]
+
+Idéntico al caso prepend.
+\end{proof}
+
+\begin{remark}
+La política de inserción (prepend vs append) no afecta el costo
+esperado de búsqueda exitosa. En promedio, el elemento buscado está a
+mitad de la lista independientemente del orden, ya que buscamos un
+elemento uniformemente aleatorio. La clave algebraica es que
+$\sum_{i=1}^{n}(n{-}i) = \sum_{i=1}^{n}(i{-}1) = n(n{-}1)/2$.
+\end{remark}
+
+% ===================================================================
+\section{Resumen de resultados}
+% ===================================================================
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llp{5.5cm}}
+\toprule
+\textbf{Resultado} & \textbf{Técnica} & \textbf{Clave} \\
+\midrule
+$C_{\text{miss}} = \alpha$
+  & $E[L_{h(k)}] = \alpha$
+  & Recorrer lista completa \\
+$C_{\text{hit}} = 1 + (n{-}1)/2m$
+  & Contar posteriores en mismo bucket
+  & $\Pr[h(k_r){=}h(k_i)] = 1/m$, sumar $n{-}i$ \\
+$O(1)$ con $\alpha = O(1)$
+  & Redimensionamiento
+  & $\alpha$ acotado $\Rightarrow$ costos acotados \\
+$T_{\text{hit}} < T_{\text{miss}}$ siempre
+  & Comparación directa
+  & Encontrar antes de fin de lista \\
+Prepend $\equiv$ append
+  & Simetría de la suma
+  & $\sum(n{-}i) = \sum(i{-}1) = n(n{-}1)/2$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

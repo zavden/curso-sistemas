@@ -1,0 +1,25 @@
+services:
+  writer:
+    image: alpine:latest
+    volumes:
+      - shared:/data
+    command: >
+      sh -c '
+        while true; do
+          echo "<h1>Generated at $$(date)</h1>" > /data/index.html
+          echo "Wrote index.html at $$(date)"
+          sleep 5
+        done
+      '
+
+  reader:
+    image: nginx:alpine
+    volumes:
+      - shared:/usr/share/nginx/html:ro
+    ports:
+      - "8080:80"
+    depends_on:
+      - writer
+
+volumes:
+  shared:

@@ -1,0 +1,13 @@
+FROM alpine:latest
+
+WORKDIR /app/data
+
+# Write data BEFORE declaring VOLUME
+RUN echo "this data will be preserved" > /app/data/important.txt
+
+# VOLUME declared AFTER the data exists in the image
+# The initial copy behavior will populate the volume
+# with the existing content from the image layer.
+VOLUME /app/data
+
+CMD ["cat", "/app/data/important.txt"]

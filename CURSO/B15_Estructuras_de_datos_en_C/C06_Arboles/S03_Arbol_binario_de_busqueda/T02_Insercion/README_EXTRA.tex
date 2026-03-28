@@ -1,0 +1,270 @@
+\documentclass[11pt, letterpaper]{article}
+
+% --- Idioma y codificación ---
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% --- Matemáticas ---
+\usepackage{amsmath, amssymb, amsthm}
+
+% --- Formato ---
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue!70!black}
+
+% --- Código ---
+\lstset{
+  language=C, basicstyle=\ttfamily\small,
+  keywordstyle=\bfseries, commentstyle=\itshape,
+  numbers=left, numberstyle=\tiny, frame=single,
+  breaklines=true
+}
+
+% --- Entornos de teoremas ---
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolario}
+\theoremstyle{remark}
+\newtheorem{remark}{Observación}[section]
+
+\title{%
+  T02 --- Demostración formal:\\[4pt]
+  La inserción preserva la propiedad BST
+}
+\author{Curso Linux--C--Rust --- B15 Estructuras de datos en C}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+% ===================================================================
+\section{Definiciones formales}
+% ===================================================================
+
+\begin{definition}[Propiedad BST]
+Un árbol binario $T$ satisface la propiedad BST si para todo nodo $x$
+en $T$:
+\[
+  \forall\, y \in \text{sub\_izq}(x):\; \text{key}(y) < \text{key}(x)
+  \qquad\text{y}\qquad
+  \forall\, z \in \text{sub\_der}(x):\; \text{key}(z) > \text{key}(x)
+\]
+\end{definition}
+
+\begin{definition}[Rango válido]
+Cada nodo $x$ tiene un rango $(lo, hi)$ tal que $lo < \text{key}(x) < hi$.
+Los subárboles heredan rangos restringidos:
+\begin{itemize}
+  \item Hijo izquierdo: rango $(lo, \text{key}(x))$.
+  \item Hijo derecho: rango $(\text{key}(x), hi)$.
+\end{itemize}
+La raíz tiene rango $(-\infty, +\infty)$.
+\end{definition}
+
+\begin{definition}[BST válido]
+$T$ es un BST válido si $T$ es vacío (NULL), o $T$ satisface la
+propiedad BST y el recorrido inorden produce una secuencia
+estrictamente creciente.
+\end{definition}
+
+Asumimos claves únicas: la inserción ignora valores ya presentes.
+
+% ===================================================================
+\section{Demostración 1: inserción iterativa (invariante de bucle)}
+% ===================================================================
+
+Consideramos la inserción iterativa con puntero a puntero:
+
+\begin{lstlisting}
+void bst_insert_pp(TreeNode **root, int value) {
+    while (*root) {
+        if (value < (*root)->data)
+            root = &(*root)->left;
+        else if (value > (*root)->data)
+            root = &(*root)->right;
+        else
+            return;  // duplicado
+    }
+    *root = create_node(value);
+}
+\end{lstlisting}
+
+\begin{theorem}\label{thm:iterative}
+Si el árbol $T$ es un BST válido antes de llamar a
+\texttt{bst\_insert\_pp(\&T, v)}, entonces es un BST válido después.
+\end{theorem}
+
+\begin{definition}[Invariante de bucle]
+\begin{align}
+  \textbf{(I1)}&\quad \text{\texttt{*root} es un subárbol del BST original } T. \notag\\
+  \textbf{(I2)}&\quad lo < v < hi, \text{ donde } (lo, hi) \text{ es el rango válido de la posición de \texttt{root}.} \notag\\
+  \textbf{(I3)}&\quad \text{Los nodos del BST original no han sido modificados.} \notag
+\end{align}
+\end{definition}
+
+\begin{proof}[Prueba del Teorema~\ref{thm:iterative}]
+Probamos el invariante en tres etapas.
+
+\textbf{Inicialización.} Al entrar, \texttt{root = \&T}.
+\begin{itemize}
+  \item (I1): \texttt{*root} $= T$, el árbol completo. \checkmark
+  \item (I2): Rango de la raíz $= (-\infty, +\infty)$, y $-\infty < v < +\infty$. \checkmark
+  \item (I3): Ninguna operación ejecutada. \checkmark
+\end{itemize}
+
+\textbf{Mantenimiento.} Supongamos $\text{INV}(\texttt{root}, lo, hi)$
+con $\texttt{*root} \neq \text{NULL}$. Sea $x = \texttt{*root}$ con
+clave $k$.
+
+\emph{Caso A: $v < k$.} Se ejecuta \texttt{root = \&(x->left)}.
+Nuevo rango: $(lo, k)$.
+\begin{itemize}
+  \item (I1): \texttt{*root} es \texttt{x->left}, subárbol del BST. \checkmark
+  \item (I2): $lo < v$ (hipótesis) y $v < k$, así que $lo < v < k$. \checkmark
+  \item (I3): Solo se reasigna el puntero local. \checkmark
+\end{itemize}
+
+\emph{Caso B: $v > k$.} Simétrico. Nuevo rango: $(k, hi)$, con
+$k < v < hi$. \checkmark
+
+\emph{Caso C: $v = k$.} Se retorna sin modificar el árbol. \checkmark
+
+\textbf{Terminación.} El bucle termina cuando $\texttt{*root} = \text{NULL}$.
+Por (I2), $lo < v < hi$. Se ejecuta $\texttt{*root} = \text{create\_node}(v)$,
+creando una hoja con clave $v$.
+
+El resultado es un BST válido porque:
+\begin{enumerate}
+  \item La hoja $v$ tiene subárboles vacíos: satisface la propiedad BST
+    trivialmente.
+  \item El padre de $v$: si $v$ es hijo izquierdo, $v < \text{key}(\text{padre})$;
+    si derecho, $v > \text{key}(\text{padre})$. Correcto por (I2).
+  \item Los ancestros: por (I2), $v$ está dentro del rango heredado de
+    cada ancestro. Por (I3), sus relaciones de orden no cambian.
+  \item Nodos fuera del camino: no se ven afectados.
+\end{enumerate}
+\end{proof}
+
+\begin{lemma}[Terminación del bucle]\label{lem:loop-term}
+El bucle termina en a lo sumo $h + 1$ iteraciones, donde $h$ es la
+altura del árbol.
+\end{lemma}
+
+\begin{proof}
+En cada iteración, \texttt{root} desciende un nivel (profundidad
+$d \to d+1$). La profundidad máxima es $h$; tras $h$ descensos se
+alcanza una hoja cuyo hijo es NULL.
+\end{proof}
+
+% ===================================================================
+\section{Demostración 2: inserción recursiva (inducción estructural)}
+% ===================================================================
+
+\begin{lstlisting}
+TreeNode *bst_insert(TreeNode *root, int value) {
+    if (!root) return create_node(value);
+    if (value < root->data)
+        root->left = bst_insert(root->left, value);
+    else if (value > root->data)
+        root->right = bst_insert(root->right, value);
+    return root;
+}
+\end{lstlisting}
+
+\begin{theorem}\label{thm:recursive}
+Si $T$ es un BST válido con rango $(lo, hi)$ y $lo < v < hi$, entonces
+\texttt{bst\_insert(T, v)} retorna un BST válido con rango $(lo, hi)$.
+\end{theorem}
+
+\begin{proof}
+Por inducción estructural sobre $T$.
+
+\textbf{Base ($T = \text{NULL}$).} Se retorna una hoja con clave $v$.
+Sin hijos, satisface la propiedad BST trivialmente. El rango
+$(lo, hi)$ con $lo < v < hi$ se cumple. \checkmark
+
+\textbf{Paso inductivo ($T$ no vacío).} Sea $r$ la raíz con clave $k$
+y rango $(lo, hi)$.
+
+\emph{Hipótesis inductiva}: para cualquier subárbol $S$ de $T$ con
+rango $(lo', hi')$ y $lo' < v < hi'$, \texttt{bst\_insert(S, v)}
+retorna un BST válido con rango $(lo', hi')$.
+
+\emph{Caso $v < k$:} Se llama \texttt{bst\_insert(root->left, v)}.
+El subárbol izquierdo tiene rango $(lo, k)$. Como $lo < v$ y $v < k$:
+$lo < v < k$. Por hipótesis inductiva, el resultado es un BST válido
+con rango $(lo, k)$. El subárbol derecho no cambia. La raíz $r$ sigue
+satisfaciendo la propiedad BST. \checkmark
+
+\emph{Caso $v > k$:} Simétrico, con rango $(k, hi)$. \checkmark
+
+\emph{Caso $v = k$:} Se retorna \texttt{root} sin modificación. \checkmark
+\end{proof}
+
+% ===================================================================
+\section{Demostración 3: inorden correcto tras la inserción}
+% ===================================================================
+
+\begin{theorem}\label{thm:inorder}
+Sea $T$ un BST con recorrido inorden $[a_1, a_2, \ldots, a_n]$.
+Después de insertar $v \notin T$, el inorden es
+$[a_1, \ldots, a_j, v, a_{j+1}, \ldots, a_n]$ donde $a_j < v < a_{j+1}$.
+\end{theorem}
+
+\begin{proof}
+La inserción coloca $v$ como hoja. En el recorrido inorden, una hoja
+aparece entre su antecesor y sucesor inorden.
+
+En el camino de la raíz a la hoja $v$:
+\begin{itemize}
+  \item Si se desciende a la izquierda en un nodo $x$ (porque $v < \text{key}(x)$),
+    $x$ es candidato a \emph{sucesor} inorden de $v$.
+  \item Si se desciende a la derecha ($v > \text{key}(x)$), $x$ es
+    candidato a \emph{antecesor} inorden de $v$.
+\end{itemize}
+
+El antecesor inorden es el último nodo donde se fue a la derecha
+(el más profundo con $k < v$); el sucesor es el último donde se fue a
+la izquierda.
+
+Como $v$ se inserta como hoja sin hijos, no altera el orden relativo
+de los nodos existentes. El inorden del nuevo árbol es el anterior con
+$v$ insertado en su posición ordenada.
+\end{proof}
+
+% ===================================================================
+\section{Resumen de resultados}
+% ===================================================================
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llp{6cm}}
+\toprule
+\textbf{Resultado} & \textbf{Técnica} & \textbf{Componentes} \\
+\midrule
+Inserción iterativa preserva BST
+  & Invariante de bucle
+  & Inicialización, mantenimiento (3 casos), terminación \\
+Inserción recursiva preserva BST
+  & Inducción estructural
+  & Base (NULL), paso (3 casos) \\
+Inorden correcto tras inserción
+  & Antecesor/sucesor inorden
+  & Propiedad del camino raíz $\to$ hoja \\
+Terminación del bucle
+  & Función de decrecimiento
+  & Profundidad creciente, acotada por $h$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

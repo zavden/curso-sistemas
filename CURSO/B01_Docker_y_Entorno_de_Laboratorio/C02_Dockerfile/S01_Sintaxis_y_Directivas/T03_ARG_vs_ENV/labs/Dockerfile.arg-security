@@ -1,0 +1,6 @@
+FROM alpine:latest
+
+ARG SECRET_TOKEN=default-token
+RUN echo "Setup complete (token used internally)" > /setup.txt
+
+CMD ["cat", "/setup.txt"]

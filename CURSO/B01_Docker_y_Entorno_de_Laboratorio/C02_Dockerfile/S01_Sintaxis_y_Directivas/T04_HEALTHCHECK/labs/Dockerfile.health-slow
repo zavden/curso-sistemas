@@ -1,0 +1,11 @@
+FROM alpine:latest
+
+COPY slow-app.sh /app.sh
+RUN chmod +x /app.sh
+
+# start-period=15s gives the app time to initialize (12s)
+# Without start-period, the container would be marked unhealthy before ready
+HEALTHCHECK --interval=3s --timeout=2s --start-period=15s --retries=2 \
+  CMD [ -f /tmp/healthy ] || exit 1
+
+CMD ["/app.sh"]

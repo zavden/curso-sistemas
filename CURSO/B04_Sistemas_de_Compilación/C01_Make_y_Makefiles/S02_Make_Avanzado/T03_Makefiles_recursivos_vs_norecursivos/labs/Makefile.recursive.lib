@@ -1,0 +1,17 @@
+# lib/Makefile (recursive version)
+CC     := gcc
+CFLAGS := -Wall -Wextra -std=c17
+
+TARGET := libcalc.a
+SRCS   := calc.c
+OBJS   := $(SRCS:.c=.o)
+
+$(TARGET): $(OBJS)
+	$(AR) rcs $@ $^
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+.PHONY: clean
+clean:
+	$(RM) $(OBJS) $(TARGET)

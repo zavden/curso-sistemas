@@ -1,0 +1,13 @@
+FROM debian:bookworm
+RUN echo '#!/bin/bash' > /log-generator.sh \
+    && echo 'counter=1' >> /log-generator.sh \
+    && echo 'while true; do' >> /log-generator.sh \
+    && echo '    echo "[$(date +%H:%M:%S)] Event #${counter}: processing request"' >> /log-generator.sh \
+    && echo '    if [ $((counter % 5)) -eq 0 ]; then' >> /log-generator.sh \
+    && echo '        echo "[$(date +%H:%M:%S)] WARNING: high latency detected" >&2' >> /log-generator.sh \
+    && echo '    fi' >> /log-generator.sh \
+    && echo '    counter=$((counter + 1))' >> /log-generator.sh \
+    && echo '    sleep 2' >> /log-generator.sh \
+    && echo 'done' >> /log-generator.sh \
+    && chmod +x /log-generator.sh
+CMD ["/log-generator.sh"]

@@ -1,0 +1,15 @@
+# Stage 1: BUILD — has all compilation tools
+FROM debian:bookworm AS builder
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc libc6-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+COPY hello.c .
+RUN gcc -static -o hello hello.c
+
+# Stage 2: RUNTIME — only the binary, nothing else
+FROM debian:bookworm-slim
+COPY --from=builder /src/hello /usr/local/bin/hello
+CMD ["hello"]

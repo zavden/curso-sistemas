@@ -1,0 +1,96 @@
+# Makefile.project -- Proyecto completo usando funciones de Make
+#
+# Uso: make -f Makefile.project
+#
+# Estructura esperada:
+#   src/main.c
+#   src/core/engine.c  src/core/parser.c
+#   src/net/client.c   src/net/server.c
+#   include/*.h
+#   build/              (generado)
+
+# --- Herramientas ---
+CC  := gcc
+RM  := rm -f
+
+# --- Directorios ---
+SRC_DIR   := src
+INC_DIR   := include
+BUILD_DIR := build
+
+# --- Subdirectorios de fuentes ---
+SRC_SUBDIRS := core net
+
+# --- Descubrimiento automatico (wildcard + foreach) ---
+SRCS := $(wildcard $(SRC_DIR)/*.c) \
+        $(foreach dir,$(SRC_SUBDIRS),$(wildcard $(SRC_DIR)/$(dir)/*.c))
+
+# --- Objetos (patsubst) ---
+OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
+
+# --- Directorios de build necesarios (sort elimina duplicados) ---
+BUILD_DIRS := $(sort $(dir $(OBJS)))
+
+# --- Flags ---
+CFLAGS   := -std=c11 -Wall -Wextra -Wpedantic
+CPPFLAGS := -I$(INC_DIR)
+
+# --- Informacion del entorno (shell) ---
+OS   := $(shell uname -s)
+ARCH := $(shell uname -m)
+DATE := $(shell date +%Y-%m-%d)
+
+# --- Condicional con if ---
+DEBUG ?=
+CFLAGS += $(if $(DEBUG),-g -O0 -DDEBUG,-O2 -DNDEBUG)
+
+# --- Funcion reutilizable (call) ---
+log = @echo "[$(1)] $(2)"
+
+# --- Validacion (error/warning/info) ---
+$(info === Build Configuration ===)
+$(info CC     = $(CC))
+$(info CFLAGS = $(CFLAGS))
+$(info OS     = $(OS))
+$(info ARCH   = $(ARCH))
+$(info DATE   = $(DATE))
+$(info SRCS   = $(words $(SRCS)) files)
+$(info ============================)
+$(info )
+
+ifeq ($(strip $(SRCS)),)
+  $(error No source files found in $(SRC_DIR)/)
+endif
+
+# --- Target principal ---
+TARGET := funcapp
+
+.PHONY: all clean info
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(call log,LD,$@)
+	$(CC) $(LDFLAGS) $^ -o $@
+
+# --- Regla de compilacion ---
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIRS)
+	$(call log,CC,$<)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+# --- Crear directorios de build ---
+$(BUILD_DIRS):
+	@mkdir -p $@
+
+# --- Mostrar variables ---
+info:
+	@echo "Sources:"
+	@$(foreach src,$(SRCS),echo "  $(src)";)
+	@echo "Objects:"
+	@$(foreach obj,$(OBJS),echo "  $(obj)";)
+	@echo "Build dirs:"
+	@$(foreach d,$(BUILD_DIRS),echo "  $(d)";)
+
+# --- Limpieza ---
+clean:
+	$(RM) -r $(BUILD_DIR) $(TARGET)

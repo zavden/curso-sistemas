@@ -1,0 +1,9 @@
+services:
+  app:
+    image: alpine:latest
+    volumes:
+      - app-data:/data
+    command: sh -c 'echo "Written at $$(date)" >> /data/log.txt && cat /data/log.txt && sleep 3600'
+
+volumes:
+  app-data:

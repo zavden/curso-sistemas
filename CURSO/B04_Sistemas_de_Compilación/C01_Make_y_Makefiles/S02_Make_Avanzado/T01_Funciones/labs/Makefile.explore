@@ -1,0 +1,129 @@
+# Makefile.explore -- Explorar funciones de Make una por una
+#
+# Uso: make -f Makefile.explore
+#
+# Este Makefile no compila nada. Solo imprime el resultado
+# de cada funcion para que observes como transforma datos.
+
+# --- Preparacion: estructura de directorios simulada ---
+# Los archivos .c y .h ya existen en el directorio actual.
+# Este Makefile asume la siguiente organizacion:
+#
+#   src/core/engine.c  src/core/parser.c
+#   src/net/client.c   src/net/server.c
+#   src/main.c
+#   include/app.h      include/engine.h  include/parser.h
+#   include/client.h   include/server.h
+
+# ============================================================
+# Parte 1: wildcard
+# ============================================================
+
+SRCS_CORE := $(wildcard src/core/*.c)
+SRCS_NET  := $(wildcard src/net/*.c)
+SRCS_TOP  := $(wildcard src/*.c)
+ALL_SRCS  := $(SRCS_TOP) $(SRCS_CORE) $(SRCS_NET)
+HEADERS   := $(wildcard include/*.h)
+
+$(info === wildcard ===)
+$(info SRCS_CORE = $(SRCS_CORE))
+$(info SRCS_NET  = $(SRCS_NET))
+$(info SRCS_TOP  = $(SRCS_TOP))
+$(info ALL_SRCS  = $(ALL_SRCS))
+$(info HEADERS   = $(HEADERS))
+$(info )
+
+# ============================================================
+# Parte 2: patsubst
+# ============================================================
+
+OBJS := $(patsubst src/%.c,build/%.o,$(ALL_SRCS))
+
+$(info === patsubst ===)
+$(info ALL_SRCS -> OBJS:)
+$(info   $(ALL_SRCS))
+$(info   $(OBJS))
+$(info )
+
+# ============================================================
+# Parte 3: filter y filter-out
+# ============================================================
+
+CORE_SRCS := $(filter src/core/%,$(ALL_SRCS))
+NET_SRCS  := $(filter src/net/%,$(ALL_SRCS))
+NO_MAIN   := $(filter-out src/main.c,$(ALL_SRCS))
+
+$(info === filter / filter-out ===)
+$(info CORE_SRCS = $(CORE_SRCS))
+$(info NET_SRCS  = $(NET_SRCS))
+$(info NO_MAIN   = $(NO_MAIN))
+$(info )
+
+# ============================================================
+# Parte 4: foreach
+# ============================================================
+
+SUBDIRS   := core net
+MOD_SRCS  := $(foreach dir,$(SUBDIRS),$(wildcard src/$(dir)/*.c))
+INC_FLAGS := $(foreach dir,$(SUBDIRS),-Iinclude)
+
+$(info === foreach ===)
+$(info MOD_SRCS  = $(MOD_SRCS))
+$(info INC_FLAGS = $(INC_FLAGS))
+$(info )
+
+# ============================================================
+# Parte 5: shell
+# ============================================================
+
+FILE_COUNT := $(shell ls src/core/*.c src/net/*.c src/*.c 2>/dev/null | wc -l)
+KERNEL     := $(shell uname -s)
+ARCH       := $(shell uname -m)
+
+$(info === shell ===)
+$(info FILE_COUNT = $(FILE_COUNT))
+$(info KERNEL     = $(KERNEL))
+$(info ARCH       = $(ARCH))
+$(info )
+
+# ============================================================
+# Parte 6: call
+# ============================================================
+
+src_to_obj = $(patsubst src/%.c,build/%.o,$(1))
+log = [$(1)] $(2)
+
+$(info === call ===)
+$(info src_to_obj(src/core/engine.c) = $(call src_to_obj,src/core/engine.c))
+$(info log(INFO,Build started) = $(call log,INFO,Build started))
+$(info )
+
+# ============================================================
+# Parte 7: if
+# ============================================================
+
+DEBUG :=
+MODE_FLAG := $(if $(DEBUG),-g -O0,-O2)
+
+$(info === if ===)
+$(info DEBUG is empty -> MODE_FLAG = $(MODE_FLAG))
+$(info )
+
+# ============================================================
+# Parte 8: error / warning / info
+# ============================================================
+
+# info ya se ha usado en todo este archivo.
+# warning y error se demuestran en Makefile.validate.
+
+$(info === info/warning/error ===)
+$(info info:    imprime sin prefijo de archivo/linea -- usado en todo este Makefile)
+$(info warning: imprime con prefijo archivo:linea y continua)
+$(info error:   imprime con prefijo archivo:linea y ABORTA Make)
+$(info Ver Makefile.validate para demostracion de warning y error.)
+$(info )
+
+# --- Target por defecto (no hace nada) ---
+.PHONY: explore
+explore:
+	@echo "Exploracion completada. Toda la salida fue generada por funciones de Make."

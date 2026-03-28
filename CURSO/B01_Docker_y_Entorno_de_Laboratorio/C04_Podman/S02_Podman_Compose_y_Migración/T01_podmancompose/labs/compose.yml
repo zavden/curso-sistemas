@@ -1,0 +1,9 @@
+services:
+  web:
+    image: docker.io/library/nginx:latest
+    ports:
+      - "8888:80"
+
+  app:
+    image: docker.io/library/alpine:latest
+    command: sh -c 'while true; do echo "App running at $$(date)"; sleep 5; done'

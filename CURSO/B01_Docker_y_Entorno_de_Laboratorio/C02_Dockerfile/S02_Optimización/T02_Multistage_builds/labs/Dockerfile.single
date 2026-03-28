@@ -1,0 +1,12 @@
+# Single-stage: the final image includes GCC, headers, source code, AND the binary
+FROM debian:bookworm
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc libc6-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+COPY hello.c .
+RUN gcc -static -o hello hello.c
+
+CMD ["./hello"]

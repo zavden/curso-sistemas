@@ -1,0 +1,16 @@
+FROM alpine:latest
+
+# Layer 1: system dependencies (change rarely)
+RUN apk add --no-cache curl wget
+
+WORKDIR /app
+
+# Layer 2: dependency manifest (changes occasionally)
+COPY deps.txt .
+RUN echo "Dependencies: $(cat deps.txt | tr '\n' ' ')"
+
+# Layer 3: source code (changes every commit)
+COPY app.sh .
+RUN chmod +x app.sh
+
+CMD ["./app.sh"]

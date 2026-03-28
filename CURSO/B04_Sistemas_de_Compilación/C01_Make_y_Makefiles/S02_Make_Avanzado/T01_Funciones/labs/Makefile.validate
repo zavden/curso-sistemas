@@ -1,0 +1,30 @@
+# Makefile.validate -- Demostrar error, warning e info
+#
+# Uso:
+#   make -f Makefile.validate              (caso normal)
+#   make -f Makefile.validate MODE=invalid (provoca error)
+
+MODE ?= release
+VALID_MODES := debug release
+
+# --- $(info): imprime sin prefijo ---
+$(info Validating build configuration...)
+
+# --- $(warning): imprime con prefijo de archivo:linea, continua ---
+ifeq ($(MODE),debug)
+  $(warning Debug mode enabled -- performance will be reduced)
+endif
+
+# --- $(error): imprime con prefijo y ABORTA ---
+ifeq ($(filter $(MODE),$(VALID_MODES)),)
+  $(error MODE "$(MODE)" is not valid. Use one of: $(VALID_MODES))
+endif
+
+CFLAGS := $(if $(filter debug,$(MODE)),-g -O0,-O2)
+
+$(info MODE   = $(MODE))
+$(info CFLAGS = $(CFLAGS))
+
+.PHONY: validate
+validate:
+	@echo "Validation passed. MODE=$(MODE), CFLAGS=$(CFLAGS)"

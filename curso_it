@@ -1,0 +1,512 @@
+Welcome to Module 2
+0:09
+Lab Design
+2:47
+What is Virtual Box?
+1:52
+Downloading and Installing Oracle VirtualBox
+5:52
+Download and Install VMWare Player (Optional)
+6:26
+CentOS vs. CentOS Stream
+3:13
+Different Ways to Install Linux
+3:02
+Creating a Virtual Machine
+7:24
+Download and Install Linux (CentOS 7)
+16:51
+Download and Install Linux (CentOS 8)
+13:21
+Download and Install Linux (CentOS Stream 9)
+13:23
+Option 2 - Linux Installation on Cloud
+8:03
+Message for Redhat Installation
+0:53
+Redhat Linux Installation (Optional)
+13:09
+Ubuntu Linux Installation (Optional)
+13:53
+Take a snapshot of VM
+2:09
+Virtual Machine Management
+12:34
+Keyboard Keys Used in Linux
+10:23
+Module 2 Quiz
+Module 2 Homework
+0:32
+Module 2 Handouts
+0:01
+Welcome to Module 3
+0:09
+Important Things to Remember in Linux
+2:26
+Access to Linux System
+4:47
+Download and Install Putty
+3:54
+Access Linux via Putty or SSH command line
+6:59
+Command Prompts and Getting Prompts Back
+3:56
+What is root?
+2:18
+Changing Password
+4:52
+Introduction to Linux File System
+4:42
+FileSystem Structure and Description
+12:30
+File System Navigation Commands (cd , ls and pwd)
+9:50
+Linux File or Directory Properties
+7:06
+Absolute and Relative Paths
+5:02
+Creating Files and Directories (touch, cp, vi, mkdir)
+10:11
+Copying directories
+3:57
+Finding Files and Directories (find, locate)
+10:54
+Difference Between Find and Locate Commands
+5:48
+WildCards (*, ?, ^, [])
+9:55
+Linux File Types
+3:32
+Soft and Hard Links (ln)
+11:56
+Module 3 Quiz
+Module 3 Homework
+0:18
+Module 3 Handouts
+0:01
+Lab: Organize Project Files into Directories
+3:31
+Lab: Organize Office Records with Wildcards and Links
+2:48
+Welcome to Module 4
+0:09
+Linux Command Syntax
+6:31
+Files and Directory Permissions (chmod)
+12:42
+File Permissions Using Numeric Mode
+8:58
+File Ownership Commands (chown, chgrp)
+11:35
+Access Control List (ACL)
+13:04
+Lab: Secure Project Files with Permissions and Ownership
+1:59
+Help Commands
+4:48
+TAB Completion and Up Arrow Keys
+6:09
+Adding Text to Files
+12:22
+Input and Output Redirects (>, >>, <, stdin, stdout and stderr)
+13:58
+Standard Output to a File (tee command)
+11:17
+Pipes ( | )
+5:09
+Executing Multiple Commands
+5:40
+Lab: Create a Log File Using Redirects and Tee Command
+1:49
+File Maintenance Commands (cp, rm, mv, mkdir, rmdir)
+11:44
+File Display Commands (cat, less, more, head, tail)
+8:21
+Filters / Text Processing Commands
+2:29
+cut - Text Processors Commands
+10:17
+awk - Text Processors Commands
+14:19
+grep/egrep - Text Processors Commands
+12:50
+Lab: Create a Text Filtering and Search Workflow
+1:56
+sort/uniq - Text Processors Commands
+10:11
+Compare Files (diff and cmp)
+4:36
+wc - Text Processors Commands
+8:22
+Lab: Develop a File Handling and Processing Pipeline
+2:33
+Compress and uncompress (tar, gzip, gunzip)
+11:57
+Truncate File Size (truncate)
+7:46
+Combining and Splitting Files
+6:41
+Linux vs. Windows Commands
+6:29
+Module 4 Quiz
+Module 4 Homework
+1:39
+Module 4 Handouts
+0:01
+Welcome to Module 5
+0:09
+Linux File Editor (vi)
+14:15
+Difference between vi and vim Editors
+11:39
+"sed" Command
+21:00
+User Account Management (useradd, groupadd, usermod, userdel, groupdel)
+14:25
+Enable Password Aging
+13:42
+Switch Users and sudo Access (su, sudo)
+7:34
+Monitor Users (who, last, w, id)
+6:41
+Lab: Manage Team Accounts and Enforce Password Policies
+1:56
+Talking to Users (users, wall, write)
+7:42
+Special Permissions with setuid, setgid and sticky bit
+14:23
+Linux Directory Service - Account Authentication
+5:50
+Difference between Active Directory, LDAP, IDM, WinBIND, OpenLDAP etc.
+8:34
+System Utility Commands (date, uptime, hostname, uname, which, cal, bc)
+8:24
+Processes, Jobs and Scheduling
+5:23
+systemctl command
+8:53
+ps command
+7:20
+top command
+9:13
+kill command
+8:10
+Process Signals in Linux
+14:47
+crontab command
+7:35
+at command
+7:37
+Additional cronjobs (hourly, daily, weekly, monthly)
+7:06
+Process Management (bg, fg, nice)
+14:34
+System Monitoring Commands (df, dmesg, iostat 1, netstat, free, top)
+9:59
+System Logs Monitor (/var/log)
+11:08
+Lab: Create a System Health and Monitoring Report
+1:48
+System Maintenance Commands (shutdown, init, reboot, halt)
+5:02
+Changing System Hostname (hostnamectl)
+5:44
+Finding System Information (uname, dmidecode)
+4:29
+Finding System Architecture (arch)
+3:34
+SOS Report
+6:34
+Terminal Control Keys
+3:29
+Terminal Commands (clear, exit, script)
+6:11
+Recover Root Password
+5:34
+Environment Variables
+13:35
+The screen command
+14:57
+The tmux command
+9:44
+Module 5 Quiz
+Module 5 Homework
+1:26
+Module 5 Handouts
+0:01
+Welcome to Module 6
+0:09
+Linux Kernel
+2:25
+What is a Shell?
+3:40
+Types of Shells
+6:46
+Shell Scripting
+3:11
+Basic Shell Scripts
+12:41
+Input and Output of Script
+14:24
+if-then Scripts
+8:38
+for Loop Scripts
+7:43
+do-while Scripts
+5:40
+Case Statement Scripts
+7:03
+Lab: Develop a Menu-Driven Utility with Shell Scripting
+1:58
+Check Remote Servers Connectivity
+24:29
+Aliases (alias)
+9:36
+User and Global Aliases
+8:40
+Shell History (history)
+5:08
+Module 6 Quiz
+Module 6 Homework
+0:41
+Module 6 Handouts
+0:01
+Welcome to Module 7
+0:09
+Client and Server Relationship
+4:41
+Enable Internet on Linux VM
+2:57
+Network Components
+3:02
+Network Files and Commands (ping, ifup, ifdown, netstat, tcpdump)
+8:55
+NIC Information (ethtool)
+7:12
+NIC or Port Bonding
+17:48
+New Network Utilities (nmtui, nmcli, nm-connection-editor and GNOME Settings)
+31:57
+SSH and Telnet
+6:28
+Configure and Secure SSH
+15:35
+SSH-Keys - Access Remote Server without Password
+13:54
+The ss command
+11:20
+curl and ping commands
+9:56
+Lab: Build a Simple Network Troubleshooting Toolkit
+2:29
+FTP - File Transfer Protocol
+22:35
+SCP - Secure Copy Protocol
+8:02
+rsync - Remote Synchronization
+16:01
+Downloading Files or Apps (wget)
+7:42
+Lab: Create a File Transfer and Synchronization Toolkit
+1:52
+System Updates and Repos (rpm, yum)
+11:35
+System Upgrade and Patch Management
+10:00
+Create Local Repository (Yum Server)
+12:54
+Advance Package Management
+14:28
+Rollback Patches and Updates
+14:22
+Lab: Build a Network Diagnostics and Configuration Console
+3:04
+DNS - Download, Install and Configure (Domain Name Systems)
+28:48
+Hostname or IP Lookup (nslookup and dig)
+5:35
+Network Time Protocol (NTP)
+5:08
+chronyd (New Version of NTP)
+8:21
+New System Utility Command (timedatectl)
+9:29
+Mail Transfer Agent
+14:45
+Web Server (Apache - HTTP)
+15:09
+Installing, configuring and managing Nginx
+27:02
+Linux Web-Based Administration (cockpit)
+20:02
+Proxy server in Linux (Squid)
+14:49
+Central Logger (rsyslog)
+6:26
+Installing, configuring and managing Nagios
+34:13
+Securing Linux Machine (OS Hardening)
+24:26
+OpenLDAP Installation
+11:28
+Tracing Network Traffic (traceroute)
+6:07
+How to open Image File through Command Line
+6:42
+Firewall
+47:41
+Tune System Performance (tuned, nice and renice)
+20:27
+Lab: Develop an Admin Console for Logs, Traffic, and Processes
+2:43
+Run Containers - podman
+36:29
+Installing, configuring and managing Docker
+17:21
+Kickstart (Automate Linux Installation)
+33:07
+Installing, configuring and managing Ansible
+22:26
+Installing, configuring and managing OpenVPN
+22:25
+DHCP Server
+13:39
+Installing and Configuring a Clustered Environment on Linux
+26:32
+Module 7 Quiz
+Module 7 Homework
+0:18
+Module 7 Handouts
+0:01
+Welcome to Module 8
+0:09
+System Run Levels (0 thru 6)
+4:51
+Computer Boot Process
+5:57
+Linux Boot Process
+6:43
+Linux Boot Process (Newer Versions)
+6:50
+The systemd-analyze command
+7:08
+Message of the Day
+3:01
+Customize Message of the Day
+10:38
+Storage
+3:27
+Disk Partition (df, fdisk)
+2:58
+Add Disk and Create Standard Partition
+12:19
+Logical Volume Managment (LVM)
+4:16
+LVM Configuration During Installation
+16:02
+Add Disk and Create New LVM Partition (pvcreate, vgcreate, lvcreate,)
+12:26
+Extend Disk using LVM
+14:10
+Adding Swap Space
+13:00
+The xfs_info command
+10:22
+Advance Storage Management with Stratis
+16:42
+RAID
+4:45
+File System Check (fsck and xfs_repair)
+16:43
+System Backup (dd Command)
+14:03
+Lab: Build a Basic Disk Monitoring and Backup Console
+2:25
+Network File System (NFS)
+36:45
+Samba Installation and Configuration
+22:57
+NAS Drive for NFS or Samba
+10:57
+SATA and SAS
+6:32
+Installing, Configuration and Managing MySQL & MariaDB
+20:21
+LAMP Stack
+7:39
+Difference Between CentOS/Redhat 5, 6 and 7
+14:45
+Difference Between CentOS/RHEL 7 and 8
+5:20
+Difference between CentOS 8 and 9 Stream
+3:13
+Lab: Create a Disk and OS Compatibility Reference Console
+2:40
+Module 8 Quiz
+Module 8 Homework
+0:18
+Module 8 Handouts
+0:01
+Welcome to Module 9
+0:09
+Resume Workshop
+11:31
+Resume design and format
+3:26
+Grammatical mistakes
+2:21
+Objective or Summary
+2:23
+Support your Resume
+1:47
+Cover Letter
+9:59
+Post Resume and What to Expect
+9:53
+Linux Administrator Job Duties
+8:24
+Exposure to Other Technologies
+5:09
+Module 9 Homework
+0:15
+Module 9 Handouts
+0:01
+Welcome to Module 10
+0:09
+What is IT?
+2:38
+Facts about IT
+4:32
+Linux Operating System Jobs
+9:54
+IT Management Jobs
+3:16
+Interview Workshop
+14:00
+College degree
+2:18
+IT Certification
+3:02
+IT related diplomas
+1:29
+New to IT (A+ Certification)
+3:05
+Review Competitive Resumes
+3:10
+Linux job market
+7:45
+Redhat Certifications (RHCSA, RHCE etc.)
+12:58
+Join Linux Communities and Forums
+4:26
+300+ Interview Questions
+0:03
+Module 10 Homework
+0:05
+Module 10 Handouts
+0:01
+LPIC Learning Material 101-500
+0:02
+LPIC Learning Material 102-500
+0:01
+CompTIA Linux XK0-005 Exam Objectives

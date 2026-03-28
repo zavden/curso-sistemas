@@ -1,0 +1,13 @@
+# ARG before FROM: only visible in FROM instructions
+ARG BASE_TAG=latest
+
+FROM alpine:${BASE_TAG}
+
+# BASE_TAG is NOT available here (different scope)
+RUN echo "BASE_TAG=$BASE_TAG" > /scope-test.txt
+
+# Re-declare to make it available in this stage
+ARG BASE_TAG
+RUN echo "BASE_TAG (re-declared)=$BASE_TAG" >> /scope-test.txt
+
+CMD ["cat", "/scope-test.txt"]

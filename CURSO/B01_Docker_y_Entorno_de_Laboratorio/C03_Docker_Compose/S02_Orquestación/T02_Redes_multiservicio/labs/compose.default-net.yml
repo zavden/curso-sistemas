@@ -1,0 +1,12 @@
+services:
+  web:
+    image: alpine:latest
+    command: sleep 3600
+
+  api:
+    image: alpine:latest
+    command: sleep 3600
+
+  db:
+    image: alpine:latest
+    command: sleep 3600

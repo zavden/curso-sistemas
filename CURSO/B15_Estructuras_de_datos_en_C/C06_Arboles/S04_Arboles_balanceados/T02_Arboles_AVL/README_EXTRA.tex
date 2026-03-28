@@ -1,0 +1,276 @@
+\documentclass[11pt, letterpaper]{article}
+
+% --- Idioma y codificación ---
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% --- Matemáticas ---
+\usepackage{amsmath, amssymb, amsthm}
+
+% --- Formato ---
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue!70!black}
+
+% --- Entornos de teoremas ---
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolario}
+\theoremstyle{remark}
+\newtheorem{remark}{Observación}[section]
+
+\title{%
+  T02 --- Demostración formal:\\[4pt]
+  Cota de altura de árboles AVL
+}
+\author{Curso Linux--C--Rust --- B15 Estructuras de datos en C}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+% ===================================================================
+\section{Definiciones}
+% ===================================================================
+
+\begin{definition}[Árbol AVL]
+Un árbol binario de búsqueda es AVL si para todo nodo $x$:
+\[
+  |\operatorname{h}(\operatorname{izq}(x)) - \operatorname{h}(\operatorname{der}(x))| \leq 1
+\]
+donde $\operatorname{h}(\text{NULL}) = -1$.
+\end{definition}
+
+\begin{definition}[Árbol de Fibonacci]
+El árbol de Fibonacci de altura $h$, denotado $T_h$, es el AVL con el
+\emph{mínimo} número de nodos para altura $h$:
+\begin{itemize}
+  \item $T_0$: un solo nodo (1 nodo, altura 0).
+  \item $T_1$: raíz con un hijo izquierdo (2 nodos, altura 1).
+  \item $T_h$ ($h \geq 2$): raíz con subárbol izquierdo $T_{h-1}$
+    y subárbol derecho $T_{h-2}$.
+\end{itemize}
+\end{definition}
+
+\begin{definition}
+Sea $N(h) = |T_h|$ el número mínimo de nodos en un AVL de altura $h$.
+\end{definition}
+
+% ===================================================================
+\section{Demostración 1: recurrencia de \texorpdfstring{$N(h)$}{N(h)}}
+% ===================================================================
+
+\begin{theorem}\label{thm:recurrence}
+$N(h) = N(h-1) + N(h-2) + 1$ para $h \geq 2$, con $N(0) = 1$ y
+$N(1) = 2$.
+\end{theorem}
+
+\begin{proof}
+Sea $T$ un AVL de altura $h$ con el mínimo de nodos. Para tener
+altura $h$, al menos un subárbol tiene altura $h-1$. La condición AVL
+exige que el otro tenga altura $\geq h-2$. Para minimizar nodos,
+elegimos exactamente $h-2$.
+
+El subárbol de altura $h-1$ con mínimo de nodos tiene $N(h-1)$ nodos;
+el de altura $h-2$ tiene $N(h-2)$. Sumando la raíz:
+\[
+  N(h) = N(h-1) + N(h-2) + 1
+\]
+
+Casos base: $N(0) = 1$ (un nodo, altura 0), $N(1) = 2$ (raíz $+$ un
+hijo, altura 1).
+\end{proof}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ccl}
+\toprule
+$h$ & $N(h)$ & Cálculo \\
+\midrule
+0 & 1 & base \\
+1 & 2 & base \\
+2 & 4 & $2 + 1 + 1$ \\
+3 & 7 & $4 + 2 + 1$ \\
+4 & 12 & $7 + 4 + 1$ \\
+5 & 20 & $12 + 7 + 1$ \\
+6 & 33 & $20 + 12 + 1$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ===================================================================
+\section{Demostración 2: \texorpdfstring{$N(h) \geq \varphi^h$}{N(h) >= phi\^h}}
+% ===================================================================
+
+\begin{lemma}\label{lem:phi}
+Sea $\varphi = \frac{1+\sqrt{5}}{2} \approx 1.618$. Entonces
+$N(h) \geq \varphi^h$ para todo $h \geq 0$.
+\end{lemma}
+
+\begin{proof}
+Por inducción fuerte.
+
+\textbf{Base.}
+\[
+  N(0) = 1 \geq 1 = \varphi^0 \quad \checkmark
+  \qquad
+  N(1) = 2 \geq 1.618 = \varphi^1 \quad \checkmark
+\]
+
+\textbf{Paso inductivo ($h \geq 2$).} Suponemos $N(j) \geq \varphi^j$
+para todo $j \leq h-1$:
+\[
+  N(h) = N(h{-}1) + N(h{-}2) + 1 > N(h{-}1) + N(h{-}2)
+  \geq \varphi^{h-1} + \varphi^{h-2}
+  = \varphi^{h-2}(\varphi + 1)
+\]
+
+Como $\varphi$ es raíz de $x^2 = x + 1$, se cumple
+$\varphi + 1 = \varphi^2$. Verificación:
+\[
+  \varphi^2 = \frac{(1{+}\sqrt{5})^2}{4} = \frac{6 + 2\sqrt{5}}{4}
+  = \frac{3+\sqrt{5}}{2}
+  = \frac{1+\sqrt{5}}{2} + 1 = \varphi + 1 \quad \checkmark
+\]
+
+Sustituyendo:
+\[
+  N(h) > \varphi^{h-2} \cdot \varphi^2 = \varphi^h \qedhere
+\]
+\end{proof}
+
+% ===================================================================
+\section{Demostración 3: cota de altura
+  \texorpdfstring{$h \leq 1.44 \cdot \log_2(n+2)$}{h <= 1.44 log2(n+2)}}
+% ===================================================================
+
+\begin{theorem}\label{thm:height}
+Todo árbol AVL con $n$ nodos tiene altura
+$h \leq 1.4405 \cdot \log_2(n+2)$.
+\end{theorem}
+
+\begin{proof}
+Sea $T$ un AVL con $n$ nodos y altura $h$:
+\[
+  n \geq N(h) \geq \varphi^h
+\]
+
+Tomando logaritmo en base $\varphi$ ($\varphi > 1$):
+\[
+  h \leq \log_\varphi n
+  = \frac{\log_2 n}{\log_2 \varphi}
+  \approx \frac{\log_2 n}{0.6942}
+  \approx 1.4405 \cdot \log_2 n
+\]
+
+\textbf{Cota más precisa.} Usando $N(h) = F(h{+}3) - 1$
+(Demostración~4) y Binet: $N(h) \geq \varphi^{h+3}/\sqrt{5} - 2$.
+De $n \geq N(h)$:
+\[
+  n + 2 \geq \frac{\varphi^{h+3}}{\sqrt{5}}
+  \quad\Longrightarrow\quad
+  h + 3 \leq \log_\varphi\!\left((n{+}2)\sqrt{5}\right)
+\]
+\[
+  h \leq \log_\varphi(n{+}2) + \underbrace{\log_\varphi(\sqrt{5}) - 3}_{\approx\, -1.328}
+  < 1.4405 \cdot \log_2(n{+}2) \qedhere
+\]
+\end{proof}
+
+% ===================================================================
+\section{Demostración 4: \texorpdfstring{$N(h) = F(h+3) - 1$}{N(h) = F(h+3) - 1}}
+% ===================================================================
+
+\begin{theorem}\label{thm:fib}
+$N(h) = F(h+3) - 1$ para todo $h \geq 0$, donde
+$F(k)$ es el $k$-ésimo número de Fibonacci con $F(1)=F(2)=1$.
+\end{theorem}
+
+\begin{proof}
+Por inducción fuerte.
+
+\textbf{Base.}
+\[
+  N(0) = 1 = F(3) - 1 = 2 - 1 \quad \checkmark
+  \qquad
+  N(1) = 2 = F(4) - 1 = 3 - 1 \quad \checkmark
+\]
+
+\textbf{Paso inductivo ($h \geq 2$).} Suponemos
+$N(j) = F(j{+}3) - 1$ para todo $j \leq h{-}1$:
+\begin{align*}
+  N(h) &= N(h{-}1) + N(h{-}2) + 1 \\
+       &= [F(h{+}2) - 1] + [F(h{+}1) - 1] + 1 \\
+       &= F(h{+}2) + F(h{+}1) - 1 \\
+       &= F(h{+}3) - 1 \qedhere
+\end{align*}
+\end{proof}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ccc}
+\toprule
+$h$ & $F(h{+}3)$ & $N(h) = F(h{+}3) - 1$ \\
+\midrule
+0 & 2 & 1 \\
+1 & 3 & 2 \\
+2 & 5 & 4 \\
+3 & 8 & 7 \\
+4 & 13 & 12 \\
+5 & 21 & 20 \\
+6 & 34 & 33 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ===================================================================
+\section{Consecuencia: operaciones AVL son \texorpdfstring{$O(\log n)$}{O(log n)}}
+% ===================================================================
+
+\begin{corollary}
+Búsqueda, inserción y eliminación en un AVL con $n$ nodos tienen
+complejidad $O(\log n)$ en el peor caso.
+\end{corollary}
+
+\begin{proof}
+Cada operación recorre un camino de longitud $\leq h$, con trabajo
+$O(1)$ por nivel. Por el Teorema~\ref{thm:height}:
+\[
+  h + 1 \leq 1.44 \cdot \log_2(n{+}2) = O(\log n)
+\]
+Las rotaciones de rebalanceo son $O(h)$ en total, cada una en $O(1)$.
+\end{proof}
+
+% ===================================================================
+\section{Resumen de resultados}
+% ===================================================================
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Resultado} & \textbf{Técnica} \\
+\midrule
+$N(h) = N(h{-}1) + N(h{-}2) + 1$
+  & Minimalidad: subárboles con diferencia 1 \\
+$N(h) \geq \varphi^h$
+  & Inducción fuerte + $\varphi^2 = \varphi + 1$ \\
+$h \leq 1.44 \cdot \log_2(n{+}2)$
+  & Logaritmo de $n \geq \varphi^h$ + cambio de base \\
+$N(h) = F(h{+}3) - 1$
+  & Inducción fuerte + recurrencia Fibonacci \\
+Operaciones AVL: $O(\log n)$
+  & Corolario de la cota de altura \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

@@ -1,0 +1,29 @@
+services:
+  debian-dev:
+    build:
+      context: ./dockerfiles/debian
+    container_name: debian-dev
+    hostname: debian
+    volumes:
+      - workspace:/home/dev/workspace
+      - ./src:/home/dev/workspace/src
+    cap_add:
+      - SYS_PTRACE
+    stdin_open: true
+    tty: true
+
+  alma-dev:
+    build:
+      context: ./dockerfiles/alma
+    container_name: alma-dev
+    hostname: alma
+    volumes:
+      - workspace:/home/dev/workspace
+      - ./src:/home/dev/workspace/src
+    cap_add:
+      - SYS_PTRACE
+    stdin_open: true
+    tty: true
+
+volumes:
+  workspace:

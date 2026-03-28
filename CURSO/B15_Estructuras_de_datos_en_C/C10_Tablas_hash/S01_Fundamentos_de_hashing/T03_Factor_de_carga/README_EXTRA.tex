@@ -1,0 +1,311 @@
+\documentclass[11pt, letterpaper]{article}
+
+% --- Idioma y codificación ---
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% --- Matemáticas ---
+\usepackage{amsmath, amssymb, amsthm}
+
+% --- Formato ---
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue!70!black}
+
+% --- Entornos de teoremas ---
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolario}
+\theoremstyle{remark}
+\newtheorem{remark}{Observación}[section]
+
+\title{%
+  T03 --- Demostración formal:\\[4pt]
+  Longitud esperada de cadena $= \alpha$
+}
+\author{Curso Linux--C--Rust --- B15 Estructuras de datos en C}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+% ===================================================================
+\section{Modelo}
+% ===================================================================
+
+\begin{definition}[Tabla hash]
+Un array $T[0..m{-}1]$ de $m$ buckets. Cada bucket $T[j]$ contiene
+una lista enlazada (cadena). Se insertan $n$ claves
+$k_1, k_2, \ldots, k_n$.
+\end{definition}
+
+\begin{definition}[Hashing uniforme simple (SUHA)]
+Para cada clave $k$, $h(k)$ se distribuye uniformemente en
+$\{0, 1, \ldots, m{-}1\}$, e independientemente de las demás claves:
+\[
+  \Pr[h(k) = j] = \frac{1}{m}
+  \quad \forall\, j \in \{0, \ldots, m{-}1\}
+\]
+\end{definition}
+
+\begin{definition}[Factor de carga]
+$\alpha = n/m$.
+\end{definition}
+
+\begin{definition}
+Sea $L_j$ la longitud de la cadena en el bucket~$j$, es decir, el
+número de claves mapeadas a $T[j]$.
+\end{definition}
+
+% ===================================================================
+\section{Demostración 1:
+  \texorpdfstring{$E[L_j] = \alpha$}{E[Lj] = alpha}
+  por linealidad de la esperanza}
+% ===================================================================
+
+\begin{theorem}\label{thm:expected}
+Bajo SUHA, para todo bucket $j \in \{0, \ldots, m{-}1\}$:
+\[
+  E[L_j] = \frac{n}{m} = \alpha
+\]
+\end{theorem}
+
+\begin{proof}
+Definimos variables indicadoras. Para cada clave $k_i$
+($1 \leq i \leq n$) y cada bucket~$j$:
+\[
+  X_{ij} = \begin{cases}
+    1 & \text{si } h(k_i) = j \\
+    0 & \text{si no}
+  \end{cases}
+\]
+
+La longitud de la cadena en el bucket~$j$ es:
+\[
+  L_j = \sum_{i=1}^{n} X_{ij}
+\]
+
+Por linealidad de la esperanza (que \textbf{no} requiere
+independencia):
+\[
+  E[L_j] = \sum_{i=1}^{n} E[X_{ij}]
+         = \sum_{i=1}^{n} \Pr[h(k_i) = j]
+\]
+
+Por SUHA, $\Pr[h(k_i) = j] = 1/m$ para todo~$i$:
+\[
+  E[L_j] = \sum_{i=1}^{n} \frac{1}{m} = \frac{n}{m} = \alpha
+  \qedhere
+\]
+\end{proof}
+
+\begin{remark}
+El resultado vale para \textbf{todo} bucket~$j$, no solo ``en promedio
+sobre los buckets''. Cada bucket individual tiene longitud esperada
+exactamente~$\alpha$.
+\end{remark}
+
+% ===================================================================
+\section{Demostración 2:
+  \texorpdfstring{$L_j \sim \mathrm{Binomial}(n, 1/m)$}%
+  {Lj ~ Binomial(n, 1/m)}}
+% ===================================================================
+
+\begin{theorem}\label{thm:binomial}
+Bajo SUHA, $L_j$ sigue una distribución binomial con parámetros $n$ y
+$p = 1/m$.
+\end{theorem}
+
+\begin{proof}
+Las variables $X_{1j}, X_{2j}, \ldots, X_{nj}$ son:
+\begin{enumerate}
+  \item \textbf{Independientes}: por SUHA, $h(k_i)$ es independiente
+    de $h(k_\ell)$ para $i \neq \ell$.
+  \item \textbf{Bernoulli con el mismo parámetro}:
+    $X_{ij} \sim \mathrm{Bernoulli}(1/m)$ para todo~$i$.
+\end{enumerate}
+
+Por definición, la suma de $n$ variables Bernoulli independientes con
+el mismo parámetro~$p$ es $\mathrm{Binomial}(n, p)$:
+\[
+  L_j \sim \mathrm{Binomial}(n, 1/m) \qedhere
+\]
+\end{proof}
+
+% ===================================================================
+\section{Demostración 3: varianza de $L_j$}
+% ===================================================================
+
+\begin{theorem}\label{thm:variance}
+$\mathrm{Var}[L_j] = \alpha(1 - 1/m)$.
+\end{theorem}
+
+\begin{proof}
+Como $L_j \sim \mathrm{Binomial}(n, 1/m)$, y la varianza de una
+$\mathrm{Binomial}(n, p)$ es $np(1{-}p)$:
+\[
+  \mathrm{Var}[L_j]
+  = n \cdot \frac{1}{m} \cdot \left(1 - \frac{1}{m}\right)
+  = \frac{n}{m} \cdot \frac{m-1}{m}
+  = \alpha \cdot \frac{m-1}{m} \qedhere
+\]
+\end{proof}
+
+\begin{corollary}\mbox{}
+\begin{enumerate}
+  \item \textbf{Desviación estándar}:
+    $\sigma_{L_j} = \sqrt{\alpha(1 - 1/m)} \approx \sqrt{\alpha}$
+    para $m$ grande.
+  \item \textbf{Para $m$ grande} ($m \gg 1$):
+    $\mathrm{Var}[L_j] \approx \alpha$, y $L_j$ se aproxima a una
+    distribución $\mathrm{Poisson}(\alpha)$.
+  \item \textbf{Concentración}: por la desigualdad de Chebyshev,
+    \[
+      \Pr\!\left[|L_j - \alpha| \geq t\sqrt{\alpha}\right]
+      \leq \frac{1}{t^2}
+    \]
+    Con $\alpha = 1$ y $t = 3$:
+    $\Pr[L_j \geq 4] \leq 1/9 \approx 11\%$.
+\end{enumerate}
+\end{corollary}
+
+% ===================================================================
+\section{Demostración 4: la longitud total es exactamente $n$}
+% ===================================================================
+
+\begin{theorem}\label{thm:total}
+$\displaystyle\sum_{j=0}^{m-1} L_j = n$ con probabilidad~1.
+\end{theorem}
+
+\begin{proof}
+Cada clave $k_i$ es mapeada a exactamente un bucket (la función hash
+es total y determinista para cada clave fija). Por lo tanto, cada
+$k_i$ contribuye exactamente~1 a exactamente un~$L_j$:
+\[
+  \sum_{j=0}^{m-1} L_j
+  = \sum_{j=0}^{m-1} \sum_{i=1}^{n} X_{ij}
+  = \sum_{i=1}^{n} \underbrace{\sum_{j=0}^{m-1} X_{ij}}_{= 1}
+  = n
+\]
+
+Verificación de consistencia con el Teorema~\ref{thm:expected}:
+\[
+  \sum_{j=0}^{m-1} E[L_j]
+  = \sum_{j=0}^{m-1} \alpha
+  = m \cdot \frac{n}{m} = n \quad \checkmark \qedhere
+\]
+\end{proof}
+
+% ===================================================================
+\section{Demostración 5: longitud máxima esperada}
+% ===================================================================
+
+\begin{theorem}\label{thm:max}
+Bajo SUHA, con $n = m$ ($\alpha = 1$):
+\[
+  E\!\left[\max_j L_j\right]
+  = \Theta\!\left(\frac{\log n}{\log \log n}\right)
+\]
+\end{theorem}
+
+\begin{proof}[Prueba (sketch)]
+Usamos la cota de la distribución binomial. Para un bucket fijo~$j$:
+\[
+  \Pr[L_j \geq k]
+  = \binom{n}{k} \left(\frac{1}{m}\right)^{\!k}
+    \left(1 - \frac{1}{m}\right)^{\!n-k}
+  \leq \binom{n}{k} \frac{1}{m^k}
+\]
+
+Con $n = m$ y usando $\binom{n}{k} \leq (ne/k)^k$:
+\[
+  \Pr[L_j \geq k]
+  \leq \left(\frac{ne}{km}\right)^{\!k}
+  = \left(\frac{e}{k}\right)^{\!k}
+\]
+
+\emph{Cota superior.} Sea $k^* = c\log n / \log\log n$ para $c$
+suficientemente grande. Entonces $(e/k^*)^{k^*}$ decrece más rápido
+que $1/n^2$. Por union bound sobre los $m = n$ buckets:
+\[
+  \Pr\!\left[\max_j L_j \geq k^*\right]
+  \leq n \cdot \frac{1}{n^2} = \frac{1}{n} \to 0
+\]
+
+\emph{Cota inferior.} Se muestra (por segundo momento o
+inclusión-exclusión) que
+$\Pr[\max_j L_j \geq c'\log n / \log\log n] \to 1$ para $c'$
+suficientemente pequeño.
+\end{proof}
+
+\begin{remark}[Implicación práctica]
+Aunque $E[L_j] = 1$ (con $\alpha = 1$), el bucket \textbf{más largo}
+tiene $\Theta(\log n / \log\log n)$ elementos. El peor caso de una
+búsqueda individual no es $O(1)$, sino
+$O(\log n / \log\log n)$.
+\end{remark}
+
+% ===================================================================
+\section{Verificación numérica}
+% ===================================================================
+
+Para $\alpha = 1$ ($n = m$), la distribución $\mathrm{Poisson}(1)$
+predice:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ccc}
+\toprule
+Longitud $k$ & $\Pr[L_j = k]$ & $n{=}1000$: buckets con longitud $k$ \\
+\midrule
+0        & 0.368 & 368 \\
+1        & 0.368 & 368 \\
+2        & 0.184 & 184 \\
+3        & 0.061 & 61  \\
+4        & 0.015 & 15  \\
+5        & 0.003 & 3   \\
+$\geq 6$ & 0.001 & ${\sim}1$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Verificación: $\sum k \cdot \Pr[L_j = k] = 1 = \alpha$. \checkmark
+
+% ===================================================================
+\section{Resumen de resultados}
+% ===================================================================
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llp{5.5cm}}
+\toprule
+\textbf{Resultado} & \textbf{Técnica} & \textbf{Clave} \\
+\midrule
+$E[L_j] = \alpha$
+  & Linealidad de la esperanza
+  & $X_{ij} \sim \mathrm{Bernoulli}(1/m)$, sumar $n$ indicadoras \\
+$L_j \sim \mathrm{Binomial}(n, 1/m)$
+  & Independencia por SUHA
+  & Suma de Bernoulli i.i.d. \\
+$\mathrm{Var}[L_j] = \alpha(1{-}1/m)$
+  & Varianza de la binomial
+  & $\approx \alpha$ para $m$ grande \\
+$\sum L_j = n$
+  & Doble conteo
+  & Cada clave en exactamente un bucket \\
+$\max L_j = \Theta(\frac{\log n}{\log\log n})$
+  & Union bound + segundo momento
+  & El peor bucket es superconstante \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

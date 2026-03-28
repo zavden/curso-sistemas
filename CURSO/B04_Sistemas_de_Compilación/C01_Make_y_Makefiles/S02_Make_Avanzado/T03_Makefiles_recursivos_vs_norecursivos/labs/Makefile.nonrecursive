@@ -1,0 +1,42 @@
+# Root Makefile (non-recursive version)
+# Single Makefile with full dependency graph
+
+CC     := gcc
+CFLAGS := -Wall -Wextra -std=c17
+
+# === Library ===
+LIB_SRCS := lib/calc.c
+LIB_OBJS := $(LIB_SRCS:.c=.o)
+LIB_DEPS := $(LIB_OBJS:.o=.d)
+LIB      := lib/libcalc.a
+
+# === Application ===
+APP_SRCS := app/main.c
+APP_OBJS := $(APP_SRCS:.c=.o)
+APP_DEPS := $(APP_OBJS:.o=.d)
+APP      := app/calculator
+
+# === All objects for cleanup ===
+ALL_OBJS := $(LIB_OBJS) $(APP_OBJS)
+ALL_DEPS := $(LIB_DEPS) $(APP_DEPS)
+
+# === Targets ===
+.PHONY: all clean
+
+all: $(APP)
+
+$(APP): $(APP_OBJS) $(LIB)
+	$(CC) -o $@ $(APP_OBJS) $(LIB)
+
+$(LIB): $(LIB_OBJS)
+	$(AR) rcs $@ $^
+
+# === Compilation rule with automatic dependencies ===
+%.o: %.c
+	$(CC) $(CFLAGS) -Ilib -MMD -MP -c $< -o $@
+
+# === Include auto-generated dependency files ===
+-include $(ALL_DEPS)
+
+clean:
+	$(RM) $(ALL_OBJS) $(ALL_DEPS) $(LIB) $(APP)

@@ -1,0 +1,14 @@
+FROM debian:bookworm
+LABEL maintainer="lab-user"
+LABEL description="Image for inspect lab"
+ENV APP_ENV=production
+ENV APP_PORT=8080
+EXPOSE 8080
+EXPOSE 443
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+COPY show-info.sh /app/show-info.sh
+RUN chmod +x /app/show-info.sh
+ENTRYPOINT ["/app/show-info.sh"]
+CMD ["--verbose"]

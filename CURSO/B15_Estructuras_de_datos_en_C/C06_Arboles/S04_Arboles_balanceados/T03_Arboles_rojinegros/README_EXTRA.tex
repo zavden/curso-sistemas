@@ -1,0 +1,253 @@
+\documentclass[11pt, letterpaper]{article}
+
+% --- Idioma y codificación ---
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% --- Matemáticas ---
+\usepackage{amsmath, amssymb, amsthm}
+
+% --- Formato ---
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue!70!black}
+
+% --- Entornos de teoremas ---
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolario}
+\theoremstyle{remark}
+\newtheorem{remark}{Observación}[section]
+
+\title{%
+  T03 --- Demostración formal:\\[4pt]
+  Cota de altura de árboles rojinegros
+}
+\author{Curso Linux--C--Rust --- B15 Estructuras de datos en C}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+% ===================================================================
+\section{Propiedades rojinegras}
+% ===================================================================
+
+Un árbol rojinegro es un BST donde cada nodo tiene color rojo o negro
+y se cumplen:
+
+\begin{enumerate}
+  \item[\textbf{P1.}] Cada nodo es rojo o negro.
+  \item[\textbf{P2.}] La raíz es negra.
+  \item[\textbf{P3.}] Cada hoja (NULL) es negra.
+  \item[\textbf{P4.}] Si un nodo es rojo, ambos hijos son negros.
+  \item[\textbf{P5.}] Para cada nodo, todos los caminos desde él hasta
+    las hojas NULL contienen el mismo número de nodos negros.
+\end{enumerate}
+
+\begin{definition}[Black-height]
+El black-height de un nodo $x$, denotado $\operatorname{bh}(x)$, es el
+número de nodos negros en cualquier camino desde $x$ (sin incluir a $x$)
+hasta una hoja NULL. P5 garantiza que este valor está bien definido.
+\end{definition}
+
+% ===================================================================
+\section{Demostración 1: subárbol con
+  \texorpdfstring{$\geq 2^{\operatorname{bh}(x)} - 1$}{>= 2\^bh(x) - 1}
+  nodos internos}
+% ===================================================================
+
+\begin{theorem}\label{thm:subtree}
+Sea $x$ un nodo en un árbol rojinegro. El subárbol enraizado en $x$
+contiene al menos $2^{\operatorname{bh}(x)} - 1$ nodos internos.
+\end{theorem}
+
+\begin{proof}
+Por inducción sobre la altura de $x$.
+
+\textbf{Base (altura 0).} Si $x$ es una hoja NULL:
+$\operatorname{bh}(x) = 0$ y el subárbol tiene 0 nodos internos:
+\[
+  2^{\operatorname{bh}(x)} - 1 = 2^0 - 1 = 0 \quad \checkmark
+\]
+
+\textbf{Paso inductivo.} Sea $x$ un nodo interno con hijos $l$ y $r$,
+ambos con altura menor que la de $x$. Por hipótesis inductiva:
+\begin{itemize}
+  \item Subárbol de $l$: $\geq 2^{\operatorname{bh}(l)} - 1$ nodos.
+  \item Subárbol de $r$: $\geq 2^{\operatorname{bh}(r)} - 1$ nodos.
+\end{itemize}
+
+Determinamos $\operatorname{bh}$ de los hijos en función de
+$\operatorname{bh}(x)$:
+\begin{itemize}
+  \item Si el hijo es \textbf{negro}: $\operatorname{bh}(\text{hijo})
+    = \operatorname{bh}(x) - 1$.
+  \item Si el hijo es \textbf{rojo}: $\operatorname{bh}(\text{hijo})
+    = \operatorname{bh}(x)$.
+\end{itemize}
+En ambos casos: $\operatorname{bh}(\text{hijo}) \geq \operatorname{bh}(x) - 1$.
+
+Nodos internos en el subárbol de $x$:
+\begin{align*}
+  &\geq (2^{\operatorname{bh}(l)} - 1)
+      + (2^{\operatorname{bh}(r)} - 1) + 1 \\
+  &\geq (2^{\operatorname{bh}(x)-1} - 1)
+      + (2^{\operatorname{bh}(x)-1} - 1) + 1 \\
+  &= 2 \cdot 2^{\operatorname{bh}(x)-1} - 1
+   = 2^{\operatorname{bh}(x)} - 1 \qedhere
+\end{align*}
+\end{proof}
+
+% ===================================================================
+\section{Demostración 2:
+  \texorpdfstring{$\operatorname{bh}(r) \geq h/2$}{bh(r) >= h/2}}
+% ===================================================================
+
+\begin{theorem}\label{thm:bh-half}
+Sea $T$ un árbol rojinegro con altura $h$ y raíz $r$. Entonces
+$\operatorname{bh}(r) \geq h/2$.
+\end{theorem}
+
+\begin{proof}
+En un camino raíz $\to$ NULL de longitud $h$, sean $b$ los nodos
+negros bajo la raíz y $r_c$ los rojos. Entonces
+$b + r_c = h$ y $\operatorname{bh}(r) = b$.
+
+Por P4 (no dos rojos consecutivos), cada nodo rojo debe tener un hijo
+negro debajo, lo que implica $r_c \leq b$. Entonces:
+\[
+  h = b + r_c \leq b + b = 2b
+  \quad\Longrightarrow\quad
+  b \geq h/2
+  \quad\Longrightarrow\quad
+  \operatorname{bh}(r) \geq h/2 \qedhere
+\]
+\end{proof}
+
+% ===================================================================
+\section{Demostración 3:
+  \texorpdfstring{$h \leq 2 \cdot \log_2(n+1)$}{h <= 2 log2(n+1)}}
+% ===================================================================
+
+\begin{theorem}\label{thm:height}
+Todo árbol rojinegro con $n$ nodos internos tiene altura
+$h \leq 2 \cdot \log_2(n+1)$.
+\end{theorem}
+
+\begin{proof}
+Sea $T$ un rojinegro con $n$ nodos internos, altura $h$, raíz $r$.
+
+\textbf{Paso 1.} Por el Teorema~\ref{thm:subtree}:
+$n \geq 2^{\operatorname{bh}(r)} - 1$.
+
+\textbf{Paso 2.} Por el Teorema~\ref{thm:bh-half}:
+$\operatorname{bh}(r) \geq h/2$.
+
+\textbf{Paso 3.} Combinando:
+\[
+  n \geq 2^{\operatorname{bh}(r)} - 1 \geq 2^{h/2} - 1
+\]
+\[
+  n + 1 \geq 2^{h/2}
+  \quad\Longrightarrow\quad
+  \log_2(n+1) \geq h/2
+  \quad\Longrightarrow\quad
+  h \leq 2\log_2(n+1) \qedhere
+\]
+\end{proof}
+
+% ===================================================================
+\section{Comparación formal con AVL}
+% ===================================================================
+
+\begin{corollary}
+Para $n$ nodos, las cotas de altura son:
+\end{corollary}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Estructura} & \textbf{Cota de altura} & \textbf{Constante} \\
+\midrule
+Árbol perfecto     & $\log_2(n{+}1)$          & 1.0  \\
+AVL                & $1.44 \cdot \log_2(n{+}2)$ & 1.44 \\
+Rojinegro          & $2 \cdot \log_2(n{+}1)$    & 2.0  \\
+BST sin balance    & $n - 1$                   & ---  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{remark}[La cota es ajustada (tight)]
+Un rojinegro con $\operatorname{bh} = k$ puede tener camino más largo
+$2k$ (alternancia rojo-negro) y más corto $k$ (todo negro). La razón
+es exactamente $2{:}1$, confirmando que el factor~2 no se puede mejorar.
+\end{remark}
+
+% ===================================================================
+\section{Demostración 4: operaciones rojinegras son
+  \texorpdfstring{$O(\log n)$}{O(log n)}}
+% ===================================================================
+
+\begin{corollary}\label{cor:ops}
+Búsqueda, inserción y eliminación en un árbol rojinegro con $n$ nodos
+tienen complejidad $O(\log n)$ en el peor caso.
+\end{corollary}
+
+\begin{proof}
+\emph{Búsqueda}: camino raíz $\to$ hoja con $O(1)$ por nivel.
+Costo $= O(h) = O(\log n)$. \checkmark
+
+\emph{Inserción}: inserción BST estándar $O(h)$, más correcciones
+que suben $O(h)$ niveles con $O(1)$ por nivel y \textbf{a lo sumo
+2~rotaciones}. Total: $O(\log n)$. \checkmark
+
+\emph{Eliminación}: eliminación BST $O(h)$, más correcciones con
+\textbf{a lo sumo 3~rotaciones} y $O(h)$ recoloreos.
+Total: $O(\log n)$. \checkmark
+\end{proof}
+
+\begin{remark}
+Aunque la cota rojinegra ($2\log_2 n$) es peor que la AVL
+($1.44\log_2 n$), la inserción y eliminación requieren menos
+rotaciones en el peor caso ($2$--$3$ vs $O(\log n)$ en AVL). En la
+práctica, los rojinegros suelen ser más rápidos en escenarios con
+muchas modificaciones.
+\end{remark}
+
+% ===================================================================
+\section{Resumen de resultados}
+% ===================================================================
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llp{5.5cm}}
+\toprule
+\textbf{Resultado} & \textbf{Técnica} & \textbf{Clave} \\
+\midrule
+Subárbol $\geq 2^{\operatorname{bh}(x)}{-}1$ nodos
+  & Inducción sobre altura
+  & $\operatorname{bh}(\text{hijo}) \geq \operatorname{bh}(x){-}1$ \\
+$\operatorname{bh}(r) \geq h/2$
+  & P4 (no dos rojos seguidos)
+  & $r_c \leq b \Rightarrow h \leq 2b$ \\
+$h \leq 2\log_2(n{+}1)$
+  & Combinar anteriores
+  & $n \geq 2^{h/2} - 1$ \\
+Cota tight
+  & Alternancia rojo-negro
+  & Razón camino largo/corto $= 2{:}1$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

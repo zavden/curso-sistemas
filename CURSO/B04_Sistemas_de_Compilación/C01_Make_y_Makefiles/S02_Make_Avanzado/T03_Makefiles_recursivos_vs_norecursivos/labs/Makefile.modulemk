@@ -1,0 +1,34 @@
+# Root Makefile (non-recursive with module.mk pattern)
+# Each subdirectory defines its sources in a module.mk fragment
+
+CC     := gcc
+CFLAGS := -Wall -Wextra -std=c17
+
+# === Include module definitions ===
+include lib/module.mk
+include app/module.mk
+
+# === Derive objects and dependencies ===
+LIB_OBJS := $(LIB_SRCS:.c=.o)
+APP_OBJS := $(APP_SRCS:.c=.o)
+ALL_OBJS := $(LIB_OBJS) $(APP_OBJS)
+ALL_DEPS := $(ALL_OBJS:.o=.d)
+
+# === Targets ===
+.PHONY: all clean
+
+all: $(APP)
+
+$(APP): $(APP_OBJS) $(LIB)
+	$(CC) -o $@ $(APP_OBJS) $(LIB)
+
+$(LIB): $(LIB_OBJS)
+	$(AR) rcs $@ $^
+
+%.o: %.c
+	$(CC) $(CFLAGS) -Ilib -MMD -MP -c $< -o $@
+
+-include $(ALL_DEPS)
+
+clean:
+	$(RM) $(ALL_OBJS) $(ALL_DEPS) $(LIB) $(APP)

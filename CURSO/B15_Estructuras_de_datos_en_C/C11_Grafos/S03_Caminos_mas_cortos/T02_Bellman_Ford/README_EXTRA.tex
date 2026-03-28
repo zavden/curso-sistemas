@@ -1,0 +1,311 @@
+\documentclass[11pt, letterpaper]{article}
+
+% --- Idioma y codificación ---
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% --- Matemáticas ---
+\usepackage{amsmath, amssymb, amsthm}
+
+% --- Formato ---
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue!70!black}
+
+% --- Entornos de teoremas ---
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolario}
+\theoremstyle{remark}
+\newtheorem{remark}{Observación}[section]
+
+\title{%
+  T02 --- Demostración formal:\\[4pt]
+  Correctitud de Bellman-Ford por inducción
+}
+\author{Curso Linux--C--Rust --- B15 Estructuras de datos en C}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+% ===================================================================
+\section{Modelo}
+% ===================================================================
+
+\begin{definition}
+Grafo $G = (V, E)$ dirigido con $w: E \to \mathbb{R}$ (pesos
+arbitrarios). Fuente $s \in V$, $|V| = n$, $|E| = m$.
+$\delta(s,v)$ = peso del camino más corto ($-\infty$ si ciclo
+negativo alcanzable, $\infty$ si inalcanzable).
+$\delta_k(s,v)$ = peso del camino más corto con a lo sumo $k$
+aristas. Bellman-Ford realiza $n - 1$ pasadas; en cada una relaja
+todas las aristas.
+\end{definition}
+
+% ===================================================================
+\section{Lema previo: caminos más cortos simples}
+% ===================================================================
+
+\begin{lemma}\label{lem:simple}
+Si no existen ciclos negativos alcanzables desde $s$, entonces para
+todo $v$ alcanzable existe un camino más corto simple con a lo sumo
+$n - 1$ aristas.
+\end{lemma}
+
+\begin{proof}
+Sea $p$ un camino más corto de $s$ a $v$. Si $p$ contiene un ciclo
+$c$, su peso es $w(c) \geq 0$ (no hay ciclos negativos). Eliminando
+$c$:
+\[
+  w(p') = w(p) - w(c) \leq w(p) = \delta(s,v)
+\]
+Como $p$ era más corto, $w(p') = w(p)$. Repitiendo hasta eliminar
+todos los ciclos: camino simple. Un camino simple visita a lo sumo
+$n$ vértices, usando a lo sumo $n - 1$ aristas.
+\end{proof}
+
+% ===================================================================
+\section{Demostración 1: correctitud por inducción}
+% ===================================================================
+
+\begin{theorem}\label{thm:correctness}
+Tras la pasada $i$ ($i = 1, \ldots, n{-}1$):
+\[
+  \mathrm{dist}[v] \leq \delta_i(s,v) \quad \forall\, v \in V
+\]
+En particular, tras $n - 1$ pasadas,
+$\mathrm{dist}[v] = \delta(s,v)$ para todo~$v$ (sin ciclos
+negativos).
+\end{theorem}
+
+\begin{proof}
+Por inducción fuerte sobre $i$.
+
+\textbf{Base ($i = 0$).} $\mathrm{dist}[s] = 0 = \delta_0(s,s)$.
+Para $v \neq s$:
+$\mathrm{dist}[v] = \infty = \delta_0(s,v)$. \checkmark
+
+\textbf{Paso inductivo.} Supongamos que tras la pasada $i - 1$:
+\[
+  \mathrm{dist}[v] \leq \delta_{i-1}(s,v) \quad \forall\, v
+  \tag{H.I.}
+\]
+
+Sea $v$ con $\delta_i(s,v) < \infty$. Sea
+$p = s \leadsto u \to v$ un camino más corto con a lo sumo $i$
+aristas. El subcamino $s \leadsto u$ tiene a lo sumo $i - 1$
+aristas, y por subestructura óptima:
+$w(s \leadsto u) = \delta_{i-1}(s,u)$.
+
+Por H.I., tras la pasada $i - 1$:
+\[
+  \mathrm{dist}[u] \leq \delta_{i-1}(s,u) \tag{1}
+\]
+
+En la pasada $i$, se relaja $(u,v)$:
+\[
+  \mathrm{dist}[v] \leq \mathrm{dist}[u] + w(u,v) \tag{2}
+\]
+
+Combinando (1) y (2):
+\[
+  \mathrm{dist}[v] \leq \delta_{i-1}(s,u) + w(u,v)
+  = \delta_i(s,v) \tag{3}
+\]
+
+Además, $\mathrm{dist}[v] \geq \delta(s,v)$ siempre (invariante de
+cota superior, misma prueba que en Dijkstra).
+
+\textbf{Tras $n - 1$ pasadas.} Por el Lema~\ref{lem:simple},
+$\delta(s,v) = \delta_{n-1}(s,v)$:
+\[
+  \delta(s,v) \leq \mathrm{dist}[v]
+  \leq \delta_{n-1}(s,v) = \delta(s,v)
+  \quad\Longrightarrow\quad
+  \mathrm{dist}[v] = \delta(s,v) \qedhere
+\]
+\end{proof}
+
+% ===================================================================
+\section{Demostración 2: detección de ciclos negativos}
+% ===================================================================
+
+\begin{theorem}\label{thm:negcycle}
+Tras $n - 1$ pasadas, si existe $(u,v) \in E$ con
+$\mathrm{dist}[u] + w(u,v) < \mathrm{dist}[v]$, entonces hay un
+ciclo negativo alcanzable desde $s$.
+\end{theorem}
+
+\begin{proof}[Prueba por contraposición]
+Si no hay ciclos negativos, por el Teorema~\ref{thm:correctness}:
+$\mathrm{dist}[v] = \delta(s,v)$ para todo $v$. Para cualquier
+$(u,v) \in E$, la desigualdad triangular da:
+\[
+  \delta(s,v) \leq \delta(s,u) + w(u,v)
+\]
+
+Sustituyendo:
+$\mathrm{dist}[v] \leq \mathrm{dist}[u] + w(u,v)$. La condición
+de relajación es falsa para toda arista. Contrapositiva: si alguna
+arista es relajable, hay ciclo negativo.
+\end{proof}
+
+\begin{theorem}[Recíproco]\label{thm:negcycle-conv}
+Si existe un ciclo negativo alcanzable desde $s$, la pasada
+$n$-ésima detecta al menos una arista relajable.
+\end{theorem}
+
+\begin{proof}
+Sea $c = v_0 \to v_1 \to \cdots \to v_k \to v_0$ un ciclo negativo
+con $\sum_{j=0}^{k} w(v_j, v_{j+1}) < 0$.
+
+Supongamos por contradicción que ninguna arista del ciclo es
+relajable tras $n - 1$ pasadas:
+\[
+  \mathrm{dist}[v_{j+1}] \leq \mathrm{dist}[v_j] + w(v_j, v_{j+1})
+  \quad \forall\, j = 0, \ldots, k
+\]
+
+Sumando sobre las $k + 1$ aristas:
+\[
+  \sum_{j=0}^{k} \mathrm{dist}[v_{j+1}]
+  \leq \sum_{j=0}^{k} \mathrm{dist}[v_j]
+  + \sum_{j=0}^{k} w(v_j, v_{j+1})
+\]
+
+Ambas sumas de $\mathrm{dist}$ son iguales (mismos vértices del
+ciclo):
+\[
+  0 \leq \sum_{j=0}^{k} w(v_j, v_{j+1})
+\]
+
+Pero $\sum w(v_j, v_{j+1}) < 0$. Contradicción. Por tanto, al menos
+una arista es relajable.
+\end{proof}
+
+% ===================================================================
+\section{Demostración 3: complejidad
+  \texorpdfstring{$\Theta(nm)$}{Theta(nm)}}
+% ===================================================================
+
+\begin{theorem}\label{thm:complexity}
+Bellman-Ford ejecuta en $\Theta(nm)$ en el peor caso.
+\end{theorem}
+
+\begin{proof}
+\emph{Cota superior.} Inicialización $O(n)$, $n - 1$ pasadas de
+$m$ relajaciones, verificación $O(m)$:
+\[
+  T = O(n + (n{-}1)m + m) = O(nm)
+\]
+
+\emph{Cota inferior.} Camino
+$s \to v_1 \to \cdots \to v_{n-1}$ con aristas en orden inverso en
+la lista. En la pasada~1, solo $(s,v_1)$ relaja exitosamente (es la
+última procesada). En la pasada~2, solo $(v_1,v_2)$. Se necesitan
+exactamente $n - 1$ pasadas de $m$ aristas:
+$T = \Omega(nm)$.
+
+Combinando: $T = \Theta(nm)$.
+\end{proof}
+
+% ===================================================================
+\section{Demostración 4: terminación temprana}
+% ===================================================================
+
+\begin{theorem}\label{thm:early}
+Si una pasada completa no produce ninguna relajación exitosa, las
+distancias son correctas.
+\end{theorem}
+
+\begin{proof}
+Si ninguna arista $(u,v)$ satisface
+$\mathrm{dist}[u] + w(u,v) < \mathrm{dist}[v]$, entonces:
+\[
+  \mathrm{dist}[v] \leq \mathrm{dist}[u] + w(u,v)
+  \quad \forall\, (u,v) \in E
+\]
+
+Esto es la condición de la pasada $n$-ésima. Por el
+Teorema~\ref{thm:negcycle}, no hay ciclos negativos, y por el
+Teorema~\ref{thm:correctness},
+$\mathrm{dist}[v] = \delta(s,v)$ para todo $v$. Pasadas adicionales
+no cambiarían nada.
+\end{proof}
+
+\begin{remark}
+Mejor caso: si el grafo no tiene pesos negativos y las aristas están
+en ``buen'' orden (ej: BFS order), puede bastar una sola pasada:
+$O(m)$.
+\end{remark}
+
+% ===================================================================
+\section{Demostración 5: contaminación intra-pasada}
+% ===================================================================
+
+\begin{theorem}\label{thm:intrapass}
+Tras exactamente $k$ pasadas, si se usa el array actualizado dentro
+de la misma pasada (implementación estándar):
+\[
+  \mathrm{dist}^{(k)}[v] \leq \delta_k(s,v)
+\]
+La convergencia es al menos tan rápida como la versión pura (que usa
+una copia del array anterior).
+\end{theorem}
+
+\begin{proof}
+La desigualdad $\mathrm{dist}^{(k)}[v] \leq \delta_k(s,v)$ se
+mantiene porque las actualizaciones intra-pasada solo pueden
+\textbf{reducir} valores de $\mathrm{dist}$, propagando información
+adicional. Nunca aumentan un $\mathrm{dist}$ ya correcto.
+
+La versión pura satisface $\mathrm{dist}^{(k)}[v] = \delta_k(s,v)$
+exactamente. La versión con contaminación satisface
+$\mathrm{dist}^{(k)}[v] \leq \delta_k(s,v)$: puede converger más
+rápido, nunca peor.
+\end{proof}
+
+\begin{corollary}
+La implementación estándar (sin copia) nunca necesita más pasadas que
+la versión pura, y frecuentemente menos.
+\end{corollary}
+
+% ===================================================================
+\section{Resumen de resultados}
+% ===================================================================
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llp{5.5cm}}
+\toprule
+\textbf{Resultado} & \textbf{Técnica} & \textbf{Clave} \\
+\midrule
+$\mathrm{dist}[v] = \delta(s,v)$ tras $n{-}1$ pasadas
+  & Inducción sobre pasadas
+  & Pasada $i$ corrige caminos de $\leq i$ aristas \\
+Detección de ciclos negativos
+  & Contrapositiva + contradicción
+  & Sumar desigualdades en el ciclo: $0 \leq w(c) < 0$ \\
+$\Theta(nm)$
+  & Cota sup.\ + cota inf.
+  & Peor caso: 1 arista corregida por pasada \\
+Terminación temprana
+  & Sin relajación $\Rightarrow$ desig.\ triangular
+  & Equivale a verificación de pasada $n$ \\
+Contaminación intra-pasada
+  & $\mathrm{dist}^{(k)}[v] \leq \delta_k(s,v)$
+  & Solo converge más rápido, nunca peor \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

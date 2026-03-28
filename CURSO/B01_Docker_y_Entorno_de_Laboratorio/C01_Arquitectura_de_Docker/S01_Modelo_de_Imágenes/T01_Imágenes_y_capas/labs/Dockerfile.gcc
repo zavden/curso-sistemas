@@ -1,0 +1,9 @@
+FROM debian:bookworm
+COPY hello.c /src/hello.c
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gcc libc6-dev \
+    && gcc -o /src/hello /src/hello.c \
+    && apt-get remove -y gcc libc6-dev \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
+CMD ["/src/hello"]

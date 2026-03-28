@@ -1,0 +1,10 @@
+FROM debian:bookworm-slim
+
+# GOOD PATTERN: install and clean in the same RUN instruction
+# Single layer: cache files are created and deleted within the same layer
+# The final layer only contains the net result (curl binary, no cache)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
+
+CMD ["curl", "--version"]

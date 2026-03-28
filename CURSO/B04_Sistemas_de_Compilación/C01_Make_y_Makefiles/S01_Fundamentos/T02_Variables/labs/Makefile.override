@@ -1,0 +1,21 @@
+# Makefile.override -- Demonstrates override directive
+# Variables from the command line normally take precedence.
+# override prevents that.
+
+CC := gcc
+CFLAGS := -O2
+
+# This flag is ALWAYS present, even if user passes CFLAGS on command line:
+override CFLAGS += -Wall
+
+$(info CC     = $(CC))
+$(info CFLAGS = $(CFLAGS))
+
+all: hello.c
+	$(CC) $(CFLAGS) -o hello hello.c
+	@echo "Compiled with: $(CC) $(CFLAGS)"
+
+clean:
+	rm -f hello
+
+.PHONY: clean
