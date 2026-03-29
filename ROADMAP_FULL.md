@@ -5,6 +5,68 @@
 
 ---
 
+## Mapa de dependencias
+
+> Ver `MAPA_DEPENDENCIAS.tex` para la versión visual completa.
+
+### Prerequisitos por bloque
+
+| Bloque | Nombre | Requiere | Recomendado |
+|:------:|--------|----------|-------------|
+| B01 | Docker y Entorno | — | — |
+| B02 | Fundamentos de Linux | B01 | — |
+| B03 | Fundamentos de C | B02 | — |
+| B04 | Sistemas de Compilación | B03 | — |
+| B05 | Fundamentos de Rust | B03 | — |
+| B06 | Programación de Sistemas en C | B03, B04 | — |
+| B07 | Programación de Sistemas en Rust | B05 | — |
+| B08 | Almacenamiento y Sist. de Archivos | B02 | B06 |
+| B09 | Redes | B02 | — |
+| B10 | Servicios de Red | B09 | B06 |
+| B11 | Seguridad, Kernel y Arranque | B02 | B06 |
+| B12 | GUI con Rust (egui) | B05 | B07 |
+| B13 | Multimedia con GStreamer | B05 | B07 |
+| B14 | Interoperabilidad C/Rust y WASM | B06, B07 | — |
+| B15 | Estructuras de Datos | B03, B05 | B04 |
+| B16 | Patrones de Diseño | B03, B05 | B15 |
+| B17 | Testing e Ingeniería de Software | B03, B05 | B15, B16 |
+| B18 | Scripting y Automatización | B02 | B09 |
+| B19 | Bases de Datos | B02 | B09 |
+| B20 | Kubernetes y Observabilidad | B01 | B09, B18, B19 |
+| B21 | Cloud Computing y Terraform | B09, B18 | B01, B19, B20 |
+
+### Rutas de estudio sugeridas
+
+**Ruta troncal (obligatoria):**
+B01 → B02 → B03 → B05 (todo lo demás parte de aquí)
+
+**Ruta SysAdmin/Infra:**
+... → B08 → B09 → B10 → B11
+
+**Ruta C completa (sistemas + calidad):**
+... → B04 → B06 → B15 → B16 → B17
+
+**Ruta Rust completa (aplicaciones + interop):**
+... → B07 → B12 / B13 → B14
+
+**Ruta WebAssembly (camino más corto a B14):**
+```
+              ┌→ B04 → B06 ─┐
+B01 → B02 → B03 ─┤               ├→ B14 → WASM App
+              └→ B05 → B07 ─┘
+```
+7 bloques. B04+B05 en paralelo, B06+B07 en paralelo → 5 fases.
+JS/TS/Canvas se estudian por cuenta propia en paralelo.
+
+**Ruta DevOps/SRE:**
+B01 → B02 → B09 → B18 → B19 → B20 → B21
+
+**Ruta full (secuencial sugerida):**
+B01 → B02 → B03 → B04 → B05 → B06 → B07 → B08 → B09 → B10 →
+B11 → B12 → B13 → B14 → B15 → B16 → B17 → B18 → B19 → B20 → B21
+
+---
+
 ## B01 — Docker y Entorno de Laboratorio
 
 ### C01 — Arquitectura de Docker `[A]`
@@ -1789,3 +1851,365 @@
 - [x] `C11/.../T02_Bellman_Ford/README_EXTRA.md` — Inducción: tras i iteraciones, dist[v] óptima con ≤ i aristas
 - [x] `C11/.../T02_Kruskal/README_EXTRA.md` — Propiedad de corte → Kruskal produce un MST
 - [x] `C11/.../T03_Prim/README_EXTRA.md` — Propiedad de corte → Prim produce un MST
+
+---
+
+## B18 — Scripting y Automatización
+
+### C01 — Bash Scripting Avanzado `[A]`
+
+**S01 — Estructuras de datos**
+- [ ] T01 — Arrays indexados y asociativos
+- [ ] T02 — Manipulación de strings (expansión de parámetros)
+- [ ] T03 — Aritmética y bc
+
+**S02 — Control de flujo avanzado**
+- [ ] T01 — Funciones (local, return, recursión, source)
+- [ ] T02 — Traps y cleanup (EXIT, ERR, SIGINT)
+- [ ] T03 — getopts y parsing de argumentos
+- [ ] T04 — Process substitution y named pipes
+
+**S03 — Herramientas de texto**
+- [ ] T01 — sed avanzado (in-place, multiline, hold space)
+- [ ] T02 — AWK como lenguaje (BEGIN/END, arrays, funciones)
+- [ ] T03 — jq para JSON
+- [ ] T04 — yq para YAML
+
+**S04 — Buenas prácticas**
+- [ ] T01 — set -euo pipefail y error handling
+- [ ] T02 — ShellCheck y linting
+- [ ] T03 — Debugging (set -x, PS4, bash -n)
+- [ ] T04 — Portabilidad (POSIX sh vs Bash)
+
+### C02 — Python para SysAdmin `[A]`
+
+**S01 — Fundamentos rápidos**
+- [ ] T01 — Crash course (tipos, control de flujo, funciones)
+- [ ] T02 — Archivos y paths (pathlib, os.walk)
+- [ ] T03 — Expresiones regulares (re module)
+- [ ] T04 — Manejo de errores (try/except, logging)
+
+**S02 — Herramientas de sistema**
+- [ ] T01 — subprocess (run, check_output, pipes, security)
+- [ ] T02 — os y sys (environment, signals, platform)
+- [ ] T03 — argparse (CLI, subcommands)
+- [ ] T04 — json, yaml, toml (parsear y generar configs)
+
+**S03 — Networking y HTTP**
+- [ ] T01 — requests (GET/POST, auth, sessions)
+- [ ] T02 — socket básico (TCP client/server)
+- [ ] T03 — paramiko (SSH programático, SCP)
+
+**S04 — Scripts prácticos**
+- [ ] T01 — Monitor de logs
+- [ ] T02 — Health check de servicios
+- [ ] T03 — Backup automatizado
+- [ ] T04 — Inventory scanner
+
+### C03 — Ansible `[M]`
+
+**S01 — Fundamentos**
+- [ ] T01 — Arquitectura (agentless, SSH, idempotencia)
+- [ ] T02 — Inventory (hosts, groups, variables)
+- [ ] T03 — Ad-hoc commands (ping, copy, shell, apt)
+- [ ] T04 — Conexión y autenticación (SSH keys, become)
+
+**S02 — Playbooks**
+- [ ] T01 — Estructura (plays, tasks, handlers, notify)
+- [ ] T02 — Variables y facts (vars, gather_facts, register)
+- [ ] T03 — Condicionales y loops (when, loop, block/rescue)
+- [ ] T04 — Templates Jinja2 (for, if, filters)
+
+**S03 — Roles y Galaxy**
+- [ ] T01 — Estructura de un role
+- [ ] T02 — ansible-galaxy (instalar, crear, collections)
+- [ ] T03 — Ansible Vault (encrypt, decrypt, vault-password-file)
+
+**S04 — Patrones prácticos**
+- [ ] T01 — Provisionar un servidor (SSH hardening, firewall)
+- [ ] T02 — Deploy de aplicación (git, build, systemd, rollback)
+- [ ] T03 — Idempotencia (check mode, diff mode)
+- [ ] T04 — Testing con Molecule (Docker driver, testinfra)
+
+### C04 — Automatización del Sistema `[A]`
+
+**S01 — Programación de tareas**
+- [ ] T01 — cron y crontab
+- [ ] T02 — systemd timers
+- [ ] T03 — at y batch
+- [ ] T04 — cron vs systemd timers
+
+**S02 — Gestión de logs**
+- [ ] T01 — journald (journalctl filtros, persistencia)
+- [ ] T02 — rsyslog (configuración, remote logging)
+- [ ] T03 — logrotate
+- [ ] T04 — Structured logging (JSON logs)
+
+**S03 — Backup y disaster recovery**
+- [ ] T01 — rsync (delta, flags, SSH)
+- [ ] T02 — Estrategias de backup (full, incremental, 3-2-1)
+- [ ] T03 — Herramientas (borgbackup, restic, LVM snapshots)
+- [ ] T04 — Recovery plan (RTO/RPO, runbooks)
+
+---
+
+## B19 — Bases de Datos
+
+### C01 — Fundamentos de SQL `[A]`
+
+**S01 — Modelo relacional**
+- [ ] T01 — Tablas, filas, columnas
+- [ ] T02 — Claves primarias y foráneas (PK, FK, constraints)
+- [ ] T03 — Normalización (1NF, 2NF, 3NF)
+
+**S02 — DDL y DML**
+- [ ] T01 — CREATE, ALTER, DROP
+- [ ] T02 — INSERT, UPDATE, DELETE (RETURNING, ON CONFLICT)
+- [ ] T03 — SELECT básico (WHERE, ORDER BY, LIMIT, DISTINCT)
+- [ ] T04 — Funciones agregadas (COUNT, SUM, GROUP BY, HAVING)
+
+**S03 — Consultas avanzadas**
+- [ ] T01 — JOINs (INNER, LEFT, RIGHT, FULL, self-join)
+- [ ] T02 — Subqueries (IN, EXISTS, correlated)
+- [ ] T03 — CTEs y Window Functions (WITH, ROW_NUMBER, PARTITION BY)
+- [ ] T04 — Views e índices (CREATE VIEW, CREATE INDEX, B-tree)
+
+**S04 — Transacciones y concurrencia**
+- [ ] T01 — ACID
+- [ ] T02 — BEGIN/COMMIT/ROLLBACK (savepoints)
+- [ ] T03 — Niveles de aislamiento (READ COMMITTED, SERIALIZABLE)
+- [ ] T04 — Deadlocks (detección, prevención)
+
+### C02 — PostgreSQL Administración `[M]`
+
+**S01 — Instalación y configuración**
+- [ ] T01 — Instalación (apt/dnf, Docker, initdb)
+- [ ] T02 — Roles y autenticación (pg_hba.conf)
+- [ ] T03 — Bases de datos y schemas
+- [ ] T04 — Configuración (postgresql.conf)
+
+**S02 — Operaciones cotidianas**
+- [ ] T01 — psql (\d, \dt, \l, \copy, scripting)
+- [ ] T02 — Backup y restore (pg_dump, pg_restore)
+- [ ] T03 — VACUUM y ANALYZE (autovacuum, bloat)
+- [ ] T04 — Monitoreo (pg_stat_activity, slow queries)
+
+**S03 — Rendimiento**
+- [ ] T01 — EXPLAIN y EXPLAIN ANALYZE
+- [ ] T02 — Tipos de índices (B-tree, Hash, GIN, GiST)
+- [ ] T03 — Connection pooling (PgBouncer)
+- [ ] T04 — Tuning básico (shared_buffers, work_mem)
+
+**S04 — Alta disponibilidad**
+- [ ] T01 — Streaming replication (primary/standby)
+- [ ] T02 — Failover (pg_promote, Patroni overview)
+- [ ] T03 — Logical replication (pub/sub)
+
+### C03 — Redis `[M]`
+
+**S01 — Fundamentos**
+- [ ] T01 — Modelo de datos (key-value, in-memory)
+- [ ] T02 — Tipos de datos (strings, lists, sets, hashes)
+- [ ] T03 — Comandos esenciales (GET/SET, EXPIRE, SCAN)
+- [ ] T04 — redis-cli
+
+**S02 — Patrones de uso**
+- [ ] T01 — Cache (TTL, cache-aside, invalidación)
+- [ ] T02 — Contadores y rate limiting
+- [ ] T03 — Pub/Sub
+- [ ] T04 — Colas de trabajo (LPUSH/BRPOP)
+
+**S03 — Persistencia y operaciones**
+- [ ] T01 — RDB snapshots
+- [ ] T02 — AOF (Append Only File)
+- [ ] T03 — Sentinel (alta disponibilidad)
+- [ ] T04 — Redis en producción (maxmemory, eviction, security)
+
+### C04 — Bases de Datos desde C y Rust `[M]`
+
+**S01 — SQLite**
+- [ ] T01 — SQLite como librería (embedded, single-file)
+- [ ] T02 — API de C (sqlite3_open, prepare, step, finalize)
+- [ ] T03 — rusqlite en Rust (Connection, query_map, params![])
+- [ ] T04 — Cuándo usar SQLite
+
+**S02 — PostgreSQL desde código**
+- [ ] T01 — libpq en C (PQconnectdb, PQexec, prepared statements)
+- [ ] T02 — tokio-postgres en Rust (connect, query, pooling)
+- [ ] T03 — Migraciones (sqlx migrate, schema versionado)
+- [ ] T04 — SQL injection prevention (prepared statements siempre)
+
+---
+
+## B20 — Kubernetes y Observabilidad
+
+### C01 — Kubernetes Fundamentos `[A]`
+
+**S01 — Arquitectura**
+- [ ] T01 — Qué es Kubernetes (orquestador, desired state)
+- [ ] T02 — Componentes (control plane, node components)
+- [ ] T03 — Instalación local (minikube, kind, k3d)
+- [ ] T04 — kubectl (get, describe, apply, logs, exec)
+
+**S02 — Workloads**
+- [ ] T01 — Pods (spec, containers, initContainers, lifecycle)
+- [ ] T02 — Deployments (replicas, strategy, rollback)
+- [ ] T03 — Services (ClusterIP, NodePort, LoadBalancer, DNS)
+- [ ] T04 — Namespaces (ResourceQuotas, LimitRanges)
+
+**S03 — Configuración y storage**
+- [ ] T01 — ConfigMaps (literal, file, mount, env)
+- [ ] T02 — Secrets (tipos, mount, encryption at rest)
+- [ ] T03 — Volumes (PV, PVC, StorageClass, dynamic provisioning)
+- [ ] T04 — Resource limits (requests vs limits, QoS classes)
+
+**S04 — Networking**
+- [ ] T01 — Modelo de red (flat network, CNI plugins)
+- [ ] T02 — Ingress (nginx-ingress, rules, TLS)
+- [ ] T03 — Network Policies (deny-all, allow, egress)
+
+### C02 — Kubernetes Aplicado `[M]`
+
+**S01 — Helm**
+- [ ] T01 — Qué es Helm (charts, releases, repositories)
+- [ ] T02 — Usar charts existentes (install, upgrade, values)
+- [ ] T03 — Crear un chart (templates, helpers, Go syntax)
+- [ ] T04 — Chart lifecycle (versioning, hooks, testing)
+
+**S02 — Despliegues avanzados**
+- [ ] T01 — StatefulSets (stable identity, volumeClaimTemplates)
+- [ ] T02 — DaemonSets (un pod por nodo, logging agents)
+- [ ] T03 — Jobs y CronJobs (batch, backoffLimit, schedule)
+- [ ] T04 — Health checks (liveness, readiness, startup probes)
+
+**S03 — Seguridad**
+- [ ] T01 — RBAC (Role, ClusterRole, RoleBinding)
+- [ ] T02 — Pod Security Standards (restricted, baseline)
+- [ ] T03 — Service Accounts (IRSA en EKS)
+
+**S04 — Operaciones**
+- [ ] T01 — kubectl avanzado (jsonpath, patch, diff, kustomize)
+- [ ] T02 — Debugging (events, logs --previous, kubectl debug)
+- [ ] T03 — Scaling (HPA, VPA, Cluster Autoscaler)
+- [ ] T04 — Deployment strategies (blue-green, canary)
+
+### C03 — Prometheus y Grafana `[M]`
+
+**S01 — Prometheus**
+- [ ] T01 — Arquitectura (pull-based, TSDB, service discovery)
+- [ ] T02 — Tipos de métricas (counter, gauge, histogram)
+- [ ] T03 — PromQL (rate, aggregations, recording rules)
+- [ ] T04 — Alertmanager (routing, receivers, silences)
+
+**S02 — Grafana**
+- [ ] T01 — Instalación y data sources
+- [ ] T02 — Dashboards (panels, variables, templating)
+- [ ] T03 — Alerting (unified alerting, contact points)
+- [ ] T04 — Dashboards esenciales (Node Exporter, K8s, PG, Redis)
+
+**S03 — Instrumentación**
+- [ ] T01 — Node Exporter (CPU, RAM, disco, red)
+- [ ] T02 — kube-state-metrics y cAdvisor
+- [ ] T03 — Instrumentar app en Rust (prometheus crate)
+- [ ] T04 — Instrumentar app en C (libprom, endpoint HTTP)
+
+### C04 — Logging y Trazabilidad `[M]`
+
+**S01 — Centralización de logs**
+- [ ] T01 — Problema del logging distribuido
+- [ ] T02 — Loki (arquitectura, labels, LogQL)
+- [ ] T03 — Promtail / Grafana Alloy (agent, pipelines)
+- [ ] T04 — Grafana + Loki (Explore, correlación con métricas)
+
+**S02 — Stack ELK/EFK (overview)**
+- [ ] T01 — Elasticsearch (indexing, full-text search)
+- [ ] T02 — Fluent Bit (input/filter/output, K8s)
+- [ ] T03 — Kibana (Discover, dashboards)
+- [ ] T04 — ELK vs Loki (cuándo usar cada uno)
+
+**S03 — Trazabilidad (overview)**
+- [ ] T01 — Distributed tracing (spans, traces, propagation)
+- [ ] T02 — OpenTelemetry (collector, SDK, vendor-neutral)
+- [ ] T03 — Grafana Tempo / Jaeger (backends de tracing)
+- [ ] T04 — Los tres pilares (metrics + logs + traces)
+
+---
+
+## B21 — Cloud Computing y Terraform
+
+### C01 — Fundamentos de Cloud `[A]`
+
+**S01 — Conceptos**
+- [ ] T01 — IaaS, PaaS, SaaS
+- [ ] T02 — Regiones y Availability Zones
+- [ ] T03 — Modelo de responsabilidad compartida
+- [ ] T04 — Pricing (on-demand, reserved, spot, free tier)
+
+**S02 — Networking en la nube**
+- [ ] T01 — VPC (subnets, route tables, IGW, NAT)
+- [ ] T02 — Security Groups y NACLs
+- [ ] T03 — DNS (Route53, hosted zones, records)
+- [ ] T04 — Load Balancers (ALB, NLB, target groups)
+
+### C02 — AWS Core Services `[A]`
+
+**S01 — Compute**
+- [ ] T01 — EC2 (instance types, AMIs, key pairs, user-data)
+- [ ] T02 — Security Groups y SSH (bastion, Session Manager)
+- [ ] T03 — EBS (volume types, snapshots, encryption)
+- [ ] T04 — Auto Scaling (launch templates, ASG, policies)
+
+**S02 — Storage**
+- [ ] T01 — S3 (buckets, versioning, lifecycle, storage classes)
+- [ ] T02 — S3 permisos (bucket policies, presigned URLs)
+- [ ] T03 — EFS y FSx (shared filesystem)
+
+**S03 — Identity y security**
+- [ ] T01 — IAM (users, groups, roles, policies JSON)
+- [ ] T02 — IAM Roles (instance profiles, cross-account)
+- [ ] T03 — Secrets Manager y SSM Parameter Store
+
+**S04 — Otros servicios**
+- [ ] T01 — RDS (managed PostgreSQL, Multi-AZ, read replicas)
+- [ ] T02 — CloudWatch (metrics, alarms, logs, dashboards)
+- [ ] T03 — SNS y SQS (notificaciones, colas, dead-letter)
+- [ ] T04 — CLI y SDKs (aws cli, boto3)
+
+### C03 — Terraform `[M]`
+
+**S01 — Fundamentos**
+- [ ] T01 — IaC y por qué importa
+- [ ] T02 — HCL basics (bloques, tipos, variables, outputs)
+- [ ] T03 — Providers (aws, versiones, registry)
+- [ ] T04 — Workflow (init, plan, apply, destroy)
+
+**S02 — Recursos y estado**
+- [ ] T01 — Resources (aws_instance, lifecycle)
+- [ ] T02 — State (tfstate, remote state S3+DynamoDB)
+- [ ] T03 — Data sources (consultar infra existente)
+- [ ] T04 — Import (terraform import, state mv/rm)
+
+**S03 — Módulos y organización**
+- [ ] T01 — Módulos (source, inputs, outputs)
+- [ ] T02 — Estructura de proyecto (environments, modules/)
+- [ ] T03 — Variables (tfvars, validation, locals, sensitive)
+- [ ] T04 — Workspaces (new/select, vs directories)
+
+**S04 — Patrones avanzados**
+- [ ] T01 — for_each y count (dynamic blocks)
+- [ ] T02 — Provisioners (por qué evitarlos)
+- [ ] T03 — Backend remoto (S3 + DynamoDB paso a paso)
+- [ ] T04 — Terraform + Ansible (workflow completo)
+
+### C04 — Prácticas Cloud `[M]`
+
+**S01 — Despliegues**
+- [ ] T01 — VPC completa en Terraform
+- [ ] T02 — EC2 + RDS (app + database)
+- [ ] T03 — S3 static website + CloudFront
+- [ ] T04 — Auto Scaling + ALB
+
+**S02 — Seguridad y costos**
+- [ ] T01 — Security audit (IAM Access Analyzer, CloudTrail)
+- [ ] T02 — Cost management (budgets, tagging, right-sizing)
+- [ ] T03 — Well-Architected overview (6 pilares)

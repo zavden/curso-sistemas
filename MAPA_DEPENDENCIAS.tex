@@ -1,0 +1,603 @@
+\documentclass[11pt, letterpaper]{article}
+
+% --- Idioma y codificación ---
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% --- Formato ---
+\usepackage[margin=2cm, landscape]{geometry}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{colortbl}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta, calc, fit, backgrounds, decorations.pathreplacing}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue!70!black}
+\usepackage{enumitem}
+\usepackage{float}
+
+% --- Colores por pista temática ---
+\definecolor{cTrack}{HTML}{DCE6F1}   % azul claro — pista C
+\definecolor{rTrack}{HTML}{E2EFDA}   % verde claro — pista Rust
+\definecolor{lTrack}{HTML}{FFF2CC}   % amarillo claro — pista Linux/Infra
+\definecolor{qTrack}{HTML}{F2DCDB}   % rosa claro — pista Calidad/Herramientas
+\definecolor{tTrack}{HTML}{E4DFEC}   % lavanda — pista Troncal
+\definecolor{dTrack}{HTML}{FDDCC8}   % naranja claro — pista DevOps/Cloud
+\definecolor{rowhead}{HTML}{4472C4}  % azul oscuro para encabezados
+
+\title{%
+  Mapa de Dependencias del Curso\\[4pt]
+  \large Linux $\cdot$ C $\cdot$ Rust
+}
+\author{21 bloques --- B01 a B21}
+\date{}
+
+\begin{document}
+\maketitle
+
+% ===================================================================
+\section{Tabla de flujo del curso}
+% ===================================================================
+
+Cada fila representa un \textbf{nivel de profundidad}. Dentro de un
+mismo nivel, los bloques son independientes entre sí y pueden cursarse
+en cualquier orden (o en paralelo). Para avanzar al nivel siguiente se
+necesitan los prerequisitos indicados en la Sección~\ref{sec:deps}.
+
+\bigskip
+
+\renewcommand{\arraystretch}{1.8}
+\setlength{\tabcolsep}{3pt}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{
+  >{\centering\arraybackslash}m{2.0cm}|
+  >{\centering\arraybackslash}m{2.8cm}|
+  >{\centering\arraybackslash}m{2.8cm}|
+  >{\centering\arraybackslash}m{2.8cm}|
+  >{\centering\arraybackslash}m{2.8cm}|
+  >{\centering\arraybackslash}m{2.8cm}|
+  >{\centering\arraybackslash}m{2.8cm}}
+\toprule
+\rowcolor{rowhead}
+\textcolor{white}{\textbf{Nivel}}
+  & \textcolor{white}{\textbf{Herramientas}}
+  & \textcolor{white}{\textbf{Teoría / Datos}}
+  & \textcolor{white}{\textbf{Pista C}}
+  & \textcolor{white}{\textbf{Pista Rust}}
+  & \textcolor{white}{\textbf{Linux / Infra}}
+  & \textcolor{white}{\textbf{DevOps / Cloud}} \\
+\midrule
+%%% Nivel 1 %%%
+\cellcolor{tTrack}\textbf{Nivel 1}\newline Fundamentos
+  & \cellcolor{tTrack}\textbf{B01}\newline Docker
+  & \cellcolor{tTrack}\textbf{B02}\newline Fund.\ Linux
+  & \cellcolor{cTrack}\textbf{B03}\newline Fund.\ C
+  & \cellcolor{rTrack}\textbf{B05}\newline Fund.\ Rust
+  & ---
+  & --- \\
+\hline
+%%% Nivel 2 %%%
+\cellcolor{qTrack}\textbf{Nivel 2}\newline Ramificación
+  & \cellcolor{qTrack}\textbf{B04}\newline Sist.\ Compilación
+  & \cellcolor{tTrack}\textbf{B15}\newline Estr.\ de Datos
+  & \cellcolor{cTrack}\textbf{B06}\newline Prog.\ Sist.\ C
+  & \cellcolor{rTrack}\textbf{B07}\newline Prog.\ Sist.\ Rust
+  & \cellcolor{lTrack}\textbf{B08} Almac.\newline
+    \textbf{B09} Redes
+  & --- \\
+\hline
+%%% Nivel 3 %%%
+\cellcolor{qTrack}\textbf{Nivel 3}\newline Aplicado
+  & \cellcolor{qTrack}\textbf{B16}\newline Patrones
+  & \cellcolor{dTrack}\textbf{B19}\newline Bases de Datos
+  & ---
+  & \cellcolor{rTrack}\textbf{B12} GUI\newline
+    \textbf{B13} Multimedia
+  & \cellcolor{lTrack}\textbf{B10}\newline Servicios Red
+  & \cellcolor{dTrack}\textbf{B18}\newline Scripting \\
+\hline
+%%% Nivel 4 %%%
+\cellcolor{qTrack}\textbf{Nivel 4}\newline Avanzado
+  & \cellcolor{qTrack}\textbf{B17}\newline Testing+IS
+  & \cellcolor{lTrack}\textbf{B11}\newline Seguridad
+  & ---
+  & \cellcolor{tTrack}\textbf{B14}\newline Interop/WASM
+  & ---
+  & \cellcolor{dTrack}\textbf{B20}\newline Kubernetes \\
+\hline
+%%% Nivel 5 %%%
+\cellcolor{dTrack}\textbf{Nivel 5}\newline Capstone
+  & ---
+  & ---
+  & ---
+  & ---
+  & ---
+  & \cellcolor{dTrack}\textbf{B21}\newline Cloud+TF \\
+\bottomrule
+\end{tabular}
+\caption{Flujo del curso por niveles y pistas temáticas.
+  Los colores indican:
+  \colorbox{tTrack}{troncal},
+  \colorbox{cTrack}{pista C},
+  \colorbox{rTrack}{pista Rust},
+  \colorbox{lTrack}{Linux/Infra},
+  \colorbox{qTrack}{Herramientas},
+  \colorbox{dTrack}{DevOps/Cloud}.}
+\end{table}
+
+\newpage
+
+% ===================================================================
+\section{Prerequisitos detallados}\label{sec:deps}
+% ===================================================================
+
+\renewcommand{\arraystretch}{1.5}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{c l l l l}
+\toprule
+\textbf{Bloque} & \textbf{Nombre} & \textbf{Requiere} & \textbf{Recomendado} & \textbf{Aporta a} \\
+\midrule
+\rowcolor{tTrack}
+B01 & Docker y Entorno & --- & --- & B02, B20 \\
+\rowcolor{tTrack}
+B02 & Fundamentos de Linux & B01 & --- & B03, B08, B09, B11, B18, B19 \\
+\rowcolor{cTrack}
+B03 & Fundamentos de C & B02 & --- & B04, B05, B06, B15, B16 \\
+\rowcolor{qTrack}
+B04 & Sistemas de Compilación & B03 & --- & B06, B15 \\
+\rowcolor{rTrack}
+B05 & Fundamentos de Rust & B03 & --- & B07, B12, B13, B15, B16 \\
+\rowcolor{cTrack}
+B06 & Prog.\ de Sistemas en C & B03, B04 & --- & B08, B10, B11, B14 \\
+\rowcolor{rTrack}
+B07 & Prog.\ de Sistemas en Rust & B05 & --- & B12, B13, B14 \\
+\rowcolor{lTrack}
+B08 & Almacenamiento y Sist.\ Arch. & B02 & B06 & --- \\
+\rowcolor{lTrack}
+B09 & Redes & B02 & --- & B10, B18, B19, B21 \\
+\rowcolor{lTrack}
+B10 & Servicios de Red & B09 & B06 & --- \\
+\rowcolor{lTrack}
+B11 & Seguridad, Kernel y Arranque & B02 & B06 & --- \\
+\rowcolor{rTrack}
+B12 & GUI con Rust (egui) & B05 & B07 & --- \\
+\rowcolor{rTrack}
+B13 & Multimedia con GStreamer & B05 & B07 & --- \\
+\rowcolor{tTrack}
+B14 & Interop C/Rust y WASM & B06, B07 & --- & --- \\
+\rowcolor{tTrack}
+B15 & Estructuras de Datos & B03, B05 & B04 & B16 \\
+\rowcolor{qTrack}
+B16 & Patrones de Diseño & B03, B05 & B15 & B17 \\
+\rowcolor{qTrack}
+B17 & Testing e Ing.\ de Software & B03, B05 & B15, B16 & --- \\
+\rowcolor{dTrack}
+B18 & Scripting y Automatización & B02 & B09 & B21 \\
+\rowcolor{dTrack}
+B19 & Bases de Datos & B02 & B09, B03, B05 & B21 \\
+\rowcolor{dTrack}
+B20 & Kubernetes y Observabilidad & B01 & B09, B18, B19 & B21 \\
+\rowcolor{dTrack}
+B21 & Cloud Computing y Terraform & B09, B18 & B01, B19, B20 & --- \\
+\bottomrule
+\end{tabular}
+\caption{Prerequisitos obligatorios y recomendados de cada bloque.}
+\end{table}
+
+\newpage
+
+% ===================================================================
+\section{Grafo de dependencias}
+% ===================================================================
+
+Flechas sólidas = prerequisito obligatorio.
+Flechas punteadas = recomendado pero no obligatorio.
+
+\bigskip
+
+\begin{center}
+\begin{tikzpicture}[
+  node distance=1.2cm and 1.6cm,
+  block/.style={
+    rectangle, rounded corners=4pt, draw, thick,
+    minimum width=2.8cm, minimum height=1cm,
+    font=\small\bfseries, align=center,
+    text=black
+  },
+  troncal/.style={block, fill=tTrack},
+  cpista/.style={block, fill=cTrack},
+  rpista/.style={block, fill=rTrack},
+  lpista/.style={block, fill=lTrack},
+  qpista/.style={block, fill=qTrack},
+  dpista/.style={block, fill=dTrack},
+  req/.style={-{Stealth[length=6pt]}, thick},
+  rec/.style={-{Stealth[length=6pt]}, thick, densely dashed, gray},
+]
+
+% Constrain bounding box to prevent arrow curves from overflowing the page
+\useasboundingbox (-2,-15) rectangle (21,1);
+
+% --- Nivel 1 ---
+\node[troncal] (b01) {B01\\Docker};
+\node[troncal, right=2.0cm of b01] (b02) {B02\\Linux};
+\node[cpista,  right=2.0cm of b02] (b03) {B03\\Fund.\ C};
+\node[rpista,  right=2.0cm of b03] (b05) {B05\\Fund.\ Rust};
+
+% --- Nivel 2 ---
+\node[qpista,  below=1.8cm of b01] (b04) {B04\\Build};
+\node[cpista,  below=1.8cm of b03] (b06) {B06\\Sistemas C};
+\node[rpista,  below=1.8cm of b05] (b07) {B07\\Sistemas Rust};
+\node[troncal, below=1.8cm of b02] (b15) {B15\\Estr.\ Datos};
+
+% Infra branch (right)
+\node[lpista,  right=2.0cm of b05] (b08) {B08\\Almac.};
+\node[lpista,  below=0.6cm of b08] (b09) {B09\\Redes};
+
+% --- Nivel 3 ---
+\node[lpista,  below=1.8cm of b09] (b10) {B10\\Servicios};
+\node[rpista,  below=1.8cm of b07] (b12) {B12\\GUI};
+\node[qpista,  below=1.8cm of b04] (b16) {B16\\Patrones};
+\node[rpista,  left=0.4cm of b12] (b13) {B13\\Multimedia};
+\node[lpista,  below=1.8cm of b15] (b11) {B11\\Seguridad};
+
+% --- Nivel 4 ---
+\node[tTrack, block, below=1.8cm of b11] (b14) {B14\\Interop/WASM};
+\node[qpista,  below=1.8cm of b16] (b17) {B17\\Testing+IS};
+
+% --- DevOps/SRE track (Nivel 4-6) ---
+\node[dpista,  right=3.0cm of b14] (b19) {B19\\BD};
+\node[dpista,  right=1.5cm of b19] (b18) {B18\\Scripting};
+\node[dpista,  below=1.8cm of b19, xshift=2cm] (b20) {B20\\K8s+Obs.};
+\node[dpista,  below=1.8cm of b20] (b21) {B21\\Cloud+TF};
+
+% === Flechas obligatorias ===
+\draw[req] (b01) -- (b02);
+\draw[req] (b02) -- (b03);
+\draw[req] (b03) -- (b05);
+\draw[req] (b03) -- (b04);
+
+% B06 needs B03 + B04
+\draw[req] (b03) -- (b06);
+\draw[req] (b04) -- (b06);
+
+% B07 needs B05
+\draw[req] (b05) -- (b07);
+
+% Infra needs B02
+\draw[req] (b02.north east) -- (b08.west);
+\draw[req] (b02) -- (b09.west);
+\draw[req] (b09) -- (b10);
+
+% B15 needs B03 + B05
+\draw[req] (b03) -- (b15);
+\draw[req] (b05) -- (b15);
+
+% B11 needs B02
+\draw[req] (b02) -- (b11);
+
+% B14 needs B06 + B07
+\draw[req] (b06) -- (b14);
+\draw[req] (b07) -- (b14);
+
+% B16 needs B03 + B05 (via B15 recommended)
+\draw[req] (b03.south) to[out=-90,in=160] (b16.north west);
+\draw[req] (b05.south) to[out=-90,in=20] (b16.north east);
+
+% B17 needs B03 + B05 (through B16)
+\draw[req] (b16) -- (b17);
+
+% B12, B13 need B05
+\draw[req] (b05) -- (b12);
+\draw[req] (b05) -- (b13);
+
+% DevOps obligatorias
+\draw[req] (b02.south east) to[out=-20,in=160] (b18.north west);  % B18 ← B02
+\draw[req] (b02.south east) to[out=-25,in=150] (b19.north west);  % B19 ← B02
+\draw[req] (b01.south) to[out=-60,in=170] (b20.west);             % B20 ← B01
+\draw[req] (b09.south east) to[out=-45,in=45] (b21.north east);   % B21 ← B09
+\draw[req] (b18.south) to[out=-100,in=30] (b21.north east);       % B21 ← B18
+
+% === Flechas recomendadas ===
+\draw[rec] (b06) -- (b08);
+\draw[rec] (b06) to[bend right=15] (b10);
+\draw[rec] (b06) -- (b11);
+\draw[rec] (b07) -- (b12);
+\draw[rec] (b07) -- (b13);
+\draw[rec] (b15) -- (b16);
+\draw[rec] (b15) to[out=-110,in=110] (b17);
+\draw[rec] (b04) -- (b15.north west);
+
+% DevOps recomendadas
+\draw[rec] (b09.south) to[out=-60,in=50] (b18.north east);        % B18 rec B09
+\draw[rec] (b09.south west) to[out=-100,in=50] (b19.north east);  % B19 rec B09
+\draw[rec] (b09.south) to[out=-50,in=50] (b20.north east);        % B20 rec B09
+\draw[rec] (b18.south) to[out=-110,in=100] (b20.north);           % B20 rec B18
+\draw[rec] (b19.south) to[out=-30,in=160] (b20.north west);       % B20 rec B19
+\draw[rec] (b01.south west) to[out=-50,in=160] (b21.north west);  % B21 rec B01
+\draw[rec] (b19.south) to[out=-80,in=140] (b21.north west);       % B21 rec B19
+\draw[rec] (b20) -- (b21);                                         % B21 rec B20
+
+\end{tikzpicture}
+\end{center}
+
+\newpage
+
+% ===================================================================
+\section{Rutas de estudio sugeridas}
+% ===================================================================
+
+\subsection{Ruta troncal (obligatoria para todos)}
+
+\begin{center}
+\begin{tikzpicture}[
+  node distance=0.6cm,
+  blk/.style={rectangle, rounded corners=3pt, draw, thick,
+    fill=tTrack, minimum width=1.8cm, minimum height=0.7cm,
+    font=\small\bfseries},
+  arr/.style={-{Stealth[length=5pt]}, thick}
+]
+\node[blk] (a) {B01};
+\node[blk, right=of a] (b) {B02};
+\node[blk, right=of b] (c) {B03};
+\node[blk, right=of c] (d) {B05};
+\draw[arr] (a)--(b); \draw[arr] (b)--(c); \draw[arr] (c)--(d);
+\end{tikzpicture}
+\end{center}
+
+Todo lo demás parte de estos cuatro bloques. Son secuenciales y
+obligatorios.
+
+\subsection{Ruta SysAdmin / Infraestructura}
+
+\begin{center}
+\begin{tikzpicture}[
+  node distance=0.6cm,
+  blk/.style={rectangle, rounded corners=3pt, draw, thick,
+    fill=lTrack, minimum width=1.8cm, minimum height=0.7cm,
+    font=\small\bfseries},
+  trn/.style={rectangle, rounded corners=3pt, draw, thick,
+    fill=tTrack, minimum width=1.8cm, minimum height=0.7cm,
+    font=\small\bfseries},
+  arr/.style={-{Stealth[length=5pt]}, thick}
+]
+\node[trn] (a) {troncal};
+\node[blk, right=of a] (b) {B08};
+\node[blk, right=of b] (c) {B09};
+\node[blk, right=of c] (d) {B10};
+\node[blk, right=of d] (e) {B11};
+\draw[arr] (a)--(b); \draw[arr] (b)--(c);
+\draw[arr] (c)--(d); \draw[arr] (d)--(e);
+\end{tikzpicture}
+\end{center}
+
+Ideal para quien busca certificaciones Linux (LPIC, RHCSA) o
+administración de servidores. B06 recomendado antes de B10 y B11.
+
+\subsection{Ruta C completa (sistemas + calidad)}
+
+\begin{center}
+\begin{tikzpicture}[
+  node distance=0.6cm,
+  blk/.style={rectangle, rounded corners=3pt, draw, thick,
+    fill=cTrack, minimum width=1.8cm, minimum height=0.7cm,
+    font=\small\bfseries},
+  qblk/.style={rectangle, rounded corners=3pt, draw, thick,
+    fill=qTrack, minimum width=1.8cm, minimum height=0.7cm,
+    font=\small\bfseries},
+  trn/.style={rectangle, rounded corners=3pt, draw, thick,
+    fill=tTrack, minimum width=1.8cm, minimum height=0.7cm,
+    font=\small\bfseries},
+  arr/.style={-{Stealth[length=5pt]}, thick}
+]
+\node[trn] (a) {troncal};
+\node[qblk, right=of a] (b) {B04};
+\node[blk, right=of b] (c) {B06};
+\node[trn, right=of c] (d) {B15};
+\node[qblk, right=of d] (e) {B16};
+\node[qblk, right=of e] (f) {B17};
+\draw[arr] (a)--(b); \draw[arr] (b)--(c);
+\draw[arr] (c)--(d); \draw[arr] (d)--(e); \draw[arr] (e)--(f);
+\end{tikzpicture}
+\end{center}
+
+Para desarrollo de sistemas, embebidos, o contribución a proyectos
+de código abierto en C.
+
+\subsection{Ruta Rust completa (aplicaciones + interop)}
+
+\begin{center}
+\begin{tikzpicture}[
+  node distance=0.6cm,
+  blk/.style={rectangle, rounded corners=3pt, draw, thick,
+    fill=rTrack, minimum width=1.8cm, minimum height=0.7cm,
+    font=\small\bfseries},
+  trn/.style={rectangle, rounded corners=3pt, draw, thick,
+    fill=tTrack, minimum width=1.8cm, minimum height=0.7cm,
+    font=\small\bfseries},
+  arr/.style={-{Stealth[length=5pt]}, thick}
+]
+\node[trn] (a) {troncal};
+\node[blk, right=of a] (b) {B07};
+\node[blk, right=of b] (c) {B12};
+\node[blk, right=of c] (d) {B13};
+\node[trn, right=of d] (e) {B14};
+\draw[arr] (a)--(b); \draw[arr] (b)--(c);
+\draw[arr] (c)--(d); \draw[arr] (d)--(e);
+\end{tikzpicture}
+\end{center}
+
+Para desarrollo de aplicaciones en Rust, WebAssembly, o GUI.
+B14 (Interop) requiere también B06, así que la ruta C parcial es
+necesaria para llegar ahí.
+
+\subsection{Ruta DevOps / SRE}
+
+\begin{center}
+\begin{tikzpicture}[
+  node distance=0.6cm,
+  blk/.style={rectangle, rounded corners=3pt, draw, thick,
+    fill=dTrack, minimum width=1.8cm, minimum height=0.7cm,
+    font=\small\bfseries},
+  lblk/.style={rectangle, rounded corners=3pt, draw, thick,
+    fill=lTrack, minimum width=1.8cm, minimum height=0.7cm,
+    font=\small\bfseries},
+  trn/.style={rectangle, rounded corners=3pt, draw, thick,
+    fill=tTrack, minimum width=1.8cm, minimum height=0.7cm,
+    font=\small\bfseries},
+  arr/.style={-{Stealth[length=5pt]}, thick}
+]
+\node[trn] (a) {troncal};
+\node[lblk, right=of a] (b) {B09};
+\node[blk, right=of b] (c) {B18};
+\node[blk, right=of c] (d) {B19};
+\node[blk, right=of d] (e) {B20};
+\node[blk, right=of e] (f) {B21};
+\draw[arr] (a)--(b); \draw[arr] (b)--(c);
+\draw[arr] (c)--(d); \draw[arr] (d)--(e); \draw[arr] (e)--(f);
+\end{tikzpicture}
+\end{center}
+
+Para roles de SysAdmin, DevOps, o SRE. Cubre scripting, bases de datos,
+cloud (AWS + Terraform), Kubernetes, y observabilidad. B01 (Docker)
+recomendado en paralelo con B09.
+
+\subsection{Ruta WebAssembly (camino más corto a B14)}
+
+\begin{center}
+\begin{tikzpicture}[
+  node distance=0.6cm,
+  blk/.style={rectangle, rounded corners=3pt, draw, thick,
+    minimum width=1.8cm, minimum height=0.7cm,
+    font=\small\bfseries},
+  trn/.style={blk, fill=tTrack},
+  cblk/.style={blk, fill=cTrack},
+  rblk/.style={blk, fill=rTrack},
+  qblk/.style={blk, fill=qTrack},
+  ext/.style={rectangle, rounded corners=3pt, draw, thick,
+    minimum width=2.4cm, minimum height=0.7cm,
+    font=\small\bfseries, fill=gray!15, densely dashed},
+  arr/.style={-{Stealth[length=5pt]}, thick},
+  par/.style={decorate, decoration={brace, amplitude=5pt, mirror},
+    thick, gray}
+]
+% Main path
+\node[trn] (b01) {B01};
+\node[trn, right=of b01] (b02) {B02};
+\node[cblk, right=of b02] (b03) {B03};
+% Fork: C track (top) and Rust track (bottom)
+\node[qblk, above right=0.6cm and 0.6cm of b03] (b04) {B04};
+\node[rblk, below right=0.6cm and 0.6cm of b03] (b05) {B05};
+\node[cblk, right=of b04] (b06) {B06};
+\node[rblk, right=of b05] (b07) {B07};
+% Merge at B14
+\node[trn, below right=0.6cm and 0.6cm of b06] (b14) {B14};
+% External goal
+\node[ext, right=1.0cm of b14] (wasm) {WASM App};
+% External self-study
+\node[ext, below=0.8cm of b14] (js) {JS/TS/Canvas};
+
+\draw[arr] (b01)--(b02);
+\draw[arr] (b02)--(b03);
+\draw[arr] (b03)--(b04);
+\draw[arr] (b03)--(b05);
+\draw[arr] (b04)--(b06);
+\draw[arr] (b05)--(b07);
+\draw[arr] (b06)--(b14);
+\draw[arr] (b07)--(b14);
+\draw[arr] (b14)--(wasm);
+\draw[arr, densely dashed, gray] (js)--(wasm);
+
+% Parallel braces
+\draw[par] ($(b04.north west)+(-0.1,0.15)$) -- ($(b05.south west)+(-0.1,-0.15)$)
+  node[midway, left=6pt, font=\scriptsize, gray, align=center] {en\\paralelo};
+\draw[par] ($(b06.north west)+(-0.1,0.15)$) -- ($(b07.south west)+(-0.1,-0.15)$)
+  node[midway, left=6pt, font=\scriptsize, gray, align=center] {en\\paralelo};
+\end{tikzpicture}
+\end{center}
+
+Camino más corto hacia WebAssembly: \textbf{7 bloques}. B04+B05 pueden
+cursarse en paralelo, y después B06+B07 también, reduciendo el camino
+efectivo a \textbf{5 fases}. JS, TypeScript y Shaders/Canvas se estudian
+por cuenta propia en paralelo con cualquier fase del curso.
+
+\subsection{Ruta completa (secuencial sugerida)}
+
+\begin{center}
+\begin{tikzpicture}[
+  node distance=0.3cm,
+  blk/.style={rectangle, rounded corners=3pt, draw, thick,
+    minimum width=1.2cm, minimum height=0.6cm,
+    font=\scriptsize\bfseries},
+  arr/.style={-{Stealth[length=4pt]}, thick}
+]
+\node[blk, fill=tTrack] (b01) {B01};
+\node[blk, fill=tTrack, right=of b01] (b02) {B02};
+\node[blk, fill=cTrack, right=of b02] (b03) {B03};
+\node[blk, fill=qTrack, right=of b03] (b04) {B04};
+\node[blk, fill=rTrack, right=of b04] (b05) {B05};
+\node[blk, fill=cTrack, right=of b05] (b06) {B06};
+\node[blk, fill=rTrack, right=of b06] (b07) {B07};
+\node[blk, fill=lTrack, right=of b07] (b08) {B08};
+\node[blk, fill=lTrack, right=of b08] (b09) {B09};
+\node[blk, fill=lTrack, right=of b09] (b10) {B10};
+\node[blk, fill=lTrack, right=of b10] (b11) {B11};
+\node[blk, fill=rTrack, below=0.8cm of b01] (b12) {B12};
+\node[blk, fill=rTrack, right=of b12] (b13) {B13};
+\node[blk, fill=tTrack, right=of b13] (b14) {B14};
+\node[blk, fill=tTrack, right=of b14] (b15) {B15};
+\node[blk, fill=qTrack, right=of b15] (b16) {B16};
+\node[blk, fill=qTrack, right=of b16] (b17) {B17};
+\node[blk, fill=dTrack, right=of b17] (b18) {B18};
+\node[blk, fill=dTrack, right=of b18] (b19) {B19};
+\node[blk, fill=dTrack, right=of b19] (b20) {B20};
+\node[blk, fill=dTrack, right=of b20] (b21) {B21};
+
+\foreach \a/\b in {b01/b02,b02/b03,b03/b04,b04/b05,b05/b06,
+  b06/b07,b07/b08,b08/b09,b09/b10,b10/b11}
+  \draw[arr] (\a)--(\b);
+\draw[arr] (b11.south) -- ++(0,-0.25) -| (b12.north);
+\foreach \a/\b in {b12/b13,b13/b14,b14/b15,b15/b16,b16/b17,
+  b17/b18,b18/b19,b19/b20,b20/b21}
+  \draw[arr] (\a)--(\b);
+\end{tikzpicture}
+\end{center}
+
+B01 $\to$ B02 $\to$ B03 $\to$ B04 $\to$ B05 $\to$ B06 $\to$ B07
+$\to$ B08 $\to$ B09 $\to$ B10 $\to$ B11 $\to$ B12 $\to$ B13 $\to$
+B14 $\to$ B15 $\to$ B16 $\to$ B17 $\to$ B18 $\to$ B19 $\to$ B20
+$\to$ B21
+
+% ===================================================================
+\section{Leyenda de pistas temáticas}
+% ===================================================================
+
+\begin{itemize}[leftmargin=2cm]
+  \item[\colorbox{tTrack}{\makebox[1.5cm]{}}]
+    \textbf{Troncal} --- bloques fundacionales o que integran ambos
+    lenguajes (B01, B02, B14, B15).
+  \item[\colorbox{cTrack}{\makebox[1.5cm]{}}]
+    \textbf{Pista C} --- programación en C puro (B03, B06).
+  \item[\colorbox{rTrack}{\makebox[1.5cm]{}}]
+    \textbf{Pista Rust} --- programación en Rust (B05, B07, B12, B13).
+  \item[\colorbox{lTrack}{\makebox[1.5cm]{}}]
+    \textbf{Linux / Infraestructura} --- administración y servicios
+    (B08, B09, B10, B11).
+  \item[\colorbox{qTrack}{\makebox[1.5cm]{}}]
+    \textbf{Herramientas / Calidad} --- build systems, patrones,
+    testing (B04, B16, B17).
+  \item[\colorbox{dTrack}{\makebox[1.5cm]{}}]
+    \textbf{DevOps / Cloud} --- scripting, bases de datos, cloud,
+    Kubernetes y observabilidad (B18, B19, B20, B21).
+\end{itemize}
+
+\end{document}
