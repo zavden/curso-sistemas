@@ -1,5 +1,14 @@
 # ShellCheck
 
+## Objetivos de aprendizaje
+
+Al terminar este tema deberías poder:
+
+- Ejecutar ShellCheck localmente y entender su output (`SC####`, severidad, fix).
+- Corregir las advertencias más comunes de Bash (`SC2086`, `SC2164`, `SC2002`, etc.).
+- Decidir cuándo silenciar una regla y documentar correctamente la justificación.
+- Integrar ShellCheck en editor, pre-commit y CI/CD sin falsos positivos frecuentes.
+
 ## 1. Qué es ShellCheck
 
 ShellCheck es un **analizador estático** para scripts de shell. Lee tu código sin
@@ -18,7 +27,7 @@ ShellCheck detecta categorías de problemas que son **invisibles** a simple vist
 ```bash
 # ShellCheck encuentra esto:
 echo $var                  # SC2086: variable sin comillas (word splitting)
-[ $x == 1 ]               # SC2039: == no es POSIX, usar =
+[ $x == 1 ]               # warning de portabilidad: == no es POSIX en [ ] (usar =)
 cat file | grep pattern    # SC2002: uso inútil de cat (UUOC)
 cd /tmp                    # SC2164: cd sin || exit (puede fallar)
 rm -rf $dir/               # SC2115: $dir puede ser vacío → rm -rf /
@@ -48,7 +57,7 @@ sudo snap install shellcheck
 cabal install ShellCheck
 
 # Docker (sin instalar nada)
-docker run --rm -v "$PWD:/mnt" koalaman/shellcheck:stable script.sh
+docker run --rm -v "$PWD:/mnt" -w /mnt koalaman/shellcheck:stable script.sh
 
 # Verificar instalación
 shellcheck --version
@@ -59,6 +68,28 @@ shellcheck --version
 ---
 
 ## 3. Uso básico
+
+### 3.0 Quickstart (60 segundos)
+
+```bash
+# 1) Crear script con un bug común
+cat <<'EOF' > quick.sh
+#!/bin/bash
+echo $1
+EOF
+
+# 2) Analizar
+shellcheck quick.sh
+
+# 3) Corregir
+sed -i 's/echo $1/echo "$1"/' quick.sh
+
+# 4) Verificar que quedó limpio
+shellcheck quick.sh
+```
+
+Si el segundo `shellcheck` no muestra warnings, ya tienes el flujo base dominado:
+escribir → analizar → corregir → re-analizar.
 
 ### 3.1 Analizar un script
 
@@ -119,6 +150,9 @@ In example.sh line 7:
 [ $# -eq 0 ] && echo "No args"
   ^-- SC2086 (info): Double quote to prevent globbing and word splitting.
 ```
+
+> Nota: los códigos exactos y textos pueden variar ligeramente según la versión de
+> ShellCheck y el shell objetivo (`--shell=bash` vs `--shell=sh`).
 
 Cada warning tiene:
 - **Ubicación**: archivo, línea, columna
@@ -388,9 +422,9 @@ echo $var_that_i_know_is_safe
 # shellcheck disable=SC2086,SC2002
 cat $file | process
 
-# Desactivar para todo el archivo (poner al inicio)
-# shellcheck disable=SC2086
+# Desactivar para todo el archivo (poner justo después del shebang)
 #!/bin/bash
+# shellcheck disable=SC2086
 echo $var1
 echo $var2
 ```
@@ -564,14 +598,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: ShellCheck
-        uses: ludeeus/action-shellcheck@master
-        with:
-          severity: warning
-          scandir: './scripts'
-          # format: gcc
-          # ignore_paths: vendor
-          # ignore_names: generated.sh
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck
+        run: |
+          find ./scripts -name '*.sh' -print0 \
+            | xargs -0 shellcheck --severity=warning
 ```
 
 ### 8.2 GitLab CI
@@ -603,26 +638,26 @@ repos:
 #!/bin/bash
 set -euo pipefail
 
-files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.sh$' || true)
-if [[ -n "$files" ]]; then
+mapfile -d '' -t files < <(
+  git diff --cached --name-only --diff-filter=ACM -z -- '*.sh'
+)
+
+if (( ${#files[@]} > 0 )); then
   echo "Running ShellCheck..."
-  # shellcheck disable=SC2086
-  shellcheck $files
+  shellcheck "${files[@]}"
 fi
 ```
 
 ### 8.4 Makefile
 
 ```makefile
-SHELL_FILES := $(shell find . -name '*.sh' -not -path './vendor/*')
-
 .PHONY: lint
 lint:
-	shellcheck --severity=warning $(SHELL_FILES)
+	find . -name '*.sh' -not -path './vendor/*' -print0 | xargs -0 shellcheck --severity=warning
 
 .PHONY: lint-fix
 lint-fix:
-	shellcheck -f diff $(SHELL_FILES) | git apply
+	find . -name '*.sh' -not -path './vendor/*' -print0 | xargs -0 shellcheck -f diff | git apply
 ```
 
 ### 8.5 Script de CI genérico
@@ -637,7 +672,7 @@ errors=0
 
 while IFS= read -r -d '' file; do
   if ! shellcheck --severity="$severity" "$file"; then
-    (( errors++ ))
+    (( errors++ )) || true    # || true: evita abort por set -e cuando errors=0 (T01)
   fi
 done < <(find . -name '*.sh' -not -path './.git/*' -print0)
 
@@ -796,15 +831,18 @@ fi
 <details>
 <summary>Ver solución</summary>
 
-**5 warnings**:
+**Advertencias principales** (el conteo exacto puede variar por versión/configuración, típicamente ~5):
 
 1. **SC2086** línea 2: `echo $1` → falta comillas → `echo "$1"`
 2. **SC2086** línea 4: `[ $name == ... ]` → falta comillas → `[ "$name" == ... ]`
-3. **SC2039** línea 4: `==` en `[ ]` no es estándar (POSIX usa `=`) → `[ "$name" = "admin" ]` o usar `[[ ]]`
-4. **SC2086** línea 4: `$name` sin comillas (dentro de `[ ]`)
-5. **SC2086** línea 5: `$name` sin comillas en `echo`
+3. **SC2086** línea 4: `$name` sin comillas (dentro de `[ ]`)
+4. **SC2086** línea 5: `$name` sin comillas en `echo`
 
-La mayoría son SC2086 (quoting). Es la regla más frecuente. Script corregido:
+La mayoría son SC2086 (quoting). Es la regla más frecuente.
+
+**Nota**: `==` en `[ ]` es válido en Bash y ShellCheck **no lo reporta** con
+`#!/bin/bash`. Solo lo reportaría (SC3014) si el shebang fuera `#!/bin/sh`.
+Aun así, usar `[[ ]]` es preferible en Bash. Script corregido:
 
 ```bash
 #!/bin/bash
@@ -1039,11 +1077,11 @@ fi
 <details>
 <summary>Ver solución</summary>
 
-Con `#!/bin/sh`, ShellCheck reporta:
+Con `#!/bin/sh`, ShellCheck reporta bashismos (los códigos pueden variar según versión):
 
-1. **SC3010** (warning): `[[ ]]` no es POSIX — usar `[ ]` con `=` en vez de `==`.
-2. **SC3039** (warning): `==` no es válido en `[ ]` POSIX — usar `=`.
-3. **SC3030** (warning): Arrays no existen en POSIX sh — `arr=(1 2 3)` es bashismo.
+1. `[[ ... ]]` no es POSIX (`sh` espera `[ ... ]`).
+2. Operadores/comparaciones estilo Bash reducen portabilidad en `sh` (en POSIX usar `[ "$a" = "$b" ]`).
+3. Arrays no existen en POSIX sh — `arr=(1 2 3)` es bashismo.
 
 Versión POSIX:
 

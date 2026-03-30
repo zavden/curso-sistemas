@@ -28,13 +28,14 @@
 \definecolor{qTrack}{HTML}{F2DCDB}   % rosa claro — pista Calidad/Herramientas
 \definecolor{tTrack}{HTML}{E4DFEC}   % lavanda — pista Troncal
 \definecolor{dTrack}{HTML}{FDDCC8}   % naranja claro — pista DevOps/Cloud
+\definecolor{goTrack}{HTML}{D1F2EB}  % turquesa claro — pista Go
 \definecolor{rowhead}{HTML}{4472C4}  % azul oscuro para encabezados
 
 \title{%
   Mapa de Dependencias del Curso\\[4pt]
-  \large Linux $\cdot$ C $\cdot$ Rust
+  \large Linux $\cdot$ C $\cdot$ Rust $\cdot$ Go
 }
-\author{21 bloques --- B01 a B21}
+\author{22 bloques --- B01 a B22}
 \date{}
 
 \begin{document}
@@ -58,13 +59,14 @@ necesitan los prerequisitos indicados en la Sección~\ref{sec:deps}.
 \centering
 \small
 \begin{tabular}{
-  >{\centering\arraybackslash}m{2.0cm}|
-  >{\centering\arraybackslash}m{2.8cm}|
-  >{\centering\arraybackslash}m{2.8cm}|
-  >{\centering\arraybackslash}m{2.8cm}|
-  >{\centering\arraybackslash}m{2.8cm}|
-  >{\centering\arraybackslash}m{2.8cm}|
-  >{\centering\arraybackslash}m{2.8cm}}
+  >{\centering\arraybackslash}m{1.8cm}|
+  >{\centering\arraybackslash}m{2.4cm}|
+  >{\centering\arraybackslash}m{2.4cm}|
+  >{\centering\arraybackslash}m{2.4cm}|
+  >{\centering\arraybackslash}m{2.4cm}|
+  >{\centering\arraybackslash}m{2.4cm}|
+  >{\centering\arraybackslash}m{2.4cm}|
+  >{\centering\arraybackslash}m{2.4cm}}
 \toprule
 \rowcolor{rowhead}
 \textcolor{white}{\textbf{Nivel}}
@@ -72,6 +74,7 @@ necesitan los prerequisitos indicados en la Sección~\ref{sec:deps}.
   & \textcolor{white}{\textbf{Teoría / Datos}}
   & \textcolor{white}{\textbf{Pista C}}
   & \textcolor{white}{\textbf{Pista Rust}}
+  & \textcolor{white}{\textbf{Pista Go}}
   & \textcolor{white}{\textbf{Linux / Infra}}
   & \textcolor{white}{\textbf{DevOps / Cloud}} \\
 \midrule
@@ -81,6 +84,7 @@ necesitan los prerequisitos indicados en la Sección~\ref{sec:deps}.
   & \cellcolor{tTrack}\textbf{B02}\newline Fund.\ Linux
   & \cellcolor{cTrack}\textbf{B03}\newline Fund.\ C
   & \cellcolor{rTrack}\textbf{B05}\newline Fund.\ Rust
+  & \cellcolor{goTrack}\textbf{B22}\newline Fund.\ Go
   & ---
   & --- \\
 \hline
@@ -90,6 +94,7 @@ necesitan los prerequisitos indicados en la Sección~\ref{sec:deps}.
   & \cellcolor{tTrack}\textbf{B15}\newline Estr.\ de Datos
   & \cellcolor{cTrack}\textbf{B06}\newline Prog.\ Sist.\ C
   & \cellcolor{rTrack}\textbf{B07}\newline Prog.\ Sist.\ Rust
+  & ---
   & \cellcolor{lTrack}\textbf{B08} Almac.\newline
     \textbf{B09} Redes
   & --- \\
@@ -101,6 +106,7 @@ necesitan los prerequisitos indicados en la Sección~\ref{sec:deps}.
   & ---
   & \cellcolor{rTrack}\textbf{B12} GUI\newline
     \textbf{B13} Multimedia
+  & ---
   & \cellcolor{lTrack}\textbf{B10}\newline Servicios Red
   & \cellcolor{dTrack}\textbf{B18}\newline Scripting \\
 \hline
@@ -111,10 +117,12 @@ necesitan los prerequisitos indicados en la Sección~\ref{sec:deps}.
   & ---
   & \cellcolor{tTrack}\textbf{B14}\newline Interop/WASM
   & ---
+  & ---
   & \cellcolor{dTrack}\textbf{B20}\newline Kubernetes \\
 \hline
 %%% Nivel 5 %%%
 \cellcolor{dTrack}\textbf{Nivel 5}\newline Capstone
+  & ---
   & ---
   & ---
   & ---
@@ -128,6 +136,7 @@ necesitan los prerequisitos indicados en la Sección~\ref{sec:deps}.
   \colorbox{tTrack}{troncal},
   \colorbox{cTrack}{pista C},
   \colorbox{rTrack}{pista Rust},
+  \colorbox{goTrack}{pista Go},
   \colorbox{lTrack}{Linux/Infra},
   \colorbox{qTrack}{Herramientas},
   \colorbox{dTrack}{DevOps/Cloud}.}
@@ -189,6 +198,8 @@ B19 & Bases de Datos & B02 & B09, B03, B05 & B21 \\
 B20 & Kubernetes y Observabilidad & B01 & B09, B18, B19 & B21 \\
 \rowcolor{dTrack}
 B21 & Cloud Computing y Terraform & B09, B18 & B01, B19, B20 & --- \\
+\rowcolor{goTrack}
+B22 & Fundamentos de Go & B02 & B09 & B20, B21 \\
 \bottomrule
 \end{tabular}
 \caption{Prerequisitos obligatorios y recomendados de cada bloque.}
@@ -220,6 +231,7 @@ Flechas punteadas = recomendado pero no obligatorio.
   lpista/.style={block, fill=lTrack},
   qpista/.style={block, fill=qTrack},
   dpista/.style={block, fill=dTrack},
+  gopista/.style={block, fill=goTrack},
   req/.style={-{Stealth[length=6pt]}, thick},
   rec/.style={-{Stealth[length=6pt]}, thick, densely dashed, gray},
 ]
@@ -232,6 +244,9 @@ Flechas punteadas = recomendado pero no obligatorio.
 \node[troncal, right=2.0cm of b01] (b02) {B02\\Linux};
 \node[cpista,  right=2.0cm of b02] (b03) {B03\\Fund.\ C};
 \node[rpista,  right=2.0cm of b03] (b05) {B05\\Fund.\ Rust};
+
+% Go (Nivel 1, below B02 to the right)
+\node[gopista, below=0.6cm of b02] (b22) {B22\\Fund.\ Go};
 
 % --- Nivel 2 ---
 \node[qpista,  below=1.8cm of b01] (b04) {B04\\Build};
@@ -300,6 +315,9 @@ Flechas punteadas = recomendado pero no obligatorio.
 \draw[req] (b05) -- (b12);
 \draw[req] (b05) -- (b13);
 
+% B22 needs B02
+\draw[req] (b02) -- (b22);
+
 % DevOps obligatorias
 \draw[req] (b02.south east) to[out=-20,in=160] (b18.north west);  % B18 ← B02
 \draw[req] (b02.south east) to[out=-25,in=150] (b19.north west);  % B19 ← B02
@@ -316,6 +334,9 @@ Flechas punteadas = recomendado pero no obligatorio.
 \draw[rec] (b15) -- (b16);
 \draw[rec] (b15) to[out=-110,in=110] (b17);
 \draw[rec] (b04) -- (b15.north west);
+
+% B22 recomendadas
+\draw[rec] (b09.west) to[out=180,in=-30] (b22.south east);        % B22 rec B09
 
 % DevOps recomendadas
 \draw[rec] (b09.south) to[out=-60,in=50] (b18.north east);        % B18 rec B09
@@ -365,6 +386,9 @@ obligatorios.
   blk/.style={rectangle, rounded corners=3pt, draw, thick,
     fill=lTrack, minimum width=1.8cm, minimum height=0.7cm,
     font=\small\bfseries},
+  goblk/.style={rectangle, rounded corners=3pt, draw, thick,
+    fill=goTrack, minimum width=1.8cm, minimum height=0.7cm,
+    font=\small\bfseries},
   trn/.style={rectangle, rounded corners=3pt, draw, thick,
     fill=tTrack, minimum width=1.8cm, minimum height=0.7cm,
     font=\small\bfseries},
@@ -375,13 +399,17 @@ obligatorios.
 \node[blk, right=of b] (c) {B09};
 \node[blk, right=of c] (d) {B10};
 \node[blk, right=of d] (e) {B11};
+\node[goblk, right=of e] (f) {B22};
 \draw[arr] (a)--(b); \draw[arr] (b)--(c);
-\draw[arr] (c)--(d); \draw[arr] (d)--(e);
+\draw[arr] (c)--(d); \draw[arr] (d)--(e); \draw[arr] (e)--(f);
 \end{tikzpicture}
 \end{center}
 
 Ideal para quien busca certificaciones Linux (LPIC, RHCSA) o
 administración de servidores. B06 recomendado antes de B10 y B11.
+B22 (Go) puede cursarse tras B09; se lista al final porque complementa
+la ruta con el lenguaje dominante del ecosistema SysAdmin (Docker,
+Kubernetes, Terraform, Prometheus).
 
 \subsection{Ruta C completa (sistemas + calidad)}
 
@@ -451,6 +479,9 @@ necesaria para llegar ahí.
   lblk/.style={rectangle, rounded corners=3pt, draw, thick,
     fill=lTrack, minimum width=1.8cm, minimum height=0.7cm,
     font=\small\bfseries},
+  goblk/.style={rectangle, rounded corners=3pt, draw, thick,
+    fill=goTrack, minimum width=1.8cm, minimum height=0.7cm,
+    font=\small\bfseries},
   trn/.style={rectangle, rounded corners=3pt, draw, thick,
     fill=tTrack, minimum width=1.8cm, minimum height=0.7cm,
     font=\small\bfseries},
@@ -458,18 +489,22 @@ necesaria para llegar ahí.
 ]
 \node[trn] (a) {troncal};
 \node[lblk, right=of a] (b) {B09};
-\node[blk, right=of b] (c) {B18};
+\node[goblk, right=of b] (g) {B22};
+\node[blk, right=of g] (c) {B18};
 \node[blk, right=of c] (d) {B19};
 \node[blk, right=of d] (e) {B20};
 \node[blk, right=of e] (f) {B21};
-\draw[arr] (a)--(b); \draw[arr] (b)--(c);
-\draw[arr] (c)--(d); \draw[arr] (d)--(e); \draw[arr] (e)--(f);
+\draw[arr] (a)--(b); \draw[arr] (b)--(g);
+\draw[arr] (g)--(c); \draw[arr] (c)--(d);
+\draw[arr] (d)--(e); \draw[arr] (e)--(f);
 \end{tikzpicture}
 \end{center}
 
-Para roles de SysAdmin, DevOps, o SRE. Cubre scripting, bases de datos,
-cloud (AWS + Terraform), Kubernetes, y observabilidad. B01 (Docker)
-recomendado en paralelo con B09.
+Para roles de SysAdmin, DevOps, o SRE. B22 (Go) se recomienda antes de
+B18 para poder escribir herramientas propias en Go además de scripts
+Bash/Python. Go es especialmente útil antes de B20 (Kubernetes) ya que
+K8s, Prometheus, y la mayoría de herramientas cloud-native están escritas
+en Go. B01 (Docker) recomendado en paralelo con B09.
 
 \subsection{Ruta WebAssembly (camino más corto a B14)}
 
@@ -530,6 +565,40 @@ cursarse en paralelo, y después B06+B07 también, reduciendo el camino
 efectivo a \textbf{5 fases}. JS, TypeScript y Shaders/Canvas se estudian
 por cuenta propia en paralelo con cualquier fase del curso.
 
+\subsection{Ruta Go / Tooling SysAdmin}
+
+\begin{center}
+\begin{tikzpicture}[
+  node distance=0.6cm,
+  blk/.style={rectangle, rounded corners=3pt, draw, thick,
+    minimum width=1.8cm, minimum height=0.7cm,
+    font=\small\bfseries},
+  trn/.style={blk, fill=tTrack},
+  goblk/.style={blk, fill=goTrack},
+  lblk/.style={blk, fill=lTrack},
+  dblk/.style={blk, fill=dTrack},
+  arr/.style={-{Stealth[length=5pt]}, thick}
+]
+\node[trn] (b01) {B01};
+\node[trn, right=of b01] (b02) {B02};
+\node[goblk, right=of b02] (b22) {B22};
+\node[lblk, right=of b22] (b09) {B09};
+\node[dblk, right=of b09] (b18) {B18};
+\node[dblk, right=of b18] (b20) {B20};
+\node[dblk, right=of b20] (b21) {B21};
+\draw[arr] (b01)--(b02); \draw[arr] (b02)--(b22);
+\draw[arr] (b22)--(b09); \draw[arr] (b09)--(b18);
+\draw[arr] (b18)--(b20); \draw[arr] (b20)--(b21);
+\end{tikzpicture}
+\end{center}
+
+Ruta corta (\textbf{7 bloques}) para quien quiere Go + infraestructura
+sin pasar por C/Rust. Go es el lenguaje en el que están escritos Docker,
+Kubernetes, Terraform, Prometheus, Grafana, etcd, containerd, Consul y
+Vault --- la mayoría de herramientas cloud-native. Ideal para perfiles
+SysAdmin que quieren leer el código fuente de sus herramientas, escribir
+operadores de K8s, plugins de Terraform, o exporters de Prometheus.
+
 \subsection{Ruta completa (secuencial sugerida)}
 
 \begin{center}
@@ -561,6 +630,7 @@ por cuenta propia en paralelo con cualquier fase del curso.
 \node[blk, fill=dTrack, right=of b18] (b19) {B19};
 \node[blk, fill=dTrack, right=of b19] (b20) {B20};
 \node[blk, fill=dTrack, right=of b20] (b21) {B21};
+\node[blk, fill=goTrack, below=0.8cm of b12] (b22) {B22};
 
 \foreach \a/\b in {b01/b02,b02/b03,b03/b04,b04/b05,b05/b06,
   b06/b07,b07/b08,b08/b09,b09/b10,b10/b11}
@@ -569,13 +639,14 @@ por cuenta propia en paralelo con cualquier fase del curso.
 \foreach \a/\b in {b12/b13,b13/b14,b14/b15,b15/b16,b16/b17,
   b17/b18,b18/b19,b19/b20,b20/b21}
   \draw[arr] (\a)--(\b);
+\draw[arr] (b21.south) -- ++(0,-0.25) -| (b22.north);
 \end{tikzpicture}
 \end{center}
 
 B01 $\to$ B02 $\to$ B03 $\to$ B04 $\to$ B05 $\to$ B06 $\to$ B07
 $\to$ B08 $\to$ B09 $\to$ B10 $\to$ B11 $\to$ B12 $\to$ B13 $\to$
 B14 $\to$ B15 $\to$ B16 $\to$ B17 $\to$ B18 $\to$ B19 $\to$ B20
-$\to$ B21
+$\to$ B21 $\to$ B22
 
 % ===================================================================
 \section{Leyenda de pistas temáticas}
@@ -589,6 +660,10 @@ $\to$ B21
     \textbf{Pista C} --- programación en C puro (B03, B06).
   \item[\colorbox{rTrack}{\makebox[1.5cm]{}}]
     \textbf{Pista Rust} --- programación en Rust (B05, B07, B12, B13).
+  \item[\colorbox{goTrack}{\makebox[1.5cm]{}}]
+    \textbf{Pista Go} --- lenguaje dominante del ecosistema SysAdmin y
+    cloud-native (B22). Docker, K8s, Terraform, Prometheus están
+    escritos en Go.
   \item[\colorbox{lTrack}{\makebox[1.5cm]{}}]
     \textbf{Linux / Infraestructura} --- administración y servicios
     (B08, B09, B10, B11).

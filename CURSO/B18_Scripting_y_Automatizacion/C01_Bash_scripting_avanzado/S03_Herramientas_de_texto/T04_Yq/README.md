@@ -178,8 +178,8 @@ yq -o=json -I=0 '.' config.yaml
 # XML output
 yq -o=xml '.' config.yaml
 
-# TSV / CSV (para arrays de arrays)
-yq -o=tsv '.' data.yaml
+# TOML output
+yq -o=toml '.' config.yaml
 
 # Props (Java properties)
 yq -o=props '.' config.yaml
@@ -473,8 +473,8 @@ yq 'select(.kind == "Deployment")' multi.yaml
 yq '.metadata.namespace = "production"' multi.yaml
 # Ambos documentos reciben el campo namespace
 
-# Aplicar cambio solo a documentos específicos
-yq 'select(.kind == "Deployment") | .spec.replicas = 3' multi.yaml
+# Aplicar cambio solo a documentos específicos (sin perder los demás)
+yq '(select(.kind == "Deployment") | .spec.replicas) = 3' multi.yaml
 
 # Contar documentos
 yq '[documentIndex] | unique | length' multi.yaml
@@ -676,7 +676,7 @@ done
 set -euo pipefail
 
 find "${1:-.}" -name '*.yaml' -print0 | while IFS= read -r -d '' file; do
-  yq -r '
+  yq '
     select(.kind == "Deployment" or .kind == "StatefulSet" or .kind == "DaemonSet") |
     .spec.template.spec.containers[].image
   ' "$file" 2>/dev/null
@@ -787,8 +787,8 @@ read -r host port < <(
 )
 echo "Host=$host Port=$port"
 
-# Iterar sobre array
-yq -r '.server.tags[]' server.yaml | while IFS= read -r tag; do
+# Iterar sobre array (yq ya imprime sin comillas por defecto)
+yq '.server.tags[]' server.yaml | while IFS= read -r tag; do
   echo "Tag: $tag"
 done
 
@@ -860,10 +860,11 @@ yq 'getpath(["spec","replicas"])' deployment.yaml
 # 2
 ```
 
-### 12.3 `reduce`
+### 12.3 Acumular con `map` + `add`
+
+`yq` no tiene `reduce` como jq. Para acumular valores, se usa `map` + `add`:
 
 ```bash
-# Acumular valores
 echo '
 items:
   - name: a
@@ -874,6 +875,9 @@ items:
     count: 8
 ' | yq '.items | map(.count) | add'
 # 16
+
+# Para reduce real, convertir a JSON y usar jq:
+yq -o=json '.items' data.yaml | jq 'reduce .[] as $i (0; . + $i.count)'
 ```
 
 ### 12.4 Concatenar y crear documentos
@@ -916,7 +920,7 @@ Si ya dominaste `jq` (T03), esta tabla te muestra las diferencias clave:
 | **Output JSON** | Es el default | `yq -o=json` |
 | **Merge archivos** | `jq -s '.[0] * .[1]'` | `yq '. * load("b.yaml")'` |
 | **Sintaxis select** | Idéntica | Idéntica |
-| **Sintaxis map** | `map(f)` | `.[] |= f` (map no siempre disponible) |
+| **Sintaxis map** | `map(f)` | `map(f)` disponible desde v4.18; antes usar `.[] |= f` |
 | **String interpolation** | `\(expr)` | No soportado (usar `+`) |
 | **try-catch** | `try f catch g` | No tiene equivalente directo |
 | **Funciones custom** | `def name: body;` | No soportado |
@@ -1126,6 +1130,7 @@ yq '.all.children.webservers.hosts | keys' inventory.yaml
 | `sort_keys(..)` | Ordenar keys recursivamente | `yq 'sort_keys(..)'` |
 | `add` | Sumar/concatenar | `yq '.nums \| add'` |
 | `unique` | Deduplicar array | `yq '.tags \| unique'` |
+| `map(f)` | Transformar array (v4.18+) | `yq 'map(. + 1)'` |
 | `.field = val` | Asignar valor | `yq '.port = 9090'` |
 | `.field \|= f` | Update in-place | `yq '.port \|= . + 1'` |
 | `+= [val]` | Añadir a array | `yq '.tags += ["new"]'` |
@@ -1140,6 +1145,7 @@ yq '.all.children.webservers.hosts | keys' inventory.yaml
 | `-n` | Null input (crear desde cero) | `yq -n '.x = 1'` |
 | `-o=json` | Output JSON | `yq -o=json '.'` |
 | `-o=xml` | Output XML | `yq -o=xml '.'` |
+| `-o=toml` | Output TOML | `yq -o=toml '.'` |
 | `-o=props` | Output properties | `yq -o=props '.'` |
 | `-P` | Pretty-print YAML | `yq -P '.' f.json` |
 | `-e` | Exit code si null/false | `yq -e '.field' f.yaml` |
@@ -1159,7 +1165,7 @@ yq '.all.children.webservers.hosts | keys' inventory.yaml
 | `null` en vez de campo vacío | Campo no existe | Verificar con `has()` o usar `// "default"` |
 | Pierde comentarios | Usaste JSON como intermediario | Usar `yq` directamente, no `yq → jq → yq` |
 | Indentación cambia | yq reformatea al escribir | Ajustar con `-I=N` (N = espacios de indent) |
-| `map` no funciona | Sintaxis de jq, no de mikefarah yq | Usar `.[] \|= f` en vez de `map(f)` |
+| `map` no funciona | Versión de yq anterior a v4.18 | Actualizar yq o usar `.[] \|= f` en vez de `map(f)` |
 | Variable shell no se expande | Comillas simples impiden expansión | Usar comillas dobles o `env(VAR)` |
 | `-i` no guarda cambios | Expresión produce output vacío (error en filtro) | Verificar expresión sin `-i` primero |
 | Merge no es recursivo | Usaste `+` en vez de `*` | `*` = deep merge, `+` = shallow merge |
@@ -1430,8 +1436,8 @@ Añade `metadata.namespace = "staging"` **solo al Deployment**, sin modificar el
 <summary>Ver solución</summary>
 
 ```bash
-# Solo al Deployment
-yq 'select(.kind == "Deployment").metadata.namespace = "staging"' multi.yaml
+# Solo al Deployment (los paréntesis preservan los otros docs en el output)
+yq '(select(.kind == "Deployment") | .metadata.namespace) = "staging"' multi.yaml
 
 # Alternativa con documentIndex
 yq '(select(documentIndex == 1) | .metadata.namespace) = "staging"' multi.yaml
@@ -1585,20 +1591,27 @@ Actualiza **todos** los servicios que tengan `DATABASE_URL` para apuntar a `post
 <summary>Ver solución</summary>
 
 ```bash
+# Opción 1: asignación directa con select para filtrar servicios que tienen la key
 yq -i '
   (.services[].environment | select(has("DATABASE_URL"))).DATABASE_URL = "postgres://db.prod/myapp"
+' docker-compose.yaml
+
+# Opción 2: usando |= para update in-place
+yq -i '
+  .services[].environment.DATABASE_URL |= (select(. != null) | "postgres://db.prod/myapp")
 ' docker-compose.yaml
 ```
 
 El operador `|=` aplicado a múltiples nodos actualiza **cada uno independientemente**.
-Cuando escribes `.services[].environment.DATABASE_URL |= ...`, yq:
+Cuando escribes `.services[].environment.DATABASE_URL |= f`, yq:
 
 1. Expande `.services[]` → `api`, `worker`
 2. Para cada servicio, navega a `.environment.DATABASE_URL`
-3. Aplica la transformación al valor de cada nodo encontrado
+3. Aplica `f` al valor actual de cada nodo encontrado (`.` dentro de `f` es el valor existente)
 
-Es como un `UPDATE` de SQL con un `WHERE` implícito — todos los nodos que matchean
-la expresión de la izquierda se actualizan con la expresión de la derecha.
+La diferencia con `=`: `=` reemplaza con un valor absoluto, `|=` transforma el valor
+existente. Aquí el resultado es el mismo, pero `|=` es útil cuando la transformación
+depende del valor actual (e.g., `.version |= . + 1`).
 </details>
 
 ---

@@ -1,5 +1,15 @@
 # set -euo pipefail
 
+## Objetivos de aprendizaje
+
+Al terminar este tema deberías poder:
+
+- Explicar qué problema resuelve cada opción: `-e`, `-u`, `pipefail`.
+- Predecir cuándo `set -e` aborta y cuándo **no** (sus excepciones).
+- Escribir scripts robustos que fallen rápido y limpien recursos con `trap`.
+- Relajar reglas de forma controlada (`if`, `|| true`, `set +e`) sin ocultar bugs.
+- Diagnosticar fallos en pipelines con `$PIPESTATUS`.
+
 ## 1. El problema — scripts silenciosamente rotos
 
 Por defecto, Bash **ignora errores** y **continúa ejecutando** el resto del script.
@@ -29,6 +39,14 @@ set -euo pipefail
 Esta línea activa tres protecciones independientes que, combinadas, convierten
 Bash de un lenguaje peligrosamente permisivo a uno razonablemente seguro.
 
+### Qué rompe qué (resumen rápido)
+
+| Opción | Detecta | Patrón que evita |
+|--------|---------|------------------|
+| `set -e` | Comandos que fallan (`exit != 0`) | Que el script siga después de un fallo |
+| `set -u` | Variables no definidas | Typos de variables y defaults vacíos silenciosos |
+| `set -o pipefail` | Fallos en cualquier etapa del pipeline | Errores ocultos por el último comando exitoso |
+
 ```
     Script sin protección          Script con set -euo pipefail
     ┌────────────────────┐         ┌────────────────────┐
@@ -46,8 +64,8 @@ Bash de un lenguaje peligrosamente permisivo a uno razonablemente seguro.
 
 ### 2.1 Qué hace
 
-Termina el script inmediatamente si **cualquier comando** retorna un exit code
-distinto de cero:
+En términos prácticos, termina el script inmediatamente si un comando retorna un
+exit code distinto de cero **en la mayoría de contextos**:
 
 ```bash
 #!/bin/bash
@@ -59,9 +77,13 @@ echo "Paso 2"     # NUNCA se ejecuta
 ```
 
 ```bash
-# Equivalente a poner esto después de CADA comando:
+# Modelo mental simplificado (NO equivalencia exacta):
 comando || exit $?
 ```
+
+La equivalencia anterior sirve para entender la idea general, pero `set -e` tiene
+excepciones (por ejemplo `if`, `&&`, `||`, `!`, condiciones de loops y algunos
+casos de subshell/command substitution) que se detallan en las secciones 2.3 y 2.5.
 
 ### 2.2 Cuándo se activa
 
@@ -76,12 +98,18 @@ ls /no/existe
 # ✗ ABORTA: último comando de un pipeline (sin pipefail)
 echo "ok" | grep "nope"
 
-# ✗ ABORTA: fallo en subshell
+# ✗ ABORTA: fallo en subshell real
+(false)
+
+# ✗ ABORTA: command substitution con único comando que falla
 $(false)
 
-# ✗ ABORTA: fallo en command substitution usado en asignación
+# ✗ ABORTA: command substitution en asignación (si el comando final falla)
 result=$(cat /no/existe)
 ```
+
+Nota: sin `inherit_errexit`, dentro de `$()` un fallo **intermedio** puede quedar
+oculto si luego otro comando termina en éxito (ver sección 8.3).
 
 ### 2.3 Cuándo NO se activa
 
@@ -144,8 +172,11 @@ my_func_safe() {
   echo "no llega aquí"
 }
 
-# TRAMPA 2: command substitution en argumentos
-echo "Value: $(cat /no/existe)"    # ← SÍ aborta (falla cat)
+# TRAMPA 2: command substitution puede ocultar fallos intermedios
+echo "Value: $(false; echo ok)"    # sin inherit_errexit: imprime "ok" y NO aborta
+
+# Si el comando final dentro de $() falla, sí aborta:
+echo "Value: $(cat /no/existe)"    # aborta (cat es el comando final y falla)
 
 # TRAMPA 3: funciones en condición de if
 check() {
@@ -341,16 +372,18 @@ Bash guarda el exit code de **cada comando** del pipeline en el array `$PIPESTAT
 set -o pipefail
 
 false | true | false
-echo "${PIPESTATUS[@]}"    # 1 0 1
-echo "${PIPESTATUS[0]}"    # 1 (primer comando)
-echo "${PIPESTATUS[1]}"    # 0 (segundo)
-echo "${PIPESTATUS[2]}"    # 1 (tercero)
+status=("${PIPESTATUS[@]}")    # guardar INMEDIATAMENTE — se sobrescribe con cada comando
+echo "${status[@]}"            # 1 0 1
+echo "${status[0]}"            # 1 (primer comando)
+echo "${status[1]}"            # 0 (segundo)
+echo "${status[2]}"            # 1 (tercero)
 
 # Uso práctico: verificar qué parte del pipeline falló
 curl -s "$url" | jq '.data'
-if (( PIPESTATUS[0] != 0 )); then
+status=("${PIPESTATUS[@]}")
+if (( status[0] != 0 )); then
   echo "curl falló" >&2
-elif (( PIPESTATUS[1] != 0 )); then
+elif (( status[1] != 0 )); then
   echo "jq falló (¿JSON inválido?)" >&2
 fi
 ```
@@ -378,6 +411,10 @@ rm -f /tmp/lockfile || true    # -f ya maneja esto, pero el patrón es útil
 # Comando que puede fallar legítimamente
 docker stop my-container 2>/dev/null || true
 ```
+
+⚠️ Usa `|| true` solo cuando el fallo sea **esperado y no crítico**. Evítalo en
+pasos sensibles (backups, migraciones, deploy, borrados), porque puede ocultar
+errores reales que deberían detener el script.
 
 ### 5.2 `if` para capturar el resultado
 
@@ -650,12 +687,18 @@ echo "¡Listo!"
 IFS=$'\n\t'
 
 # Default IFS = space + tab + newline
-# Con solo newline + tab, los espacios en nombres de archivo no rompen loops:
+# Aunque IFS sin espacio reduce problemas, ESTE patrón sigue siendo frágil:
 for file in $(find . -name "*.txt"); do
-  echo "$file"    # funciona con "my file.txt" si IFS no tiene espacio
+  echo "$file"
 done
 
-# Nota: mejor usar find -print0 | while read -r -d '' de todas formas
+# Problemas restantes: nombres con newline, globbing y parsing ambiguo.
+# Patrón recomendado (robusto):
+find . -name "*.txt" -print0 | while IFS= read -r -d '' file; do
+  echo "$file"
+done
+
+# Regla pedagógica: usar siempre -print0 + read -d '' en scripts de producción.
 ```
 
 ### 8.2 shopt -s failglob
@@ -695,6 +738,18 @@ set -euo pipefail
 shopt -s inherit_errexit failglob
 ```
 
+### 8.5 Matriz rápida por versión de Bash
+
+| Feature | Bash mínimo | Nota / fallback |
+|---------|-------------|-----------------|
+| `[[ -v VAR ]]` | 4.2 | Fallback: `[[ "${VAR+x}" == "x" ]]` |
+| `inherit_errexit` | 4.4 | Sin esto, `$()` puede ocultar fallos intermedios |
+| Arrays vacíos + `set -u` sin errores espurios | 4.4 | En versiones viejas usar `${arr[@]+"${arr[@]}"}` |
+| `mapfile` | 4.0 | Fallback: `while IFS= read -r` |
+
+Si trabajas en entornos heterogéneos (containers viejos, servidores legacy),
+declara explícitamente el runtime mínimo en documentación/CI.
+
 ---
 
 ## 9. Errores comunes
@@ -706,7 +761,7 @@ shopt -s inherit_errexit failglob
 | Variable vacía no detectada | `set -u` solo detecta **no definidas** | Usar `${var:?msg}` para rechazar vacías |
 | `set -e` no funciona dentro de `if` | `if` desactiva `set -e` en la condición | Usar `\|\|` en vez de `if` para check, o capturar exit code |
 | Pipeline falla por `head`/`grep` | `pipefail` propaga fallos del pipe | `\|\| true` en el comando que puede fallar |
-| `$@` falla con `set -u` sin args | Bash < 4.4: `$@` sin args es unbound | Usar `"${@}"` o actualizar Bash |
+| `PIPESTATUS` tiene valores inesperados | Se consultó después de otro comando | Guardar inmediatamente: `s=("${PIPESTATUS[@]}")` |
 | Array vacío falla con `set -u` | Bash < 4.4: array vacío es unbound | `${arr[@]+"${arr[@]}"}` o Bash ≥ 4.4 |
 | Trap no se ejecuta | Trap definido después del error | Definir traps al inicio del script |
 | `set -e` no aborta en función | Función llamada desde `if` o `\|\|` | Reestructurar: no usar funciones como condición de `if` |
@@ -808,36 +863,22 @@ fi
 <details>
 <summary>Ver solución</summary>
 
-```
-después de false
-check falló
-```
-
-Cuando una función se usa como condición de `if`, `set -e` se **desactiva dentro
-de toda la función**. Por eso `false` no aborta — `echo "después de false"` se
-ejecuta. La función `check` retorna el exit code del último comando (`echo` = 0),
-pero como `false` no abortó, la función completa retorna 0... No. Espera.
-
-Más precisamente: el exit code de la función es el del último comando ejecutado.
-`echo "después de false"` retorna 0. Pero `check` está en un `if`, y el exit code
-que evalúa el `if` es el de la función completa.
-
-En realidad, `false` retorna 1, `echo "después de false"` retorna 0. El exit code
-de la función es 0 (último comando). Entonces `if check` evalúa como true... pero
-no. Hay que probarlo:
-
 **Resultado real**:
 ```
 después de false
 check tuvo éxito
 ```
 
-`false` no aborta (dentro de `if`, `set -e` está desactivado). `echo` se ejecuta y
-retorna 0. La función retorna 0 (del último `echo`). El `if` toma la rama `then`.
+Cuando una función se usa como condición de `if`, Bash entra en un contexto donde
+`set -e` no aborta por ese `false` interno. Por eso la función continúa y ejecuta
+`echo "después de false"`.
 
-**La lección**: `set -e` dentro de `if` está desactivado, lo que puede causar que
-funciones parezcan exitosas cuando en realidad tuvieron fallos internos. Es la
-trampa más peligrosa de `set -e`.
+La función devuelve el exit code del **último comando ejecutado** (`echo` = 0), así
+que `if check` evalúa true y entra en `then`.
+
+**La lección**: evita usar funciones complejas directamente como condición de `if`
+si dependes de `set -e`; valida explícitamente dentro de la función o retorna
+errores de forma manual.
 </details>
 
 ---
@@ -1133,7 +1174,7 @@ reactivar `set -e` inmediatamente después.
 
 ### Ejercicio 9 — PIPESTATUS
 
-**Predicción**: ¿Qué imprime?
+**Predicción**: ¿Qué imprime este script?
 
 ```bash
 #!/bin/bash
@@ -1150,20 +1191,31 @@ echo "PIPESTATUS: ${PIPESTATUS[@]}"
 
 ```
 Exit: 1
-PIPESTATUS: 1 1 0
+PIPESTATUS: 0
 ```
 
-- `false` → exit code 1
-- `grep "x"` → recibe stdin vacío (de false), no encuentra "x" → exit code 1
-- `true` → exit code 0
+**No** imprime `PIPESTATUS: 1 1 0` como uno esperaría. Este es un gotcha importante.
 
-Con `pipefail`, el exit code del pipeline es el del **último comando que falló**
-(más a la derecha con exit ≠ 0). Ese es `grep` (posición 2, exit code 1).
+Inmediatamente después del pipeline: `$?` = 1, `PIPESTATUS` = `(1 1 0)`.
+Pero `echo "Exit: $?"` es un nuevo comando (pipeline de un elemento). Después de
+que ejecuta, `PIPESTATUS` se sobrescribe con `(0)` — el PIPESTATUS del `echo`.
 
-`PIPESTATUS` guarda los tres exit codes: `(1 1 0)`.
+`PIPESTATUS` es **efímero**: se sobrescribe con cada comando, incluyendo `echo`,
+`if`, e incluso asignaciones como `x=$?`.
 
-Sin `pipefail`, el exit code sería `0` (de `true`, el último comando), y los
-fallos de `false` y `grep` pasarían desapercibidos.
+**Patrón correcto** — guardar antes de cualquier otro comando:
+
+```bash
+false | grep "x" | true
+saved=("${PIPESTATUS[@]}")    # guardar INMEDIATAMENTE
+echo "PIPESTATUS: ${saved[@]}"
+# PIPESTATUS: 1 1 0  ← ahora sí
+
+# Diagnóstico por etapa del pipeline:
+(( saved[0] != 0 )) && echo "false falló" >&2
+(( saved[1] != 0 )) && echo "grep falló" >&2
+(( saved[2] != 0 )) && echo "true falló" >&2
+```
 </details>
 
 ---
