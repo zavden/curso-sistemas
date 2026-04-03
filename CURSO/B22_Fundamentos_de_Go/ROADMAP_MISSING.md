@@ -2,9 +2,9 @@
 
 **Generado**: 2026-03-29
 **Total tópicos definidos en BLOQUE_22.md**: 76
-**Tópicos completados (README.md creados)**: 17
-**Tópicos pendientes**: 59
-**Progreso**: 22.4%
+**Tópicos completados (README.md creados)**: 18
+**Tópicos pendientes**: 58
+**Progreso**: 23.7%
 
 ---
 
@@ -14,7 +14,7 @@
 |---|:---:|:---:|:---:|:---:|
 | C01 Toolchain y Ecosistema | 7 | 7 | 0 | **100%** |
 | C02 Tipos de Datos y Variables | 8 | 8 | 0 | **100%** |
-| C03 Control de Flujo | 7 | 2 | 5 | 29% |
+| C03 Control de Flujo | 7 | 3 | 4 | 43% |
 | C04 Funciones | 6 | 0 | 6 | 0% |
 | C05 Tipos Compuestos | 8 | 0 | 8 | 0% |
 | C06 Interfaces | 7 | 0 | 7 | 0% |
@@ -26,7 +26,7 @@
 
 ---
 
-## Tópicos Completados (17)
+## Tópicos Completados (18)
 
 ### C01 Toolchain y Ecosistema — COMPLETO
 
@@ -53,14 +53,13 @@
 
 - [x] S01/T01 — if/else
 - [x] S01/T02 — for
+- [x] S01/T03 — switch
 
 ---
 
-## Tópicos Pendientes (59)
+## Tópicos Pendientes (58)
 
-### C03 Control de Flujo — 5 pendientes
-
-- [ ] **S01/T03 — switch**: sin fall-through por defecto, fallthrough keyword, switch sin expresión (if-else chain), type switch
+### C03 Control de Flujo — 4 pendientes
 - [ ] **S01/T04 — Labels y goto**: break/continue con labels, goto (raro pero existe), cuándo es legítimo
 - [ ] **S02/T01 — defer**: LIFO, evaluación de argumentos, defer en loops (¡cuidado!), patrones de cleanup
 - [ ] **S02/T02 — panic y recover**: cuándo usar panic (programador errors), recover en deferred functions, no usar como excepciones
@@ -157,8 +156,8 @@
 El siguiente tópico a crear sigue el orden secuencial de BLOQUE_22.md:
 
 ```
-Próximo:  C03/S01/T03 — switch
-Después:  C03/S01/T04 — Labels y goto
+Próximo:  C03/S01/T04 — Labels y goto
+Después:  C03/S02/T01 — defer
           C03/S02/T01 — defer
           C03/S02/T02 — panic y recover
           C03/S02/T03 — Comparación con Rust
